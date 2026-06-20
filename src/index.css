@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cs-ink: #2F4156;
+  --cs-muted: #567C8D;
+  --cs-line: #C8D9E6;
+  --cs-paper: #F5EFEB;
+  --cs-panel: #ffffff;
+  --cs-navy: #2F4156;
+  --cs-blue: #567C8D;
+  --cs-teal: #567C8D;
+  --cs-gold: #567C8D;
+  --cs-shadow: 0 20px 60px rgba(47, 65, 86, 0.1);
+}
+
+body {
+  margin: 0;
+  font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--cs-paper);
+  color: var(--cs-ink);
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.cs-display {
+  font-family: 'Sora', 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: rgba(86, 124, 141, 0.22);
+  color: var(--cs-ink);
+}
+
+button,
+a,
+input,
+textarea {
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(86, 124, 141, 0.25);
+  outline-offset: 3px;
+}
+
+.cs-shell {
+  background:
+    linear-gradient(180deg, rgba(245, 239, 235, 0.98), rgba(255, 255, 255, 0.96)),
+    radial-gradient(circle at 20% 0%, rgba(200, 217, 230, 0.7), transparent 34%),
+    radial-gradient(circle at 80% 8%, rgba(86, 124, 141, 0.12), transparent 30%);
+}
+
+.cs-card {
+  border: 1px solid var(--cs-line);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--cs-shadow);
+}
+
+.cs-soft-card {
+  border: 1px solid rgba(200, 217, 230, 0.9);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 10px 34px rgba(47, 65, 86, 0.07);
+}
+
+.cs-button {
+  background: var(--cs-navy);
+  color: white;
+  box-shadow: 0 14px 32px rgba(47, 65, 86, 0.2);
+}
+
+.cs-button:hover {
+  background: #2F4156;
+  transform: translateY(-1px);
+}
+
+.cs-button-secondary {
+  border: 1px solid var(--cs-line);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--cs-ink);
+}
+
+/* Custom Scrollbar for the specific class used in the code */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Hide scrollbar for the template scroller but keep functionality */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.document-scale-content [contenteditable="true"] ul,
+.document-scale-content [contenteditable="true"] ol {
+  margin: 0.75em 0;
+  padding-left: 1.35em;
+}
+
+.document-scale-content [contenteditable="true"] ul {
+  list-style: disc;
+}
+
+.document-scale-content [contenteditable="true"] ol {
+  list-style: decimal;
+}
+
+.document-scale-content [contenteditable="true"] li {
+  display: list-item;
+  margin: 0.28em 0;
+  padding-left: 0.2em;
+}
+
+[data-scroll-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0) scale(0.985);
+  transition:
+    opacity 640ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 640ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-scroll-reveal].is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-scroll-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
