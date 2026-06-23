@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Linkedin, Mail, Twitter } from 'lucide-react';
+import { FileText, Linkedin, Mail, Twitter, Phone, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const productLinks = [
@@ -22,9 +22,10 @@ const Footer = () => {
   return (
     <footer className="border-t border-[#C8D9E6] py-14 text-slate-900">
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
-        <div className="flex flex-col gap-8 border-b border-[#C8D9E6] pb-10 md:flex-row md:items-center md:justify-between">
-          <div>
-            <button onClick={() => navigate('/')} className="flex items-center gap-3">
+        <div className="grid gap-10 py-10 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Column 1: Logo & About Description & Socials */}
+          <div className="flex flex-col">
+            <button onClick={() => navigate('/')} className="flex items-center gap-3 self-start">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2F4156] text-white">
                 <FileText size={22} />
               </div>
@@ -33,24 +34,23 @@ const Footer = () => {
                 <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#567C8D]">Executive Letters</p>
               </div>
             </button>
-            <p className="mt-4 max-w-md text-sm font-semibold leading-6 text-slate-500">
+            <p className="mt-4 max-w-sm text-sm font-semibold leading-6 text-slate-500">
               Premium cover letters, executive templates, and Grow AI drafting for senior job applications.
             </p>
+            <div className="mt-6 flex gap-3 text-slate-500">
+              <a href="mailto:support@careersenseai.com" className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#C8D9E6] transition hover:text-[#567C8D]">
+                <Mail size={18} />
+              </a>
+              <a href="https://www.linkedin.com" className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#C8D9E6] transition hover:text-[#567C8D]">
+                <Linkedin size={18} />
+              </a>
+              <a href="https://twitter.com" className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#C8D9E6] transition hover:text-[#567C8D]">
+                <Twitter size={18} />
+              </a>
+            </div>
           </div>
-          <div className="flex gap-3 text-slate-500">
-            <a href="mailto:hello@careersense.ai" className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#C8D9E6] transition hover:text-[#567C8D]">
-              <Mail size={18} />
-            </a>
-            <a href="https://www.linkedin.com" className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#C8D9E6] transition hover:text-[#567C8D]">
-              <Linkedin size={18} />
-            </a>
-            <a href="https://twitter.com" className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#C8D9E6] transition hover:text-[#567C8D]">
-              <Twitter size={18} />
-            </a>
-          </div>
-        </div>
 
-        <div className="grid gap-10 py-10 md:grid-cols-3">
+          {/* Column 2: Product */}
           <div>
             <h3 className="cs-display font-extrabold text-slate-950">Product</h3>
             <ul className="mt-4 space-y-3 text-sm font-semibold text-slate-500">
@@ -61,6 +61,8 @@ const Footer = () => {
               ))}
             </ul>
           </div>
+
+          {/* Column 3: Workflows */}
           <div>
             <h3 className="cs-display font-extrabold text-slate-950">Workflows</h3>
             <ul className="mt-4 space-y-3 text-sm font-semibold text-slate-500">
@@ -69,15 +71,36 @@ const Footer = () => {
               ))}
             </ul>
           </div>
-          <div className="rounded-2xl border border-[#C8D9E6] bg-white p-6">
-            <h3 className="cs-display font-extrabold text-slate-950">Grow updates</h3>
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
-              Product updates for executive templates, AI writing, and application tools.
-            </p>
-            <div className="mt-5 flex gap-2">
-              <input className="min-w-0 flex-1 rounded-lg border border-[#C8D9E6] bg-white px-3 py-2 text-sm outline-none focus:border-[#567C8D] focus:ring-2 focus:ring-[#567C8D]/15" placeholder="Email address" />
-              <button className="rounded-lg bg-[#2F4156] px-4 py-2 text-sm font-black text-white hover:bg-[#567C8D]">Join</button>
-            </div>
+
+          {/* Column 4: Contact Details */}
+          <div>
+            <h3 className="cs-display font-extrabold text-slate-950">Contact</h3>
+            <ul className="mt-4 space-y-3.5 text-sm font-semibold text-slate-500">
+              <li className="flex items-center gap-2">
+                <Mail size={16} className="text-[#567C8D]" />
+                <a href="mailto:support@careersenseai.com" className="hover:text-[#567C8D]">
+                  support@careersenseai.com
+                </a>
+              </li>
+              <li className="flex items-start gap-2">
+                <Phone size={16} className="mt-0.5 text-[#567C8D]" />
+                <div className="flex flex-col gap-1.5">
+                  <a href="tel:+12018936385" className="hover:text-[#567C8D] flex items-center gap-1.5">
+                    <span>🇺🇸</span> <span>+1 (201) 893-6385</span>
+                  </a>
+                  <a href="tel:+919891422329" className="hover:text-[#567C8D] flex items-center gap-1.5">
+                    <span>🇮🇳</span> <span>+91 9891422329</span>
+                  </a>
+                </div>
+              </li>
+              <li className="flex items-start gap-2">
+                <MapPin size={16} className="mt-0.5 text-[#567C8D]" />
+                <div className="leading-relaxed">
+                  85 CourtHouse Pl, Jersey City<br />
+                  New Jersey - 07306
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
 

@@ -6,8 +6,10 @@ import {
   CheckCircle2,
   FileText,
   Layout,
+  Lock,
   Menu,
   PenLine,
+  Play,
   Target,
   UploadCloud,
   X,
@@ -17,7 +19,9 @@ import CoverLetterGenie from '../components/landing/CoverLetterGenie';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
 import { useStore } from '../store/useStore';
 import { templateCount } from '../components/templates/templateCatalog';
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import coverLetterVideo from '../assets/CoverLetter1.mp4';
 
 const AnimatedHeroBackground = lazy(() => import('../components/landing/AnimatedHeroBackground'));
 const CoverLetterAssistant = lazy(() => import('../components/landing/CoverLetterAssistant'));
@@ -66,6 +70,7 @@ const HERO_WORDS = ['Smarter', 'Faster', 'Sharper'];
 
 const Home = () => {
   const navigate = useNavigate();
+  const { isSignedIn } = useAuth();
   const resetBuilder = useStore((state) => state.resetBuilder);
   const setCreationMode = useStore((state) => state.setCreationMode);
   const setGeneratedLetter = useStore((state) => state.setGeneratedLetter);
@@ -75,6 +80,7 @@ const Home = () => {
   const [heroWordVisible, setHeroWordVisible] = useState(true);
   const [scrollShade, setScrollShade] = useState(0);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   useEffect(() => {
     const refreshUsage = () => setUsage(getCareerSenseUsage());
@@ -204,10 +210,12 @@ const Home = () => {
             </nav>
 
             <div className="flex items-center gap-2">
-              <div className="hidden flex-1 items-center justify-end gap-2 sm:flex-none md:flex">
-                <UsagePill label="Career Points Used" value={formatPoints(usage.totalPoints)} />
-                <UsagePill label="Total Bill" value={formatUsd(usage.totalBillUsd)} />
-              </div>
+              <SignedIn>
+                <div className="hidden flex-1 items-center justify-end gap-2 sm:flex-none md:flex">
+                  <UsagePill label="Career Points Used" value={formatPoints(usage.totalPoints)} />
+                  <UsagePill label="Total Bill" value={formatUsd(usage.totalBillUsd)} />
+                </div>
+              </SignedIn>
               <SignedOut>
                 <SignInButton mode="modal">
                   <button className="inline-flex h-11 items-center justify-center rounded-xl bg-[#2F4156] px-5 text-[13px] font-bold text-white hover:bg-[#233244] shadow-sm transition">
@@ -245,18 +253,20 @@ const Home = () => {
                   </SignInButton>
                 </SignedOut>
               </nav>
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <UsagePill
-                  label="Career Points Used"
-                  value={formatPoints(usage.totalPoints)}
-                  mobile
-                />
-                <UsagePill
-                  label="Total Bill"
-                  value={formatUsd(usage.totalBillUsd)}
-                  mobile
-                />
-              </div>
+              <SignedIn>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <UsagePill
+                    label="Career Points Used"
+                    value={formatPoints(usage.totalPoints)}
+                    mobile
+                  />
+                  <UsagePill
+                    label="Total Bill"
+                    value={formatUsd(usage.totalBillUsd)}
+                    mobile
+                  />
+                </div>
+              </SignedIn>
             </div>
           )}
         </div>
@@ -296,28 +306,70 @@ const Home = () => {
                   <span>Start Building</span>
                   <ArrowRight size={22} />
                 </button>
+                <SignedIn>
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="inline-flex min-h-[38px] min-w-[180px] items-center justify-between rounded-[12px] border border-[#C8D9E6] bg-white px-6 text-[14px] font-black text-[#0F1C2E] shadow-[0_14px_28px_rgba(47,65,86,0.09)] transition hover:-translate-y-0.5 hover:border-[#9DB5C6] hover:bg-white"
+                  >
+                    <span>Dashboard</span>
+                    <Layout size={20} />
+                  </button>
+                </SignedIn>
                 <button
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => setIsVideoModalOpen(true)}
                   className="inline-flex min-h-[38px] min-w-[180px] items-center justify-between rounded-[12px] border border-[#C8D9E6] bg-white px-6 text-[14px] font-black text-[#0F1C2E] shadow-[0_14px_28px_rgba(47,65,86,0.09)] transition hover:-translate-y-0.5 hover:border-[#9DB5C6] hover:bg-white"
                 >
-                  <span>Dashboard</span>
-                  <Layout size={20} />
+                  <span>How it works</span>
+                  <Play size={18} className="text-[#0F1C2E] fill-current" />
                 </button>
               </div>
 
               <div id="methods" className="mb-9 grid scroll-mt-4 gap-3 sm:grid-cols-3">
-                {methods.map(({ mode, icon: Icon, title, text }) => (
-                  <button key={title} onClick={() => startBuilderForMode(mode)} className="cs-soft-card group min-h-[176px] rounded-2xl p-5 text-left backdrop-blur transition hover:-translate-y-1 hover:border-[#567C8D]/40 hover:bg-white sm:min-h-[220px]">
-                    <div className="mb-5 flex items-center justify-between">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#C8D9E6] text-[#567C8D]">
-                        <Icon size={22} />
+                {methods.map(({ mode, icon: Icon, title, text }) => {
+                  const isLocked = !isSignedIn && mode !== 'resume';
+
+                  const cardContent = (
+                    <div className="group min-h-[176px] rounded-2xl p-5 text-left backdrop-blur border border-transparent bg-white/55 hover:border-[#567C8D]/40 hover:bg-white sm:min-h-[220px] transition duration-300 relative h-full">
+                      <div className="mb-5 flex items-center justify-between">
+                        <div className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${isLocked ? 'bg-slate-200 text-slate-400' : 'bg-[#C8D9E6] text-[#567C8D]'}`}>
+                          {isLocked ? <Lock size={20} /> : <Icon size={22} />}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {isLocked ? (
+                            <span className="inline-flex items-center gap-1 rounded bg-[#E2E8F0] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#64748B] ring-1 ring-slate-300">
+                              <Lock size={10} /> Sign In
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center rounded bg-[#F5EFEB] text-[#2F4156] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ring-[#C8D9E6]">
+                              {mode === 'scratch' ? 'Free' : mode === 'resume' ? 'Grow AI' : 'Best match'}
+                            </span>
+                          )}
+                          <ArrowRight size={15} className="text-[#567C8D] transition group-hover:translate-x-1" />
+                        </div>
                       </div>
-                      <ArrowRight size={15} className="text-[#567C8D] transition group-hover:translate-x-1" />
+                      <h3 className="cs-display font-extrabold text-[#2F4156]">{title}</h3>
+                      <p className="mt-2 text-sm font-semibold leading-6 text-[#567C8D]">
+                        {isLocked ? "Please sign in to unlock this build option." : text}
+                      </p>
                     </div>
-                    <h3 className="cs-display font-extrabold text-[#2F4156]">{title}</h3>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-[#567C8D]">{text}</p>
-                  </button>
-                ))}
+                  );
+
+                  if (isLocked) {
+                    return (
+                      <SignInButton mode="modal" key={title}>
+                        <div className="cursor-pointer relative h-full">
+                          {cardContent}
+                        </div>
+                      </SignInButton>
+                    );
+                  }
+
+                  return (
+                    <button key={title} onClick={() => startBuilderForMode(mode)} className="w-full text-left focus:outline-none h-full">
+                      {cardContent}
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="flex flex-wrap gap-6 border-t border-[#C8D9E6] pt-6">
@@ -371,6 +423,42 @@ const Home = () => {
           <Footer />
         </LazyLandingSection>
       </div>
+
+      <AnimatePresence>
+        {isVideoModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsVideoModalOpen(false)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-white/20 bg-black shadow-2xl"
+            >
+              <button
+                onClick={() => setIsVideoModalOpen(false)}
+                className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition"
+                aria-label="Close video"
+              >
+                <X size={20} />
+              </button>
+              <div className="aspect-video w-full bg-black">
+                <video
+                  src={coverLetterVideo}
+                  autoPlay
+                  controls
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

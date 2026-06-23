@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, RedirectToSignIn, SignedIn, SignedOut } from '@clerk/clerk-react';
 import { useStore } from './store/useStore';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -31,7 +31,19 @@ function App() {
       <Suspense fallback={<div className="min-h-screen bg-[#F5EFEB]" />}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <>
+                <SignedIn>
+                  <Dashboard />
+                </SignedIn>
+                <SignedOut>
+                  <RedirectToSignIn />
+                </SignedOut>
+              </>
+            } 
+          />
           <Route path="/builder" element={<Builder />} />
         </Routes>
       </Suspense>

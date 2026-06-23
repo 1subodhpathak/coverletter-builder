@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../store/useStore';
 import { generateCoverLetter } from '../../services/groqService';
 import LoadingSkeleton from '../landing/LoadingSkeleton';
+import { useClerk } from '@clerk/clerk-react';
 
 // --- TEMPLATE IMPORTS ---
 import ModernTemplate from '../templates/ModernTemplate';
@@ -36,6 +37,7 @@ import {
 } from 'lucide-react';
 
 const Editor = ({ guideTarget }) => {
+  const clerk = useClerk();
   // GET DATA FROM STORE
   const { 
     generatedLetter, resumeText, jobDescription, setGeneratedLetter,
@@ -786,6 +788,12 @@ const Editor = ({ guideTarget }) => {
   };
 
   const handleDownload = async () => {
+    if (!clerkUserId) {
+      alert("Please sign in first to export your cover letter.");
+      clerk.openSignIn({});
+      return;
+    }
+
     const sourceElement =
       previewModalFrameRef.current?.querySelector('#cover-letter-preview') ||
       previewFrameRef.current?.querySelector('#cover-letter-preview') ||

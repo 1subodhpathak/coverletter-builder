@@ -2,14 +2,14 @@ import React, { Suspense, lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, Check, FileText, PenLine, Target, 
+  ArrowLeft, Check, FileText, PenLine, Target, Lock,
   UploadCloud, ChevronRight, Zap, 
   LayoutTemplate, LifeBuoy, Sparkles, User, Palette,
   Bold, List, Menu, X, Mail, Phone, Building2, MapPin, CheckCircle2
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
 
 const ManualDetailsStep = lazy(() => import('../components/generator/ManualDetailsStep'));
 const ResumeUploader = lazy(() => import('../components/generator/ResumeUploader'));
@@ -230,6 +230,7 @@ const creationContentByMode = {
 
 const Builder = () => {
   const navigate = useNavigate();
+  const { isSignedIn } = useAuth();
   const [isHelpOpen, setIsHelpOpen] = React.useState(false);
   const [editorGuideTarget, setEditorGuideTarget] = React.useState(null);
   const [creditUsage, setCreditUsage] = React.useState(() => getCareerSenseUsage());
@@ -383,24 +384,26 @@ const Builder = () => {
               >
                 <LifeBuoy size={14} /> Help
               </button>
-              <div className="hidden items-center gap-1.5 xl:gap-2 xl:flex">
-                <div className="flex min-h-10 items-center gap-1.5 xl:gap-2 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[11px] font-bold text-[#567C8D] shadow-sm">
-                  <Zap size={12} className="text-[#567C8D]" />
-                  Career Points Used
-                  <span className="text-[#2F4156]">{formatPoints(creditUsage.totalPoints)}</span>
+              <SignedIn>
+                <div className="hidden items-center gap-1.5 xl:gap-2 xl:flex">
+                  <div className="flex min-h-10 items-center gap-1.5 xl:gap-2 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[11px] font-bold text-[#567C8D] shadow-sm">
+                    <Zap size={12} className="text-[#567C8D]" />
+                    Career Points Used
+                    <span className="text-[#2F4156]">{formatPoints(creditUsage.totalPoints)}</span>
+                  </div>
+                  <div className="flex min-h-10 items-center gap-1.5 xl:gap-2 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[11px] font-bold text-[#567C8D] shadow-sm">
+                    <FileText size={12} className="text-[#567C8D]" />
+                    Total Bill
+                    <span className="text-[#2F4156]">{formatUsd(creditUsage.totalBillUsd)}</span>
+                  </div>
                 </div>
-                <div className="flex min-h-10 items-center gap-1.5 xl:gap-2 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[11px] font-bold text-[#567C8D] shadow-sm">
-                  <FileText size={12} className="text-[#567C8D]" />
-                  Total Bill
-                  <span className="text-[#2F4156]">{formatUsd(creditUsage.totalBillUsd)}</span>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-[#2F4156] shadow-sm transition-all hover:bg-[#F5EFEB] hover:shadow focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]"
-              >
-                Dashboard
-              </button>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-[#2F4156] shadow-sm transition-all hover:bg-[#F5EFEB] hover:shadow focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]"
+                >
+                  Dashboard
+                </button>
+              </SignedIn>
               <button onClick={handleBack} className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-[#2F4156] shadow-sm transition-all hover:bg-[#F5EFEB] hover:shadow focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]">
                 <ArrowLeft size={14} />
                 Back
@@ -465,16 +468,18 @@ const Builder = () => {
                   <LifeBuoy size={14} />
                   Help
                 </button>
-                <button
-                  onClick={() => {
-                    setIsMobileNavOpen(false);
-                    navigate('/dashboard');
-                  }}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-md border border-[#C8D9E6] bg-white px-3 py-2 text-[12px] font-bold text-[#2F4156] shadow-sm"
-                >
-                  <LayoutTemplate size={14} />
-                  Dashboard
-                </button>
+                <SignedIn>
+                  <button
+                    onClick={() => {
+                      setIsMobileNavOpen(false);
+                      navigate('/dashboard');
+                    }}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-md border border-[#C8D9E6] bg-white px-3 py-2 text-[12px] font-bold text-[#2F4156] shadow-sm"
+                  >
+                    <LayoutTemplate size={14} />
+                    Dashboard
+                  </button>
+                </SignedIn>
                 <button
                   onClick={() => {
                     setIsMobileNavOpen(false);
@@ -497,18 +502,20 @@ const Builder = () => {
                   </SignInButton>
                 </SignedOut>
               </div>
-              <div className="mt-3 grid gap-2">
-                <MobileInfoPill
-                  icon={Zap}
-                  label="Career Points Used"
-                  value={formatPoints(creditUsage.totalPoints)}
-                />
-                <MobileInfoPill
-                  icon={FileText}
-                  label="Total Bill"
-                  value={formatUsd(creditUsage.totalBillUsd)}
-                />
-              </div>
+              <SignedIn>
+                <div className="mt-3 grid gap-2">
+                  <MobileInfoPill
+                    icon={Zap}
+                    label="Career Points Used"
+                    value={formatPoints(creditUsage.totalPoints)}
+                  />
+                  <MobileInfoPill
+                    icon={FileText}
+                    label="Total Bill"
+                    value={formatUsd(creditUsage.totalBillUsd)}
+                  />
+                </div>
+              </SignedIn>
             </div>
           )}
         </div>
@@ -621,7 +628,7 @@ const Builder = () => {
               transition={{ duration: 0.4, ease: "easeInOut" }}
               className="w-full"
             >
-              {step === 0 && <CreationStart onChoose={chooseMode} />}
+              {step === 0 && <CreationStart onChoose={chooseMode} isSignedIn={isSignedIn} />}
               {step === 1 && (
                 <Suspense fallback={<StepFallback />}>
                   <ManualDetailsStep />
@@ -656,7 +663,7 @@ const StepFallback = ({ tinted = false }) => (
   <div className={`min-h-[60vh] w-full ${tinted ? 'bg-[#F5EFEB]' : ''}`} />
 );
 
-const CreationStart = ({ onChoose }) => {
+const CreationStart = ({ onChoose, isSignedIn }) => {
   const defaultMode = 'default';
   const [previewMode, setPreviewMode] = React.useState(defaultMode);
   const activeContent = creationContentByMode[previewMode] ?? creationContentByMode[defaultMode];
@@ -703,41 +710,35 @@ const CreationStart = ({ onChoose }) => {
         </div>
 
         <div className="flex flex-col gap-5">
-          {creationOptions.map(({ mode, title, badge, badgeStyle, icon: Icon, description, features }, index) => (
-            <motion.button
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 + (index * 0.1) }}
-              key={mode}
-              onClick={() => onChoose(mode)}
-              onMouseEnter={() => setPreviewMode(mode)}
-              onFocus={() => setPreviewMode(mode)}
-              onMouseLeave={() => setPreviewMode(defaultMode)}
-              onBlur={() => setPreviewMode(defaultMode)}
-              className="group relative w-full text-left focus:outline-none"
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <div className="absolute -inset-0.5 rounded-2xl bg-[#567C8D] opacity-0 blur transition duration-500 group-hover:opacity-15" />
+          {creationOptions.map(({ mode, title, badge, badgeStyle, icon: Icon, description, features }, index) => {
+            const isLocked = !isSignedIn && mode !== 'resume';
 
+            const cardContent = (
               <div className={`relative flex flex-col gap-5 rounded-xl border bg-white/95 p-6 shadow-sm backdrop-blur-md transition-all duration-300 sm:flex-row ${index === 2 ? 'border-[#567C8D]/40 shadow-[0_18px_45px_rgba(47,65,86,0.12)]' : 'border-[#C8D9E6] group-hover:border-[#567C8D]/30 group-hover:shadow-[0_18px_45px_rgba(47,65,86,0.1)]'}`}>
                 <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border transition-colors ${
+                  isLocked ? 'border-slate-300 bg-slate-100 text-slate-400' :
                   index === 2
                     ? 'border-[#567C8D]/25 bg-[#C8D9E6]/55 text-[#2F4156]'
                     : 'border-[#C8D9E6] bg-[#F5EFEB]/60 text-[#567C8D] group-hover:bg-[#C8D9E6]/30'
                 }`}>
-                  <Icon size={22} strokeWidth={2} />
+                  {isLocked ? <Lock size={20} /> : <Icon size={22} strokeWidth={2} />}
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-3">
                     <h3 className="text-[16px] font-bold text-[#2F4156]">{title}</h3>
-                    <span className={`inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${badgeStyle}`}>
-                      {badge}
-                    </span>
+                    {isLocked ? (
+                      <span className="inline-flex items-center gap-1 rounded bg-[#E2E8F0] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#64748B] ring-1 ring-slate-300">
+                        <Lock size={10} /> Sign In
+                      </span>
+                    ) : (
+                      <span className={`inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${badgeStyle}`}>
+                        {badge}
+                      </span>
+                    )}
                   </div>
                   <p className="mb-4 pr-8 text-[13px] leading-relaxed text-[#567C8D]">
-                    {description}
+                    {isLocked ? "Sign in to unlock this creation method." : description}
                   </p>
 
                   <div className="flex flex-wrap items-center gap-3">
@@ -754,8 +755,45 @@ const CreationStart = ({ onChoose }) => {
                   <ChevronRight size={16} strokeWidth={2.5} />
                 </div>
               </div>
-            </motion.button>
-          ))}
+            );
+
+            if (isLocked) {
+              return (
+                <SignInButton mode="modal" key={mode}>
+                  <div 
+                    onMouseEnter={() => setPreviewMode(mode)}
+                    onFocus={() => setPreviewMode(mode)}
+                    onMouseLeave={() => setPreviewMode(defaultMode)}
+                    onBlur={() => setPreviewMode(defaultMode)}
+                    className="group relative w-full text-left focus:outline-none cursor-pointer"
+                  >
+                    <div className="absolute -inset-0.5 rounded-2xl bg-[#567C8D] opacity-0 blur transition duration-500 group-hover:opacity-15" />
+                    {cardContent}
+                  </div>
+                </SignInButton>
+              );
+            }
+
+            return (
+              <motion.button
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 + (index * 0.1) }}
+                key={mode}
+                onClick={() => onChoose(mode)}
+                onMouseEnter={() => setPreviewMode(mode)}
+                onFocus={() => setPreviewMode(mode)}
+                onMouseLeave={() => setPreviewMode(defaultMode)}
+                onBlur={() => setPreviewMode(defaultMode)}
+                className="group relative w-full text-left focus:outline-none"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <div className="absolute -inset-0.5 rounded-2xl bg-[#567C8D] opacity-0 blur transition duration-500 group-hover:opacity-15" />
+                {cardContent}
+              </motion.button>
+            );
+          })}
         </div>
       </div>
     </div>
