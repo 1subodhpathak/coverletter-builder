@@ -19,7 +19,7 @@ import Footer from '../components/landing/Footer';
 import Testimonial from '../components/landing/Testimonial';
 import { TemplateShowcase, templateCount } from '../components/templates/TemplateGallery';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
-import { useStore } from '../store/useStore';
+import BlueLogo from '../assets/logos/BlueLogo.png';
 
 const methods = [
   {
@@ -101,12 +101,14 @@ const Home = () => {
       <header className="sticky top-0 z-50 border-b border-[#dbe3ef] bg-[#fbfaf6]/88 backdrop-blur-xl">
         <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-3 lg:px-8">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0b1f3a] text-white shadow-sm">
-              <FileText size={22} />
-            </div>
+            <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
             <div className="text-left">
-              <p className="cs-display text-lg font-extrabold leading-none tracking-tight">CareerSense</p>
-              <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#6b7280]">Executive Letters</p>
+              <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
+                <span className="text-[#0D2E63]">Career</span><span className="text-[#306099]">Sense</span>
+              </h1>
+              <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#6B87A0]">
+                Executive Letters
+              </p>
             </div>
           </button>
 

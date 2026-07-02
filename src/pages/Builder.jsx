@@ -10,6 +10,7 @@ import {
 import { useStore } from '../store/useStore';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
 import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
+import BlueLogo from '../assets/logos/BlueLogo.png';
 
 const ManualDetailsStep = lazy(() => import('../components/generator/ManualDetailsStep'));
 const ResumeUploader = lazy(() => import('../components/generator/ResumeUploader'));
@@ -333,12 +334,14 @@ const Builder = () => {
           <div className="flex min-h-16 flex-wrap lg:flex-nowrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3 sm:gap-6">
             <button onClick={openHome} className="flex items-center gap-3 transition-opacity hover:opacity-80">
-              <div className="flex h-8 w-8 items-center justify-center rounded bg-[#2F4156] text-white shadow-sm">
-                <FileText size={16} strokeWidth={2.5} />
-              </div>
+              <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
               <div className="text-left">
-                <p className="cs-display text-lg font-extrabold leading-none tracking-tight text-[#2F4156]">CareerSense</p>
-                <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#567C8D]">Executive Letters</p>
+                <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
+                  <span className="text-[#0D2E63]">Career</span><span className="text-[#306099]">Sense</span>
+                </h1>
+                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#6B87A0]">
+                  Executive Letters
+                </p>
               </div>
             </button>
             <div className="hidden h-6 w-px bg-[#C8D9E6] md:block" />

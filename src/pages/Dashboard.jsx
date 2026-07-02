@@ -24,7 +24,8 @@ import { templateCount } from '../components/templates/templateCatalog';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
 import { useStore } from '../store/useStore';
 import { extractTextFromPDF, hasUsablePdfText, parseResumeData } from '../services/pdfService';
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
+import BlueLogo from '../assets/logos/BlueLogo.png';
 
 const TemplateLibraryPage = lazy(() =>
   import('../components/templates/TemplateGallery').then((module) => ({
@@ -186,12 +187,14 @@ const Dashboard = () => {
 
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] border-r border-[#C8D9E6] bg-white/78 px-4 py-5 shadow-[0_24px_60px_rgba(47,65,86,0.08)] backdrop-blur-xl lg:block">
         <button onClick={() => navigate('/')} className="mb-7 flex items-center gap-3 px-2 text-left transition-opacity hover:opacity-80">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2F4156] text-white shadow-sm">
-            <FileText size={17} strokeWidth={2.4} />
-          </div>
+          <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
           <div>
-            <p className="text-[14px] font-bold leading-none tracking-tight text-[#2F4156]">CareerSense</p>
-            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#567C8D]">Workspace</p>
+            <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
+              <span className="text-[#0D2E63]">Career</span><span className="text-[#306099]">Sense</span>
+            </h1>
+            <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#6B87A0]">
+              Workspace
+            </p>
           </div>
         </button>
 

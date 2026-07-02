@@ -22,6 +22,7 @@ import { templateCount } from '../components/templates/templateCatalog';
 import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import coverLetterVideo from '../assets/CoverLetter1.mp4';
+import BlueLogo from '../assets/logos/BlueLogo.png';
 
 const AnimatedHeroBackground = lazy(() => import('../components/landing/AnimatedHeroBackground'));
 const CoverLetterAssistant = lazy(() => import('../components/landing/CoverLetterAssistant'));
@@ -192,12 +193,14 @@ const Home = () => {
         <div className="mx-auto max-w-[1400px] border border-white/45 bg-white/55 px-4 py-3 shadow-[0_18px_60px_rgba(47,65,86,0.14)] backdrop-blur-2xl supports-[backdrop-filter]:bg-white/42 sm:rounded-2xl sm:px-6">
           <div className="flex min-h-16 flex-wrap items-center justify-between gap-3">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2F4156] text-white shadow-sm ring-1 ring-white/35">
-                <FileText size={22} />
-              </div>
+              <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
               <div className="text-left">
-                <p className="cs-display text-lg font-extrabold leading-none tracking-tight">CareerSense</p>
-                <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#567C8D]">Executive Letters</p>
+                <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
+                  <span className="text-[#0D2E63]">Career</span><span className="text-[#306099]">Sense</span>
+                </h1>
+                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#6B87A0]">
+                  Executive Letters
+                </p>
               </div>
             </button>
 
