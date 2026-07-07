@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileText, Linkedin, Mail, Twitter, Phone, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import BlueLogo from '../../assets/logos/BlueLogo.png';
+import BlueLogo from '../../assets/logos/BlueGray.png';
 
 const productLinks = [
   { label: 'Builder', path: '/builder' },
@@ -30,9 +30,9 @@ const Footer = () => {
               <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
               <div className="text-left">
                 <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
-                  <span className="text-[#0D2E63]">Career</span><span className="text-[#306099]">Sense</span>
+                  <span className="text-[#2F4156]">Career</span><span className="text-[#567C8D]">Sense</span>
                 </h1>
-                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#6B87A0]">
+                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#C8D9E6]">
                   Executive Letters
                 </p>
               </div>

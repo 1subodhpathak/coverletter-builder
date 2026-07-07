@@ -1,16 +1,16 @@
 import React, { Suspense, lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   ArrowLeft, Check, FileText, PenLine, Target, Lock,
-  UploadCloud, ChevronRight, Zap, 
+  UploadCloud, ChevronRight, Zap,
   LayoutTemplate, LifeBuoy, Sparkles, User, Palette,
   Bold, List, Menu, X, Mail, Phone, Building2, MapPin, CheckCircle2
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
 import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
-import BlueLogo from '../assets/logos/BlueLogo.png';
+import BlueLogo from '../assets/logos/BlueGray.png';
 
 const ManualDetailsStep = lazy(() => import('../components/generator/ManualDetailsStep'));
 const ResumeUploader = lazy(() => import('../components/generator/ResumeUploader'));
@@ -309,15 +309,15 @@ const Builder = () => {
     : 'The best cover letters come from strong inputs: your contact details, target company information, relevant achievements, and the job description.';
   const helpQuickFacts = isEditorStep
     ? [
-        { label: 'Review first', value: 'Role, company, signature' },
-        { label: 'Must confirm', value: 'One-page print preview' },
-        { label: 'Best result', value: 'Tailored opening + proof' },
-      ]
+      { label: 'Review first', value: 'Role, company, signature' },
+      { label: 'Must confirm', value: 'One-page print preview' },
+      { label: 'Best result', value: 'Tailored opening + proof' },
+    ]
     : [
-        { label: 'Most important input', value: 'Job description' },
-        { label: 'Must have', value: 'Name, email, phone, role' },
-        { label: 'Best source', value: 'Resume + achievements' },
-      ];
+      { label: 'Most important input', value: 'Job description' },
+      { label: 'Must have', value: 'Name, email, phone, role' },
+      { label: 'Best source', value: 'Resume + achievements' },
+    ];
 
   const runHelpAction = (item) => {
     if (item.targetTab) {
@@ -332,107 +332,106 @@ const Builder = () => {
       <header className="sticky top-0 z-50 w-full border-b border-[#C8D9E6] bg-white/90 backdrop-blur-xl">
         <div className="mx-auto w-full px-4 py-2 sm:px-6">
           <div className="flex min-h-16 flex-wrap lg:flex-nowrap items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3 sm:gap-6">
-            <button onClick={openHome} className="flex items-center gap-3 transition-opacity hover:opacity-80">
-              <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
-              <div className="text-left">
-                <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
-                  <span className="text-[#0D2E63]">Career</span><span className="text-[#306099]">Sense</span>
-                </h1>
-                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#6B87A0]">
-                  Executive Letters
-                </p>
-              </div>
-            </button>
-            <div className="hidden h-6 w-px bg-[#C8D9E6] md:block" />
-            {step > 0 && (
-            <div className="hidden min-w-0 items-center lg:flex">
-              {steps.map((item, index) => {
-                const active = step === item.num;
-                const done = step > item.num;
-                return (
-                  <React.Fragment key={item.label}>
-                    <div className={`flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 xl:px-3 xl:py-1.5 transition-colors ${active ? 'bg-[#C8D9E6]/50' : ''}`}>
-                      <div
-                        className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
-                          active
-                            ? 'bg-[#2F4156] text-white shadow-sm'
-                            : done
-                              ? 'bg-[#567C8D] text-white'
-                              : 'bg-[#C8D9E6] text-[#567C8D]'
-                        }`}
-                      >
-                        {done ? <Check size={10} strokeWidth={3} /> : item.num}
-                      </div>
-                      <span className={`text-[12px] font-semibold ${active ? 'text-[#2F4156]' : 'text-[#567C8D]'}`}>
-                        {item.label}
-                      </span>
-                    </div>
-                    {index < steps.length - 1 && (
-                      <div className={`mx-1.5 h-px w-3 xl:w-6 ${done ? 'bg-[#567C8D]' : 'bg-[#C8D9E6]'}`} />
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 xl:gap-3">
-            <div className="hidden items-center gap-2 xl:gap-3 md:flex">
-              <button
-                onClick={() => setIsHelpOpen(true)}
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-1.5 xl:px-2 text-[12px] font-semibold text-[#567C8D] transition-colors hover:text-[#2F4156] focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]"
-                aria-label="Open help toolkit"
-              >
-                <LifeBuoy size={14} /> Help
-              </button>
-              <SignedIn>
-                <div className="hidden items-center gap-1.5 xl:gap-2 xl:flex">
-                  <div className="flex min-h-10 items-center gap-1.5 xl:gap-2 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[11px] font-bold text-[#567C8D] shadow-sm">
-                    <Zap size={12} className="text-[#567C8D]" />
-                    Career Points Used
-                    <span className="text-[#2F4156]">{formatPoints(creditUsage.totalPoints)}</span>
-                  </div>
-                  <div className="flex min-h-10 items-center gap-1.5 xl:gap-2 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[11px] font-bold text-[#567C8D] shadow-sm">
-                    <FileText size={12} className="text-[#567C8D]" />
-                    Total Bill
-                    <span className="text-[#2F4156]">{formatUsd(creditUsage.totalBillUsd)}</span>
-                  </div>
+            <div className="flex min-w-0 items-center gap-3 sm:gap-6">
+              <button onClick={openHome} className="flex items-center gap-3 transition-opacity hover:opacity-80">
+                <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
+                <div className="text-left">
+                  <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
+                    <span className="text-[#2F4156]">Career</span><span className="text-[#567C8D]">Sense</span>
+                  </h1>
+                  <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#C8D9E6]">
+                    Executive Letters
+                  </p>
                 </div>
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-[#2F4156] shadow-sm transition-all hover:bg-[#F5EFEB] hover:shadow focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]"
-                >
-                  Dashboard
-                </button>
-              </SignedIn>
-              <button onClick={handleBack} className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-[#2F4156] shadow-sm transition-all hover:bg-[#F5EFEB] hover:shadow focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]">
-                <ArrowLeft size={14} />
-                Back
               </button>
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#2F4156] px-4 text-[12px] font-bold text-white shadow-sm hover:bg-[#233244] transition focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]">
-                    Sign In
-                  </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
+              <div className="hidden h-6 w-px bg-[#C8D9E6] md:block" />
+              {step > 0 && (
+                <div className="hidden min-w-0 items-center lg:flex">
+                  {steps.map((item, index) => {
+                    const active = step === item.num;
+                    const done = step > item.num;
+                    return (
+                      <React.Fragment key={item.label}>
+                        <div className={`flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 xl:px-3 xl:py-1.5 transition-colors ${active ? 'bg-[#C8D9E6]/50' : ''}`}>
+                          <div
+                            className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${active
+                              ? 'bg-[#2F4156] text-white shadow-sm'
+                              : done
+                                ? 'bg-[#567C8D] text-white'
+                                : 'bg-[#C8D9E6] text-[#567C8D]'
+                              }`}
+                          >
+                            {done ? <Check size={10} strokeWidth={3} /> : item.num}
+                          </div>
+                          <span className={`text-[12px] font-semibold ${active ? 'text-[#2F4156]' : 'text-[#567C8D]'}`}>
+                            {item.label}
+                          </span>
+                        </div>
+                        {index < steps.length - 1 && (
+                          <div className={`mx-1.5 h-px w-3 xl:w-6 ${done ? 'bg-[#567C8D]' : 'bg-[#C8D9E6]'}`} />
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-            <button
-              type="button"
-              onClick={() => setIsMobileNavOpen((current) => !current)}
-              aria-label={isMobileNavOpen ? 'Close builder menu' : 'Open builder menu'}
-              aria-expanded={isMobileNavOpen}
-              className="flex h-11 w-11 items-center justify-center rounded-md border border-[#C8D9E6] bg-white text-[#2F4156] shadow-sm transition hover:bg-[#F5EFEB] md:hidden"
-            >
-              {isMobileNavOpen ? <X size={19} /> : <Menu size={19} />}
-            </button>
+
+            <div className="flex items-center gap-2 xl:gap-3">
+              <div className="hidden items-center gap-2 xl:gap-3 md:flex">
+                <button
+                  onClick={() => setIsHelpOpen(true)}
+                  className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-1.5 xl:px-2 text-[12px] font-semibold text-[#567C8D] transition-colors hover:text-[#2F4156] focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]"
+                  aria-label="Open help toolkit"
+                >
+                  <LifeBuoy size={14} /> Help
+                </button>
+                <SignedIn>
+                  <div className="hidden items-center gap-1.5 xl:gap-2 xl:flex">
+                    <div className="flex min-h-10 items-center gap-1.5 xl:gap-2 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[11px] font-bold text-[#567C8D] shadow-sm">
+                      <Zap size={12} className="text-[#567C8D]" />
+                      Career Points Used
+                      <span className="text-[#2F4156]">{formatPoints(creditUsage.totalPoints)}</span>
+                    </div>
+                    <div className="flex min-h-10 items-center gap-1.5 xl:gap-2 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[11px] font-bold text-[#567C8D] shadow-sm">
+                      <FileText size={12} className="text-[#567C8D]" />
+                      Total Bill
+                      <span className="text-[#2F4156]">{formatUsd(creditUsage.totalBillUsd)}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-[#2F4156] shadow-sm transition-all hover:bg-[#F5EFEB] hover:shadow focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]"
+                  >
+                    Dashboard
+                  </button>
+                </SignedIn>
+                <button onClick={handleBack} className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-[#2F4156] shadow-sm transition-all hover:bg-[#F5EFEB] hover:shadow focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]">
+                  <ArrowLeft size={14} />
+                  Back
+                </button>
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#2F4156] px-4 text-[12px] font-bold text-white shadow-sm hover:bg-[#233244] transition focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                </SignedOut>
+                <SignedIn>
+                  <UserButton afterSignOutUrl="/" />
+                </SignedIn>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileNavOpen((current) => !current)}
+                aria-label={isMobileNavOpen ? 'Close builder menu' : 'Open builder menu'}
+                aria-expanded={isMobileNavOpen}
+                className="flex h-11 w-11 items-center justify-center rounded-md border border-[#C8D9E6] bg-white text-[#2F4156] shadow-sm transition hover:bg-[#F5EFEB] md:hidden"
+              >
+                {isMobileNavOpen ? <X size={19} /> : <Menu size={19} />}
+              </button>
+            </div>
           </div>
-        </div>
           {isMobileNavOpen && (
             <div className="border-t border-[#C8D9E6] pt-3 md:hidden">
               {step > 0 && (
@@ -443,13 +442,12 @@ const Builder = () => {
                     return (
                       <div
                         key={item.label}
-                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-semibold ${
-                          active
-                            ? 'bg-[#C8D9E6]/50 text-[#2F4156]'
-                            : done
-                              ? 'bg-[#567C8D] text-white'
-                              : 'bg-[#F5EFEB] text-[#567C8D]'
-                        }`}
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-semibold ${active
+                          ? 'bg-[#C8D9E6]/50 text-[#2F4156]'
+                          : done
+                            ? 'bg-[#567C8D] text-white'
+                            : 'bg-[#F5EFEB] text-[#567C8D]'
+                          }`}
                       >
                         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/80 text-[10px] font-bold text-inherit">
                           {done ? <Check size={10} strokeWidth={3} /> : item.num}
@@ -568,32 +566,32 @@ const Builder = () => {
                 {helpItems.map((item) => {
                   const { title, text, icon: Icon, actionLabel, targetTab, bullets } = item;
                   return (
-                  <div key={title} className="rounded-lg border border-[#C8D9E6] bg-white p-3 shadow-sm sm:p-4">
-                    <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-md bg-[#C8D9E6]/55 text-[#2F4156] sm:mb-3">
-                      <Icon size={18} />
-                    </div>
-                    <h3 className="text-sm font-black text-[#2F4156]">{title}</h3>
-                    <p className="mt-1 text-xs font-semibold leading-5 text-[#567C8D]">{text}</p>
-                    {bullets?.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        {bullets.map((bullet) => (
-                          <div key={bullet} className="flex items-start gap-2 text-[11px] font-semibold leading-5 text-[#2F4156]">
-                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#567C8D]" />
-                            <span>{bullet}</span>
-                          </div>
-                        ))}
+                    <div key={title} className="rounded-lg border border-[#C8D9E6] bg-white p-3 shadow-sm sm:p-4">
+                      <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-md bg-[#C8D9E6]/55 text-[#2F4156] sm:mb-3">
+                        <Icon size={18} />
                       </div>
-                    )}
-                    {targetTab && (
-                      <button
-                        onClick={() => runHelpAction(item)}
-                        className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-[#F5EFEB] px-3 py-2 text-[11px] font-black text-[#2F4156] transition hover:border-[#567C8D]/50 hover:bg-[#C8D9E6]/45"
-                      >
-                        {actionLabel}
-                        <ChevronRight size={13} />
-                      </button>
-                    )}
-                  </div>
+                      <h3 className="text-sm font-black text-[#2F4156]">{title}</h3>
+                      <p className="mt-1 text-xs font-semibold leading-5 text-[#567C8D]">{text}</p>
+                      {bullets?.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          {bullets.map((bullet) => (
+                            <div key={bullet} className="flex items-start gap-2 text-[11px] font-semibold leading-5 text-[#2F4156]">
+                              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#567C8D]" />
+                              <span>{bullet}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {targetTab && (
+                        <button
+                          onClick={() => runHelpAction(item)}
+                          className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-[#F5EFEB] px-3 py-2 text-[11px] font-black text-[#2F4156] transition hover:border-[#567C8D]/50 hover:bg-[#C8D9E6]/45"
+                        >
+                          {actionLabel}
+                          <ChevronRight size={13} />
+                        </button>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -619,7 +617,7 @@ const Builder = () => {
             </Suspense>
           </div>
         )}
-        
+
         <div className="relative z-10 h-full">
           <AnimatePresence mode="wait">
             <motion.div
@@ -718,12 +716,11 @@ const CreationStart = ({ onChoose, isSignedIn }) => {
 
             const cardContent = (
               <div className={`relative flex flex-col gap-5 rounded-xl border bg-white/95 p-6 shadow-sm backdrop-blur-md transition-all duration-300 sm:flex-row ${index === 2 ? 'border-[#567C8D]/40 shadow-[0_18px_45px_rgba(47,65,86,0.12)]' : 'border-[#C8D9E6] group-hover:border-[#567C8D]/30 group-hover:shadow-[0_18px_45px_rgba(47,65,86,0.1)]'}`}>
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border transition-colors ${
-                  isLocked ? 'border-slate-300 bg-slate-100 text-slate-400' :
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border transition-colors ${isLocked ? 'border-slate-300 bg-slate-100 text-slate-400' :
                   index === 2
                     ? 'border-[#567C8D]/25 bg-[#C8D9E6]/55 text-[#2F4156]'
                     : 'border-[#C8D9E6] bg-[#F5EFEB]/60 text-[#567C8D] group-hover:bg-[#C8D9E6]/30'
-                }`}>
+                  }`}>
                   {isLocked ? <Lock size={20} /> : <Icon size={22} strokeWidth={2} />}
                 </div>
 
@@ -763,7 +760,7 @@ const CreationStart = ({ onChoose, isSignedIn }) => {
             if (isLocked) {
               return (
                 <SignInButton mode="modal" key={mode}>
-                  <div 
+                  <div
                     onMouseEnter={() => setPreviewMode(mode)}
                     onFocus={() => setPreviewMode(mode)}
                     onMouseLeave={() => setPreviewMode(defaultMode)}

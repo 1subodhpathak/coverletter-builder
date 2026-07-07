@@ -19,7 +19,7 @@ import Footer from '../components/landing/Footer';
 import Testimonial from '../components/landing/Testimonial';
 import { TemplateShowcase, templateCount } from '../components/templates/TemplateGallery';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
-import BlueLogo from '../assets/logos/BlueLogo.png';
+import BlueLogo from '../assets/logos/BlueGray.png';
 
 const methods = [
   {

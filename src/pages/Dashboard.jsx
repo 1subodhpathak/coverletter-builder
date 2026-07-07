@@ -11,6 +11,7 @@ import {
   Home as HomeIcon,
   LayoutTemplate,
   Loader2,
+  Menu,
   PenLine,
   Plus,
   Sparkles,
@@ -18,14 +19,16 @@ import {
   Trash2,
   UploadCloud,
   UserRound,
+  X,
   Zap,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { templateCount } from '../components/templates/templateCatalog';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
 import { useStore } from '../store/useStore';
 import { extractTextFromPDF, hasUsablePdfText, parseResumeData } from '../services/pdfService';
 import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
-import BlueLogo from '../assets/logos/BlueLogo.png';
+import BlueLogo from '../assets/logos/BlueGray.png';
 
 const TemplateLibraryPage = lazy(() =>
   import('../components/templates/TemplateGallery').then((module) => ({
@@ -73,6 +76,7 @@ const Dashboard = () => {
 
   const [activeView, setActiveView] = useState('dashboard');
   const [creditUsage, setCreditUsage] = useState(() => getCareerSenseUsage());
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -190,9 +194,9 @@ const Dashboard = () => {
           <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
           <div>
             <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
-              <span className="text-[#0D2E63]">Career</span><span className="text-[#306099]">Sense</span>
+              <span className="text-[#2F4156]">Career</span><span className="text-[#567C8D]">Sense</span>
             </h1>
-            <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#6B87A0]">
+            <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#C8D9E6]">
               Workspace
             </p>
           </div>
@@ -205,11 +209,10 @@ const Dashboard = () => {
               <button
                 key={id}
                 onClick={() => handleNav(id)}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-all duration-200 ${
-                  active
-                    ? 'bg-[#C8D9E6]/55 text-[#2F4156] shadow-sm'
-                    : 'text-[#567C8D] hover:bg-white/70 hover:text-[#2F4156]'
-                }`}
+                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-all duration-200 ${active
+                  ? 'bg-[#C8D9E6]/55 text-[#2F4156] shadow-sm'
+                  : 'text-[#567C8D] hover:bg-white/70 hover:text-[#2F4156]'
+                  }`}
               >
                 <Icon size={16} strokeWidth={active ? 2.5 : 2} />
                 {label}
@@ -219,10 +222,131 @@ const Dashboard = () => {
         </nav>
       </aside>
 
+      {/* Mobile Menu Drawer Overlay */}
+      <AnimatePresence>
+        {isMobileNavOpen && (
+          <div className="fixed inset-0 z-50 flex lg:hidden">
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileNavOpen(false)}
+              className="fixed inset-0 bg-[#2F4156]/40 backdrop-blur-xs"
+            />
+
+            {/* Sliding Drawer Panel (Left-side full height) */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className="relative flex w-full max-w-[300px] flex-col bg-white p-6 shadow-2xl border-r border-[#C8D9E6] h-full"
+            >
+              
+              {/* Header containing Logo & Close button */}
+              <div className="flex items-center justify-between mb-8">
+                <button
+                  onClick={() => {
+                    setIsMobileNavOpen(false);
+                    navigate('/');
+                  }}
+                  className="flex items-center gap-3 text-left transition-opacity hover:opacity-80"
+                >
+                  <img
+                    src={BlueLogo}
+                    alt="CareerSense Logo"
+                    className="h-10 w-10 object-contain rounded-2xl shrink-0"
+                  />
+                  <div>
+                    <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
+                      <span className="text-[#2F4156]">Career</span>
+                      <span className="text-[#567C8D]">Sense</span>
+                    </h1>
+                    <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#C8D9E6]">
+                      Workspace
+                    </p>
+                  </div>
+                </button>
+
+                {/* Close button */}
+                <button
+                  type="button"
+                  onClick={() => setIsMobileNavOpen(false)}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#C8D9E6] bg-white text-[#2F4156] transition hover:bg-slate-50 focus:outline-none"
+                  aria-label="Close navigation menu"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Initialize Builder CTA inside mobile drawer */}
+              <button
+                onClick={() => {
+                  startBuilder();
+                  setIsMobileNavOpen(false);
+                }}
+                className="mb-5 flex w-full h-11 items-center justify-center gap-2 rounded-xl bg-[#2F4156] text-[13px] font-bold text-white transition hover:bg-[#233244] shadow-sm"
+              >
+                <PenLine size={14} />
+                Initialize Builder
+              </button>
+
+              {/* Navigation Items list */}
+              <nav className="space-y-1.5 flex-1" aria-label="Mobile Navigation">
+                {navItems.map(({ id, label, icon: Icon }) => {
+                  const active = activeView === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => {
+                        handleNav(id);
+                        setIsMobileNavOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-[14px] font-bold transition-all duration-200 ${
+                        active
+                          ? 'bg-[#C8D9E6]/55 text-[#2F4156] shadow-sm'
+                          : 'text-[#567C8D] hover:bg-slate-50 hover:text-[#2F4156]'
+                      }`}
+                    >
+                      <Icon size={16} strokeWidth={active ? 2.5 : 2} />
+                      {label}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {/* Footer space inside drawer (points & estimation) */}
+              <div className="border-t border-[#C8D9E6] pt-4 mt-auto space-y-2">
+                <div className="flex items-center justify-between rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 py-2 text-[11px] font-bold text-[#567C8D]">
+                  <span className="flex items-center gap-1.5"><Zap size={12} /> Points Used</span>
+                  <span className="text-[#2F4156]">{formatPoints(creditUsage.totalPoints)}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 py-2 text-[11px] font-bold text-[#567C8D]">
+                  <span className="flex items-center gap-1.5"><CreditCard size={12} /> Cost</span>
+                  <span className="text-[#2F4156]">{formatUsd(creditUsage.totalBillUsd)}</span>
+                </div>
+              </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <main className="relative lg:ml-[248px]">
         <header className="sticky top-0 z-30 border-b border-[#C8D9E6] bg-white/72 backdrop-blur-xl">
           <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-[17px] font-bold tracking-tight text-[#2F4156]">{activeLabel}</h1>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsMobileNavOpen(true)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#C8D9E6] bg-white text-[#2F4156] transition hover:bg-slate-50 focus:outline-none lg:hidden"
+                aria-label="Open navigation menu"
+              >
+                <Menu size={18} />
+              </button>
+              <h1 className="text-[17px] font-bold tracking-tight text-[#2F4156]">{activeLabel}</h1>
+            </div>
 
             <div className="flex items-center gap-3">
               <div className="hidden items-center gap-2 lg:flex">
@@ -238,12 +362,12 @@ const Dashboard = () => {
                 </div>
               </div>
               <button
-                        onClick={startBuilder}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#2F4156] px-5 text-[13px] font-bold text-white transition hover:bg-[#233244]"
-                      >
-                        <PenLine size={14} />
-                        Initialize Builder
-                      </button>
+                onClick={startBuilder}
+                className="hidden h-10 items-center justify-center gap-2 rounded-xl bg-[#2F4156] px-5 text-[13px] font-bold text-white transition hover:bg-[#233244] lg:inline-flex"
+              >
+                <PenLine size={14} />
+                Initialize Builder
+              </button>
               <SignedOut>
                 <SignInButton mode="modal">
                   <button className="inline-flex h-10 items-center justify-center rounded-xl bg-[#2F4156] px-5 text-[13px] font-bold text-white hover:bg-[#233244] shadow-sm transition">
@@ -257,28 +381,6 @@ const Dashboard = () => {
             </div>
           </div>
         </header>
-
-        <nav className="sticky top-16 z-20 border-b border-[#C8D9E6] bg-white/86 px-3 py-2 backdrop-blur-xl lg:hidden" aria-label="Mobile dashboard">
-          <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {navItems.map(({ id, label, icon: Icon }) => {
-              const active = activeView === id;
-              return (
-                <button
-                  key={id}
-                  onClick={() => handleNav(id)}
-                  className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-3 text-[12px] font-bold transition ${
-                    active
-                      ? 'border-[#C8D9E6] bg-[#C8D9E6]/45 text-[#2F4156]'
-                      : 'border-[#C8D9E6] bg-white/90 text-[#567C8D]'
-                  }`}
-                >
-                  <Icon size={14} />
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </nav>
 
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
           {activeView === 'dashboard' && (
@@ -600,9 +702,8 @@ const ActionItem = ({ text, action, isDone, onClick }) => (
     <button
       onClick={onClick}
       disabled={isDone}
-      className={`shrink-0 text-[12px] font-bold transition ${
-        isDone ? 'cursor-not-allowed text-[#567C8D]/40' : 'text-[#567C8D] hover:text-[#2F4156]'
-      }`}
+      className={`shrink-0 text-[12px] font-bold transition ${isDone ? 'cursor-not-allowed text-[#567C8D]/40' : 'text-[#567C8D] hover:text-[#2F4156]'
+        }`}
     >
       {action}
     </button>

@@ -22,7 +22,7 @@ import { templateCount } from '../components/templates/templateCatalog';
 import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import coverLetterVideo from '../assets/CoverLetter1.mp4';
-import BlueLogo from '../assets/logos/BlueLogo.png';
+import BlueLogo from '../assets/logos/BlueGray.png';
 
 const AnimatedHeroBackground = lazy(() => import('../components/landing/AnimatedHeroBackground'));
 const CoverLetterAssistant = lazy(() => import('../components/landing/CoverLetterAssistant'));
@@ -196,9 +196,9 @@ const Home = () => {
               <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
               <div className="text-left">
                 <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
-                  <span className="text-[#0D2E63]">Career</span><span className="text-[#306099]">Sense</span>
+                  <span className="text-[#2F4156]">Career</span><span className="text-[#567C8D]">Sense</span>
                 </h1>
-                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#6B87A0]">
+                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#C8D9E6]">
                   Executive Letters
                 </p>
               </div>
@@ -379,16 +379,16 @@ const Home = () => {
                 {heroStats.map((stat) => {
                   const Icon = stat.icon;
                   return (
-                  <div key={stat.label} className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#C8D9E6] bg-white/80 text-[#567C8D] shadow-sm">
-                      <Icon size={18} />
-                    </div>
+                    <div key={stat.label} className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#C8D9E6] bg-white/80 text-[#567C8D] shadow-sm">
+                        <Icon size={18} />
+                      </div>
 
-                    <div>
-                      <p className="cs-display text-2xl font-extrabold text-[#2F4156]">{stat.value}</p>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#567C8D]">{stat.label}</p>
+                      <div>
+                        <p className="cs-display text-2xl font-extrabold text-[#2F4156]">{stat.value}</p>
+                        <p className="text-xs font-black uppercase tracking-[0.16em] text-[#567C8D]">{stat.label}</p>
+                      </div>
                     </div>
-                  </div>
                   );
                 })}
               </div>
@@ -570,9 +570,8 @@ const SectionPlaceholder = ({ minHeight }) => (
 
 const UsagePill = ({ label, value, mobile = false }) => (
   <div
-    className={`h-11 items-center gap-3 rounded-xl border border-[#C8D9E6]/80 bg-white/72 px-4 shadow-sm backdrop-blur ${
-      mobile ? 'flex justify-between' : 'hidden md:inline-flex'
-    }`}
+    className={`h-11 items-center gap-3 rounded-xl border border-[#C8D9E6]/80 bg-white/72 px-4 shadow-sm backdrop-blur ${mobile ? 'flex justify-between' : 'hidden md:inline-flex'
+      }`}
   >
     <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#567C8D]">{label}</p>
     <p className="text-sm font-black text-[#2F4156]">{value}</p>
