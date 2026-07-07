@@ -1,7 +1,9 @@
-import React from 'react';
-import { FileText, Linkedin, Mail, Twitter, Phone, MapPin } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, Linkedin, Mail, Twitter, Phone, MapPin, Coffee, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BlueLogo from '../../assets/logos/BlueGray.png';
+
+const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfz55NWi27Do0xWsPxNVEMU6CTqW8diTrwk3oxR62ufMVsPxg/viewform";
 
 const productLinks = [
   { label: 'Builder', path: '/builder' },
@@ -14,6 +16,7 @@ const builderLinks = ['Executive letter builder', 'Resume upload', 'Job descript
 
 const Footer = () => {
   const navigate = useNavigate();
+  const [isCoffeeOpen, setIsCoffeeOpen] = useState(false);
 
   const handleLink = (item) => {
     if (item.path) navigate(item.path);
@@ -23,6 +26,24 @@ const Footer = () => {
   return (
     <footer className="border-t border-[#C8D9E6] py-14 text-slate-900">
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
+        {/* Top CTA Banner */}
+        <div className="mb-12 flex flex-col items-center justify-between gap-6 rounded-[24px] border border-[#C8D9E6] bg-white px-8 py-8 shadow-sm md:flex-row lg:px-10">
+          <div>
+            <h3 className="text-xl font-extrabold text-[#2F4156]">
+              Initialize Career Uplink?
+            </h3>
+            <p className="mt-1 text-sm font-semibold text-slate-500">
+              Join the network or grab a virtual coffee with our mentors.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setIsCoffeeOpen(true)}
+            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2F4156] px-6 text-sm font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#233244]"
+          >
+            <Coffee size={18} /> Coffee Connect
+          </button>
+        </div>
         <div className="grid gap-10 py-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Column 1: Logo & About Description & Socials */}
           <div className="flex flex-col">
@@ -115,6 +136,38 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      {/* Coffee Connect Modal */}
+      {isCoffeeOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2F4156]/40 p-4 backdrop-blur-sm">
+          <div className="relative flex h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-[24px] border border-[#C8D9E6] bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#C8D9E6] bg-[#F5EFEB] p-4 px-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#2F4156] shadow-sm">
+                  <Coffee size={18} />
+                </div>
+                <h3 className="font-bold text-[#2F4156]">Coffee Connect</h3>
+              </div>
+              <button
+                onClick={() => setIsCoffeeOpen(false)}
+                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="relative flex-1 bg-white">
+              <iframe
+                src={GOOGLE_FORM_URL}
+                className="absolute inset-0 h-full w-full border-0"
+                title="Coffee Connect Form"
+              >
+                Loading...
+              </iframe>
+            </div>
+          </div>
+        </div>
+      )}
     </footer>
   );
 };
