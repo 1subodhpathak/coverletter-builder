@@ -1054,110 +1054,67 @@ const formatSourceDate = (value) => {
 
 const ProfileView = () => {
   const profile = useStore((state) => state.profile);
-  const updateProfile = useStore((state) => state.updateProfile);
-  const [saved, setSaved] = useState(false);
-
-  const handleChange = (field) => (event) => {
-    updateProfile({ [field]: event.target.value });
-    setSaved(false);
-  };
-
-  const handleSave = () => {
-    updateProfile({
-      fullName: profile.fullName || '',
-      email: profile.email || '',
-      phone: profile.phone || '',
-      address: profile.address || '',
-      linkedinPortfolio: profile.linkedinPortfolio || '',
-      currentJobTitle: profile.currentJobTitle || '',
-      experienceYears: profile.experienceYears || '',
-      experienceMonths: profile.experienceMonths || '',
-    });
-    setSaved(true);
-  };
 
   const fields = [
-    { key: 'fullName', label: 'Full name', placeholder: 'Enter full name', type: 'text' },
-    { key: 'email', label: 'Email address', placeholder: 'Enter email address', type: 'email' },
-    { key: 'phone', label: 'Phone number', placeholder: 'Enter phone number', type: 'text' },
-    { key: 'address', label: 'Location / City', placeholder: 'Enter location or city', type: 'text' },
-    { key: 'linkedinPortfolio', label: 'LinkedIn / Portfolio', placeholder: 'Paste LinkedIn URL or portfolio link', type: 'text' },
+    { key: 'fullName', label: 'Full name', value: profile.fullName || '—', type: 'text' },
+    { key: 'email', label: 'Email address', value: profile.email || '—', type: 'email' },
+    { key: 'phone', label: 'Phone number', value: profile.phone || '—', type: 'text' },
+    { key: 'address', label: 'Location / City', value: profile.address || '—', type: 'text' },
+    { key: 'linkedinPortfolio', label: 'LinkedIn / Portfolio', value: profile.linkedinPortfolio || '—', type: 'text' },
   ];
 
   return (
     <section className="rounded-[24px] border border-white/70 bg-white/82 p-5 shadow-[0_18px_48px_rgba(47,65,86,0.08)] backdrop-blur-xl sm:p-6">
-      <h2 className="text-xl font-extrabold tracking-tight text-[#2F4156]">Profile Settings</h2>
-      <p className="mt-1 text-[13px] text-[#567C8D]">Saved profile details automatically prefill the required input section when you start a new cover letter.</p>
+      <h2 className="text-xl font-extrabold tracking-tight text-[#2F4156]">Profile Context (Read-Only)</h2>
+      <p className="mt-1 text-[13px] text-[#567C8D]">Below is your active workspace profile synced from your master account. Used to prefill cover letter builder sessions.</p>
 
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {fields.map((field) => (
-          <label key={field.key} className="block group">
-            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#567C8D] transition-colors group-focus-within:text-[#2F4156]">
+          <div key={field.key} className="block group">
+            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#567C8D]">
               {field.label}
             </span>
-            <input
-              type={field.type}
-              min={field.min}
-              max={field.max}
-              value={profile[field.key] || ''}
-              onChange={handleChange(field.key)}
-              className="w-full rounded-xl border border-[#C8D9E6] bg-white px-3 py-2 text-[13px] text-[#2F4156] placeholder:text-[#567C8D]/55 outline-none transition-all focus:border-[#567C8D] focus:ring-2 focus:ring-[#C8D9E6]/60 shadow-sm"
-              placeholder={field.placeholder}
-            />
-          </label>
+            <div className="flex h-10 w-full items-center rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 text-[13px] font-bold text-[#2F4156] shadow-sm">
+              {field.value}
+            </div>
+          </div>
         ))}
         <div className="md:col-span-2">
           <div className="grid gap-5 md:grid-cols-[2fr_1fr_1fr]">
-            <label className="block group">
-              <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#567C8D] transition-colors group-focus-within:text-[#2F4156]">
+            <div className="block group">
+              <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#567C8D]">
                 Current job title
               </span>
-              <input
-                type="text"
-                value={profile.currentJobTitle || ''}
-                onChange={handleChange('currentJobTitle')}
-                className="w-full rounded-xl border border-[#C8D9E6] bg-white px-3 py-2 text-[13px] text-[#2F4156] placeholder:text-[#567C8D]/55 outline-none transition-all focus:border-[#567C8D] focus:ring-2 focus:ring-[#C8D9E6]/60 shadow-sm"
-                placeholder="Enter current job title"
-              />
-            </label>
+              <div className="flex h-10 w-full items-center rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 text-[13px] font-bold text-[#2F4156] shadow-sm">
+                {profile.currentJobTitle || '—'}
+              </div>
+            </div>
             <div className="group md:col-span-2">
-              <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#567C8D] transition-colors group-focus-within:text-[#2F4156]">
+              <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-[#567C8D]">
                 Experience
               </span>
               <div className="grid gap-4 md:grid-cols-2">
-                <input
-                  type="number"
-                  min="0"
-                  value={profile.experienceYears || ''}
-                  onChange={handleChange('experienceYears')}
-                  className="w-full rounded-xl border border-[#C8D9E6] bg-white px-3 py-2 text-[13px] text-[#2F4156] placeholder:text-[#567C8D]/55 outline-none transition-all focus:border-[#567C8D] focus:ring-2 focus:ring-[#C8D9E6]/60 shadow-sm"
-                  placeholder="Years"
-                />
-                <input
-                  type="number"
-                  min="0"
-                  max="11"
-                  value={profile.experienceMonths || ''}
-                  onChange={handleChange('experienceMonths')}
-                  className="w-full rounded-xl border border-[#C8D9E6] bg-white px-3 py-2 text-[13px] text-[#2F4156] placeholder:text-[#567C8D]/55 outline-none transition-all focus:border-[#567C8D] focus:ring-2 focus:ring-[#C8D9E6]/60 shadow-sm"
-                  placeholder="Months"
-                />
+                <div className="flex h-10 w-full items-center rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 text-[13px] font-bold text-[#2F4156] shadow-sm">
+                  {profile.experienceYears ? `${profile.experienceYears} Years` : '—'}
+                </div>
+                <div className="flex h-10 w-full items-center rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 text-[13px] font-bold text-[#2F4156] shadow-sm">
+                  {profile.experienceMonths ? `${profile.experienceMonths} Months` : '—'}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 border-t border-[#C8D9E6] pt-5 sm:flex-row sm:items-center sm:justify-between">
-        <p className={`text-[12px] font-medium ${saved ? 'text-emerald-600' : 'text-[#567C8D]'}`}>
-          {saved ? 'Profile settings saved. Used for new sessions.' : 'Changes are stored to prefill new builder sessions.'}
-        </p>
-        <button
-          onClick={handleSave}
-          className="h-10 w-full rounded-xl bg-[#2F4156] px-4 text-[13px] font-bold text-white shadow-sm transition-colors hover:bg-[#233244] sm:w-auto"
+      <div className="mt-6 flex items-center justify-end border-t border-[#C8D9E6] pt-5">
+        <a
+          href="https://careersenseai.com/dashboard?tab=My%20Profile"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-[#2F4156] px-5 text-[13px] font-bold text-white shadow-sm transition-colors hover:bg-[#233244] active:scale-95 sm:w-auto"
         >
-          Save Configuration
-        </button>
+          Edit Profile ↗
+        </a>
       </div>
     </section>
   );
