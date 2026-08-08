@@ -21,6 +21,7 @@ import {
   UserRound,
   X,
   Zap,
+  Star,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { templateCount } from '../components/templates/templateCatalog';
@@ -75,8 +76,12 @@ const Dashboard = () => {
   const deleteSavedLetter = useStore((state) => state.deleteSavedLetter);
 
   const [activeView, setActiveView] = useState('dashboard');
-  const [creditUsage, setCreditUsage] = useState(() => getCareerSenseUsage());
+  const [creditUsage, setCreditUsage] = useState(() => getCareerSenseUsage(savedLetters));
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    setCreditUsage(getCareerSenseUsage(savedLetters));
+  }, [savedLetters]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -161,9 +166,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (activeView === 'credits') {
-      setCreditUsage(getCareerSenseUsage());
+      setCreditUsage(getCareerSenseUsage(savedLetters));
     }
-  }, [activeView]);
+  }, [activeView, savedLetters]);
 
   const startBuilder = () => {
     resetBuilder();
@@ -196,8 +201,8 @@ const Dashboard = () => {
             <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
               <span className="text-[#2F4156]">Career</span><span className="text-[#567C8D]">Sense</span>
             </h1>
-            <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#C8D9E6]">
-              Workspace
+            <p className="mt-1 text-[9px] font-black uppercase tracking-[0.22em] text-[#567C8D] whitespace-nowrap">
+              Executive Letters
             </p>
           </div>
         </button>
@@ -263,8 +268,8 @@ const Dashboard = () => {
                       <span className="text-[#2F4156]">Career</span>
                       <span className="text-[#567C8D]">Sense</span>
                     </h1>
-                    <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#C8D9E6]">
-                      Workspace
+                    <p className="mt-1 text-[9px] font-black uppercase tracking-[0.22em] text-[#567C8D] whitespace-nowrap">
+                      Executive Letters
                     </p>
                   </div>
                 </button>
@@ -350,15 +355,23 @@ const Dashboard = () => {
 
             <div className="flex items-center gap-3">
               <div className="hidden items-center gap-2 lg:flex">
-                <div className="flex items-center gap-2 rounded-full border border-[#C8D9E6] bg-white/75 px-3 py-1.5 text-[11px] font-bold text-[#567C8D]">
-                  <Zap size={12} className="text-[#567C8D]" />
-                  Career Points Used
-                  <span className="text-[#2F4156]">{formatPoints(creditUsage.totalPoints)}</span>
+                <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-500 shrink-0">
+                    <Star className="h-3.5 w-3.5" fill="currentColor" />
+                  </div>
+                  <div className="flex flex-col text-left leading-none">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">CS Points Used</p>
+                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatPoints(creditUsage.totalPoints)}</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 rounded-full border border-[#C8D9E6] bg-white/75 px-3 py-1.5 text-[11px] font-bold text-[#567C8D]">
-                  <CreditCard size={12} className="text-[#567C8D]" />
-                  Estimated Cost
-                  <span className="text-[#2F4156]">{formatUsd(creditUsage.totalBillUsd)}</span>
+                <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shrink-0">
+                    <span className="text-xs font-black">$</span>
+                  </div>
+                  <div className="flex flex-col text-left leading-none">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">Bill</p>
+                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatUsd(creditUsage.totalBillUsd)}</p>
+                  </div>
                 </div>
               </div>
               <button

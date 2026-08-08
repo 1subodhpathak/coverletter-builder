@@ -14,6 +14,7 @@ import {
   UploadCloud,
   X,
   Zap,
+  Star,
 } from 'lucide-react';
 import CoverLetterGenie from '../components/landing/CoverLetterGenie';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
@@ -76,7 +77,8 @@ const Home = () => {
   const setCreationMode = useStore((state) => state.setCreationMode);
   const setGeneratedLetter = useStore((state) => state.setGeneratedLetter);
   const setStep = useStore((state) => state.setStep);
-  const [usage, setUsage] = useState(() => getCareerSenseUsage());
+  const savedLetters = useStore((state) => state.savedLetters);
+  const [usage, setUsage] = useState(() => getCareerSenseUsage(savedLetters));
   const [heroWordIdx, setHeroWordIdx] = useState(0);
   const [heroWordVisible, setHeroWordVisible] = useState(true);
   const [scrollShade, setScrollShade] = useState(0);
@@ -84,14 +86,15 @@ const Home = () => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   useEffect(() => {
-    const refreshUsage = () => setUsage(getCareerSenseUsage());
+    const refreshUsage = () => setUsage(getCareerSenseUsage(savedLetters));
+    setUsage(getCareerSenseUsage(savedLetters));
     window.addEventListener('storage', refreshUsage);
     window.addEventListener('focus', refreshUsage);
     return () => {
       window.removeEventListener('storage', refreshUsage);
       window.removeEventListener('focus', refreshUsage);
     };
-  }, []);
+  }, [savedLetters]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -215,13 +218,36 @@ const Home = () => {
             <div className="flex items-center gap-2">
               <SignedIn>
                 <div className="hidden flex-1 items-center justify-end gap-2 sm:flex-none md:flex">
-                  <UsagePill label="Career Points Used" value={formatPoints(usage.totalPoints)} />
-                  <UsagePill label="Total Bill" value={formatUsd(usage.totalBillUsd)} />
+                  <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-500 shrink-0">
+                      <Star className="h-3.5 w-3.5" fill="currentColor" />
+                    </div>
+                    <div className="flex flex-col text-left leading-none">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">CS Points Used</p>
+                      <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatPoints(usage.totalPoints)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shrink-0">
+                      <span className="text-xs font-black">$</span>
+                    </div>
+                    <div className="flex flex-col text-left leading-none">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">Bill</p>
+                      <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatUsd(usage.totalBillUsd)}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/dashboard')}
+                    className="inline-flex h-9 items-center gap-2 rounded-xl bg-[#2F4156] hover:bg-[#233244] px-4 text-xs font-bold text-white shadow-2xs transition-all active:scale-95 shrink-0"
+                  >
+                    Dashboard
+                  </button>
                 </div>
               </SignedIn>
               <SignedOut>
                 <SignInButton mode="modal">
-                  <button className="inline-flex h-11 items-center justify-center rounded-xl bg-[#2F4156] px-5 text-[13px] font-bold text-white hover:bg-[#233244] shadow-sm transition">
+                  <button className="inline-flex h-9 items-center justify-center rounded-xl bg-[#2F4156] px-5 text-xs font-bold text-white hover:bg-[#233244] shadow-2xs transition">
                     Sign In
                   </button>
                 </SignInButton>
@@ -233,8 +259,7 @@ const Home = () => {
                 type="button"
                 onClick={() => setIsMobileNavOpen((current) => !current)}
                 aria-label={isMobileNavOpen ? 'Close menu' : 'Open menu'}
-                aria-expanded={isMobileNavOpen}
-                className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#C8D9E6] bg-white/88 text-[#2F4156] shadow-sm transition hover:bg-white lg:hidden"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#C8D9E6] bg-white text-[#2F4156] shadow-2xs transition hover:bg-[#F5EFEB] md:hidden"
               >
                 {isMobileNavOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
@@ -276,10 +301,9 @@ const Home = () => {
       </header>
 
       <main className="relative z-10">
-        <section className="relative isolate overflow-hidden border-b border-[#C8D9E6]">
-          <div className="relative mx-auto grid min-h-[calc(100vh-72px)] max-w-[1400px] items-center gap-10 overflow-hidden px-4 pb-12 pt-8 sm:px-6 sm:pb-16 sm:pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-            <HeroBackground />
-
+        <section className="relative z-10 px-4 pt-10 pb-12 sm:px-6 md:pt-14 md:pb-16 lg:px-8">
+          <div className="mx-auto max-w-[1400px]">
+            <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
             <div className="relative z-10" data-scroll-reveal>
               <h1 className="cs-display mb-5 max-w-3xl text-4xl font-extrabold leading-[1.06] tracking-tight text-[#2F4156] sm:text-5xl md:text-6xl lg:text-[3.75rem]">
                 Build{' '}
@@ -301,30 +325,25 @@ const Home = () => {
                 CareerSense helps senior professionals craft boardroom-ready cover letters from scratch, from a resume, or from a resume matched to an executive job description.
               </p>
 
-              <div className="mb-9 flex flex-wrap gap-3">
-                <button
-                  onClick={openBuilderStart}
-                  className="inline-flex min-h-[53px] min-w-[180px] items-center justify-between rounded-[12px] border border-[#0F1C2E] bg-[#0F1C2E] px-6 text-[14px] font-black text-white shadow-[0_14px_30px_rgba(15,28,46,0.16)] transition hover:-translate-y-0.5 hover:bg-[#16263d]"
-                >
-                  <span>Start Building</span>
-                  <ArrowRight size={22} />
-                </button>
-                <SignedIn>
+              <div className="mb-6 grid gap-3 sm:grid-cols-3">
+                <div>
                   <button
-                    onClick={() => navigate('/dashboard')}
-                    className="inline-flex min-h-[38px] min-w-[180px] items-center justify-between rounded-[12px] border border-[#C8D9E6] bg-white px-6 text-[14px] font-black text-[#0F1C2E] shadow-[0_14px_28px_rgba(47,65,86,0.09)] transition hover:-translate-y-0.5 hover:border-[#9DB5C6] hover:bg-white"
+                    onClick={openBuilderStart}
+                    className="group inline-flex w-full min-h-[46px] items-center justify-between rounded-[12px] border border-[#0F1C2E] bg-[#0F1C2E] px-5 text-[13.5px] font-black text-white shadow-[0_14px_30px_rgba(15,28,46,0.16)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#16263d]"
                   >
-                    <span>Dashboard</span>
-                    <Layout size={20} />
+                    <span>Start Building</span>
+                    <ArrowRight size={20} className="transition duration-300 group-hover:translate-x-1" />
                   </button>
-                </SignedIn>
-                <button
-                  onClick={() => setIsVideoModalOpen(true)}
-                  className="inline-flex min-h-[38px] min-w-[180px] items-center justify-between rounded-[12px] border border-[#C8D9E6] bg-white px-6 text-[14px] font-black text-[#0F1C2E] shadow-[0_14px_28px_rgba(47,65,86,0.09)] transition hover:-translate-y-0.5 hover:border-[#9DB5C6] hover:bg-white"
-                >
-                  <span>How it works</span>
-                  <Play size={18} className="text-[#0F1C2E] fill-current" />
-                </button>
+                </div>
+                <div>
+                  <button
+                    onClick={() => setIsVideoModalOpen(true)}
+                    className="group inline-flex w-full min-h-[46px] items-center justify-between rounded-[12px] border border-[#C8D9E6] bg-white px-5 text-[13.5px] font-black text-[#0F1C2E] shadow-[0_14px_28px_rgba(47,65,86,0.09)] transition duration-300 hover:-translate-y-0.5 hover:border-[#9DB5C6] hover:bg-white"
+                  >
+                    <span>How it works</span>
+                    <Play size={18} className="text-[#0F1C2E] fill-current transition duration-300 group-hover:scale-105" />
+                  </button>
+                </div>
               </div>
 
               <div id="methods" className="mb-9 grid scroll-mt-4 gap-3 sm:grid-cols-3">
@@ -398,7 +417,8 @@ const Home = () => {
               <CoverLetterGenie />
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
         <LazyLandingSection minHeight="520px">
           <CoverLetterAssistant />

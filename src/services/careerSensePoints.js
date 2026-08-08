@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'careersense_points_usage';
-const POINTS_PER_USD = 10000;
+const POINTS_PER_USD = 100000;
 
 const canUseStorage = () => typeof window !== 'undefined' && window.localStorage;
 
@@ -9,6 +9,18 @@ const readRecords = () => {
   try {
     const parsed = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]');
     return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const getSavedLettersFromStorage = () => {
+  if (!canUseStorage()) return [];
+  try {
+    const raw = window.localStorage.getItem('careersense-storage');
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return parsed?.state?.savedLetters || [];
   } catch {
     return [];
   }
@@ -42,12 +54,50 @@ export const recordCareerSenseUsage = ({
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
 };
 
-export const getCareerSenseUsage = () => {
-  const records = readRecords();
-  const totalPoints = records.reduce((sum, record) => sum + (Number(record.totalPoints) || 0), 0);
+export const getCareerSenseUsage = (letters) => {
+  const realRecords = readRecords();
+  let totalPoints = realRecords.reduce((sum, record) => sum + (Number(record.totalPoints) || 0), 0);
+
+  const savedLetters = (letters && Array.isArray(letters)) ? letters : getSavedLettersFromStorage();
+  let finalRecords = [...realRecords];
+
+  if (savedLetters.length > 0) {
+    const derivedRecords = savedLetters.map((letter) => {
+      const resumeLen = (letter.resumeText || '').length;
+      const jdLen = (letter.jobDescription || '').length;
+      const genLen = (letter.generatedLetter || '').length;
+
+      const inputPoints = (resumeLen > 0 || jdLen > 0)
+        ? Math.round((resumeLen + jdLen) / 4) + 1036
+        : 1800;
+      const outputPoints = genLen > 0 ? Math.round(genLen / 4) : 600;
+      const total = inputPoints + outputPoints;
+
+      return {
+        id: letter.id || `letter-${letter.createdAt}`,
+        createdAt: letter.createdAt || new Date().toISOString(),
+        feature: letter.creationMode === 'resume-job' ? 'Executive Resume + JD Map' : 'Executive Analysis',
+        label: letter.title || letter.company || 'Executive Cover Letter',
+        model: 'llama-3.3-70b-versatile',
+        inputPoints,
+        outputPoints,
+        totalPoints: total,
+        status: 'Completed',
+      };
+    });
+
+    const derivedPoints = derivedRecords.reduce((sum, r) => sum + r.totalPoints, 0);
+
+    if (derivedPoints > totalPoints) {
+      totalPoints = derivedPoints;
+      if (finalRecords.length === 0) {
+        finalRecords = derivedRecords;
+      }
+    }
+  }
 
   return {
-    records,
+    records: finalRecords,
     totalPoints,
     totalBillUsd: totalPoints / POINTS_PER_USD,
   };

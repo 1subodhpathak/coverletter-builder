@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Check, FileText, PenLine, Target, Lock,
-  UploadCloud, ChevronRight, Zap,
+  UploadCloud, ChevronRight, Zap, Star,
   LayoutTemplate, LifeBuoy, Sparkles, User, Palette,
   Bold, List, Menu, X, Mail, Phone, Building2, MapPin, CheckCircle2
 } from 'lucide-react';
@@ -387,16 +387,24 @@ const Builder = () => {
                   <LifeBuoy size={14} /> Help
                 </button>
                 <SignedIn>
-                  <div className="hidden items-center gap-1.5 xl:gap-2 xl:flex">
-                    <div className="flex min-h-10 items-center gap-1.5 xl:gap-2 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[11px] font-bold text-[#567C8D] shadow-sm">
-                      <Zap size={12} className="text-[#567C8D]" />
-                      Career Points Used
-                      <span className="text-[#2F4156]">{formatPoints(creditUsage.totalPoints)}</span>
+                  <div className="hidden items-center gap-2 xl:flex">
+                    <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-500 shrink-0">
+                        <Star className="h-3.5 w-3.5" fill="currentColor" />
+                      </div>
+                      <div className="flex flex-col text-left leading-none">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">CS Points Used</p>
+                        <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatPoints(creditUsage.totalPoints)}</p>
+                      </div>
                     </div>
-                    <div className="flex min-h-10 items-center gap-1.5 xl:gap-2 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[11px] font-bold text-[#567C8D] shadow-sm">
-                      <FileText size={12} className="text-[#567C8D]" />
-                      Total Bill
-                      <span className="text-[#2F4156]">{formatUsd(creditUsage.totalBillUsd)}</span>
+                    <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shrink-0">
+                        <span className="text-xs font-black">$</span>
+                      </div>
+                      <div className="flex flex-col text-left leading-none">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">Bill</p>
+                        <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatUsd(creditUsage.totalBillUsd)}</p>
+                      </div>
                     </div>
                   </div>
                   <button
