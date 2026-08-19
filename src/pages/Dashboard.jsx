@@ -975,9 +975,9 @@ const CreditsView = ({ usage }) => {
         </div>
 
         <div className="grid gap-3 bg-[#F5EFEB]/55 p-4 sm:gap-4 sm:p-6 md:grid-cols-3">
-          <CreditStat label="Compute Used" value={formatPoints(usage.totalPoints)} helper="Total operations" tone="ink" />
-          <CreditStat label="Estimated Cost" value={formatUsd(usage.totalBillUsd)} helper="Based on current tier" tone="teal" />
-          <CreditStat label="Logged Actions" value={records.length} helper="Saved in this session" tone="mist" />
+          <CreditStat label="Current Balance" value={formatUsd(usage.totalBillUsd)} helper="Settled" tone="teal" />
+          <CreditStat label="Skills Points Earned" value={formatPoints(usage.totalPoints)} helper="Earned from cover letters" tone="ink" />
+          <CreditStat label="Active Operational Tier" value="Free Pool" helper="Quota Limited" tone="mist" />
         </div>
       </div>
 

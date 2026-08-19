@@ -192,9 +192,8 @@ const Home = () => {
     <div className="relative min-h-screen overflow-x-hidden bg-[#F5EFEB] font-sans text-slate-950" style={landingShadeStyle}>
       <LandingBackdrop />
 
-      <header className="relative z-20 px-0 pt-3">
-        <div className="mx-auto max-w-[1400px] border border-white/45 bg-white/55 px-4 py-3 shadow-[0_18px_60px_rgba(47,65,86,0.14)] backdrop-blur-2xl supports-[backdrop-filter]:bg-white/42 sm:rounded-2xl sm:px-6">
-          <div className="flex min-h-16 flex-wrap items-center justify-between gap-3">
+      <header className="relative z-50 w-full border-b border-[#dbe3ef] bg-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-[1600px] min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-2 sm:px-8 sm:py-3">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
               <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
               <div className="text-left">
@@ -297,7 +296,6 @@ const Home = () => {
               </SignedIn>
             </div>
           )}
-        </div>
       </header>
 
       <main className="relative z-10">

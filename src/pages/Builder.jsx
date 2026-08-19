@@ -329,7 +329,7 @@ const Builder = () => {
   return (
     <div className="relative min-h-screen bg-[#F5EFEB] font-sans text-[#2F4156] selection:bg-[#C8D9E6]">
       {/* HEADER */}
-      <header className="sticky top-0 z-50 w-full border-b border-[#C8D9E6] bg-white/90 backdrop-blur-xl">
+      <header className="relative z-50 w-full border-b border-[#C8D9E6] bg-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur-xl">
         <div className="mx-auto w-full px-4 py-2 sm:px-6">
           <div className="flex min-h-16 flex-wrap lg:flex-nowrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3 sm:gap-6">
