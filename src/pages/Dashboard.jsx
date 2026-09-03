@@ -28,7 +28,9 @@ import { templateCount } from '../components/templates/templateCatalog';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
 import { useStore } from '../store/useStore';
 import { extractTextFromPDF, hasUsablePdfText, parseResumeData } from '../services/pdfService';
-import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, useAuth } from '@clerk/clerk-react';
+import CustomUserButton from '../components/common/CustomUserButton';
+import TokenBadgeWidget from '../components/common/TokenBadgeWidget';
 import BlueLogo from '../assets/logos/BlueGray.png';
 
 const TemplateLibraryPage = lazy(() =>
@@ -248,7 +250,7 @@ const Dashboard = () => {
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
               className="relative flex w-full max-w-[300px] flex-col bg-white p-6 shadow-2xl border-r border-[#C8D9E6] h-full"
             >
-              
+
               {/* Header containing Logo & Close button */}
               <div className="flex items-center justify-between mb-8">
                 <button
@@ -308,11 +310,10 @@ const Dashboard = () => {
                         handleNav(id);
                         setIsMobileNavOpen(false);
                       }}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-[14px] font-bold transition-all duration-200 ${
-                        active
+                      className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-[14px] font-bold transition-all duration-200 ${active
                           ? 'bg-[#C8D9E6]/55 text-[#2F4156] shadow-sm'
                           : 'text-[#567C8D] hover:bg-slate-50 hover:text-[#2F4156]'
-                      }`}
+                        }`}
                     >
                       <Icon size={16} strokeWidth={active ? 2.5 : 2} />
                       {label}
@@ -389,7 +390,10 @@ const Dashboard = () => {
                 </SignInButton>
               </SignedOut>
               <SignedIn>
-                <UserButton afterSignOutUrl="/" />
+                <div className="flex items-center gap-2">
+                  {/* <TokenBadgeWidget isLightTheme={true} /> */}
+                  <CustomUserButton />
+                </div>
               </SignedIn>
             </div>
           </div>

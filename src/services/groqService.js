@@ -199,8 +199,31 @@ const isGenericOpening = (html = '') => {
   return OPENING_BANNED_PATTERNS.some((pattern) => pattern.test(text));
 };
 
+const callBackendAiCompletion = async (params) => {
+  try {
+    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+    const backendUrl = apiBase.replace(/\/careersense\/coverletter\/?$/, "");
+    const clerkId = window.clerkUserId || window.Clerk?.user?.id || 'anonymous';
+    const res = await fetch(`${backendUrl}/careersense/coverletter/ai/chat-completion`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-clerk-user-id': clerkId,
+      },
+      body: JSON.stringify(params),
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('[groqService] Backend AI Proxy failed, trying direct Groq fallback:', err);
+  }
+
+  return groq.chat.completions.create(params);
+};
+
 const requestCoverLetterDraft = async (prompt) =>
-  groq.chat.completions.create({
+  callBackendAiCompletion({
     messages: [
       { role: "system", content: "You are an elite Executive Writer. Output valid HTML content only." },
       { role: "user", content: prompt }
@@ -367,7 +390,7 @@ Rules:
 Question: "${cleanQuestion}"`;
 
   try {
-    const completion = await groq.chat.completions.create({
+    const completion = await callBackendAiCompletion({
       messages: [
         { role: 'system', content: 'You are a sharp cover-letter coach. Be specific, useful, and brief.' },
         { role: 'user', content: prompt },

@@ -20,7 +20,9 @@ import CoverLetterGenie from '../components/landing/CoverLetterGenie';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
 import { useStore } from '../store/useStore';
 import { templateCount } from '../components/templates/templateCatalog';
-import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, useAuth } from '@clerk/clerk-react';
+import CustomUserButton from '../components/common/CustomUserButton';
+import TokenBadgeWidget from '../components/common/TokenBadgeWidget';
 import { motion, AnimatePresence } from 'framer-motion';
 import coverLetterVideo from '../assets/CoverLetter1.mp4';
 import BlueLogo from '../assets/logos/BlueGray.png';
@@ -194,229 +196,232 @@ const Home = () => {
 
       <header className="relative z-50 w-full border-b border-[#dbe3ef] bg-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-[1600px] min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-2 sm:px-8 sm:py-3">
-            <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
-              <div className="text-left">
-                <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
-                  <span className="text-[#2F4156]">Career</span><span className="text-[#567C8D]">Sense</span>
-                </h1>
-                <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#C8D9E6]">
-                  Executive Letters
-                </p>
-              </div>
-            </button>
+          <button onClick={() => navigate('/')} className="flex items-center gap-3">
+            <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
+            <div className="text-left">
+              <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
+                <span className="text-[#2F4156]">Career</span><span className="text-[#567C8D]">Sense</span>
+              </h1>
+              <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#C8D9E6]">
+                Executive Letters
+              </p>
+            </div>
+          </button>
 
-            <nav className="hidden items-center gap-7 text-sm font-extrabold text-[#567C8D] lg:flex" aria-label="Landing">
-              <a href="#methods" className="hover:text-[#2F4156]">Build Options</a>
-              <a href="#cover-letter-questions" className="hover:text-[#2F4156]">Ask Grow</a>
-              <a href="#anatomy" className="hover:text-[#2F4156]">Letter Guide</a>
-              <a href="#templates" className="hover:text-[#2F4156]">Templates</a>
-              <a href="#testimonials" className="hover:text-[#2F4156]">Reviews</a>
-            </nav>
+          <nav className="hidden items-center gap-7 text-sm font-extrabold text-[#567C8D] lg:flex" aria-label="Landing">
+            <a href="#methods" className="hover:text-[#2F4156]">Build Options</a>
+            <a href="#cover-letter-questions" className="hover:text-[#2F4156]">Ask Grow</a>
+            <a href="#anatomy" className="hover:text-[#2F4156]">Letter Guide</a>
+            <a href="#templates" className="hover:text-[#2F4156]">Templates</a>
+            <a href="#testimonials" className="hover:text-[#2F4156]">Reviews</a>
+          </nav>
 
-            <div className="flex items-center gap-2">
-              <SignedIn>
-                <div className="hidden flex-1 items-center justify-end gap-2 sm:flex-none md:flex">
-                  <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-500 shrink-0">
-                      <Star className="h-3.5 w-3.5" fill="currentColor" />
-                    </div>
-                    <div className="flex flex-col text-left leading-none">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">CS Points Used</p>
-                      <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatPoints(usage.totalPoints)}</p>
-                    </div>
+          <div className="flex items-center gap-2">
+            <SignedIn>
+              <div className="hidden flex-1 items-center justify-end gap-2 sm:flex-none md:flex">
+                <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-500 shrink-0">
+                    <Star className="h-3.5 w-3.5" fill="currentColor" />
                   </div>
-                  <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shrink-0">
-                      <span className="text-xs font-black">$</span>
-                    </div>
-                    <div className="flex flex-col text-left leading-none">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">Bill</p>
-                      <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatUsd(usage.totalBillUsd)}</p>
-                    </div>
+                  <div className="flex flex-col text-left leading-none">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">CS Points Used</p>
+                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatPoints(usage.totalPoints)}</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/dashboard')}
-                    className="inline-flex h-9 items-center gap-2 rounded-xl bg-[#2F4156] hover:bg-[#233244] px-4 text-xs font-bold text-white shadow-2xs transition-all active:scale-95 shrink-0"
-                  >
-                    Dashboard
-                  </button>
                 </div>
-              </SignedIn>
+                <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shrink-0">
+                    <span className="text-xs font-black">$</span>
+                  </div>
+                  <div className="flex flex-col text-left leading-none">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">Bill</p>
+                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatUsd(usage.totalBillUsd)}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/dashboard')}
+                  className="inline-flex h-9 items-center gap-2 rounded-xl bg-[#2F4156] hover:bg-[#233244] px-4 text-xs font-bold text-white shadow-2xs transition-all active:scale-95 shrink-0"
+                >
+                  Dashboard
+                </button>
+              </div>
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="inline-flex h-9 items-center justify-center rounded-xl bg-[#2F4156] px-5 text-xs font-bold text-white hover:bg-[#233244] shadow-2xs transition">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+            <SignedIn>
+              <div className="flex items-center gap-2">
+                {/* <TokenBadgeWidget isLightTheme={true} /> */}
+                <CustomUserButton />
+              </div>
+            </SignedIn>
+            <button
+              type="button"
+              onClick={() => setIsMobileNavOpen((current) => !current)}
+              aria-label={isMobileNavOpen ? 'Close menu' : 'Open menu'}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#C8D9E6] bg-white text-[#2F4156] shadow-2xs transition hover:bg-[#F5EFEB] md:hidden"
+            >
+              {isMobileNavOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
+        {isMobileNavOpen && (
+          <div className="mt-3 border-t border-[#C8D9E6]/70 pt-3 lg:hidden">
+            <nav className="grid gap-2 text-[12px] font-extrabold uppercase tracking-[0.12em] text-[#567C8D]" aria-label="Landing Mobile">
+              <a href="#methods" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Build Options</a>
+              <a href="#cover-letter-questions" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Ask Grow</a>
+              <a href="#anatomy" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Letter Guide</a>
+              <a href="#templates" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Templates</a>
+              <a href="#testimonials" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Reviews</a>
               <SignedOut>
                 <SignInButton mode="modal">
-                  <button className="inline-flex h-9 items-center justify-center rounded-xl bg-[#2F4156] px-5 text-xs font-bold text-white hover:bg-[#233244] shadow-2xs transition">
+                  <button onClick={() => setIsMobileNavOpen(false)} className="w-full text-center rounded-lg bg-[#2F4156] text-white px-3 py-2.5 text-[12px] font-extrabold uppercase tracking-[0.12em] hover:bg-[#233244] transition">
                     Sign In
                   </button>
                 </SignInButton>
               </SignedOut>
-              <SignedIn>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
-              <button
-                type="button"
-                onClick={() => setIsMobileNavOpen((current) => !current)}
-                aria-label={isMobileNavOpen ? 'Close menu' : 'Open menu'}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#C8D9E6] bg-white text-[#2F4156] shadow-2xs transition hover:bg-[#F5EFEB] md:hidden"
-              >
-                {isMobileNavOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
-            </div>
+            </nav>
+            <SignedIn>
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <UsagePill
+                  label="Career Points Used"
+                  value={formatPoints(usage.totalPoints)}
+                  mobile
+                />
+                <UsagePill
+                  label="Total Bill"
+                  value={formatUsd(usage.totalBillUsd)}
+                  mobile
+                />
+              </div>
+            </SignedIn>
           </div>
-          {isMobileNavOpen && (
-            <div className="mt-3 border-t border-[#C8D9E6]/70 pt-3 lg:hidden">
-              <nav className="grid gap-2 text-[12px] font-extrabold uppercase tracking-[0.12em] text-[#567C8D]" aria-label="Landing Mobile">
-                <a href="#methods" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Build Options</a>
-                <a href="#cover-letter-questions" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Ask Grow</a>
-                <a href="#anatomy" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Letter Guide</a>
-                <a href="#templates" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Templates</a>
-                <a href="#testimonials" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Reviews</a>
-                <SignedOut>
-                  <SignInButton mode="modal">
-                    <button onClick={() => setIsMobileNavOpen(false)} className="w-full text-center rounded-lg bg-[#2F4156] text-white px-3 py-2.5 text-[12px] font-extrabold uppercase tracking-[0.12em] hover:bg-[#233244] transition">
-                      Sign In
-                    </button>
-                  </SignInButton>
-                </SignedOut>
-              </nav>
-              <SignedIn>
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <UsagePill
-                    label="Career Points Used"
-                    value={formatPoints(usage.totalPoints)}
-                    mobile
-                  />
-                  <UsagePill
-                    label="Total Bill"
-                    value={formatUsd(usage.totalBillUsd)}
-                    mobile
-                  />
-                </div>
-              </SignedIn>
-            </div>
-          )}
+        )}
       </header>
 
       <main className="relative z-10">
         <section className="relative z-10 px-4 pt-10 pb-12 sm:px-6 md:pt-14 md:pb-16 lg:px-8">
           <div className="mx-auto max-w-[1400px]">
             <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
-            <div className="relative z-10" data-scroll-reveal>
-              <h1 className="cs-display mb-5 max-w-3xl text-4xl font-extrabold leading-[1.06] tracking-tight text-[#2F4156] sm:text-5xl md:text-6xl lg:text-[3.75rem]">
-                Build{' '}
-                <span
-                  style={{
-                    display: 'inline-block',
-                    transition: 'opacity 0.35s ease, transform 0.35s ease',
-                    opacity: heroWordVisible ? 1 : 0,
-                    transform: heroWordVisible ? 'translateY(0px)' : 'translateY(-10px)',
-                  }}
-                  className="text-[#567C8D]"
-                >
-                  {HERO_WORDS[heroWordIdx]}
-                </span>
-                <br />
-                with Intelligence.
-              </h1>
-              <p className="mb-8 max-w-[640px] text-base font-semibold leading-7 text-[#567C8D] sm:text-[1.08rem] sm:leading-[1.75]">
-                CareerSense helps senior professionals craft boardroom-ready cover letters from scratch, from a resume, or from a resume matched to an executive job description.
-              </p>
-
-              <div className="mb-6 grid gap-3 sm:grid-cols-3">
-                <div>
-                  <button
-                    onClick={openBuilderStart}
-                    className="group inline-flex w-full min-h-[46px] items-center justify-between rounded-[12px] border border-[#0F1C2E] bg-[#0F1C2E] px-5 text-[13.5px] font-black text-white shadow-[0_14px_30px_rgba(15,28,46,0.16)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#16263d]"
+              <div className="relative z-10" data-scroll-reveal>
+                <h1 className="cs-display mb-5 max-w-3xl text-4xl font-extrabold leading-[1.06] tracking-tight text-[#2F4156] sm:text-5xl md:text-6xl lg:text-[3.75rem]">
+                  Build{' '}
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      transition: 'opacity 0.35s ease, transform 0.35s ease',
+                      opacity: heroWordVisible ? 1 : 0,
+                      transform: heroWordVisible ? 'translateY(0px)' : 'translateY(-10px)',
+                    }}
+                    className="text-[#567C8D]"
                   >
-                    <span>Start Building</span>
-                    <ArrowRight size={20} className="transition duration-300 group-hover:translate-x-1" />
-                  </button>
-                </div>
-                <div>
-                  <button
-                    onClick={() => setIsVideoModalOpen(true)}
-                    className="group inline-flex w-full min-h-[46px] items-center justify-between rounded-[12px] border border-[#C8D9E6] bg-white px-5 text-[13.5px] font-black text-[#0F1C2E] shadow-[0_14px_28px_rgba(47,65,86,0.09)] transition duration-300 hover:-translate-y-0.5 hover:border-[#9DB5C6] hover:bg-white"
-                  >
-                    <span>How it works</span>
-                    <Play size={18} className="text-[#0F1C2E] fill-current transition duration-300 group-hover:scale-105" />
-                  </button>
-                </div>
-              </div>
+                    {HERO_WORDS[heroWordIdx]}
+                  </span>
+                  <br />
+                  with Intelligence.
+                </h1>
+                <p className="mb-8 max-w-[640px] text-base font-semibold leading-7 text-[#567C8D] sm:text-[1.08rem] sm:leading-[1.75]">
+                  CareerSense helps senior professionals craft boardroom-ready cover letters from scratch, from a resume, or from a resume matched to an executive job description.
+                </p>
 
-              <div id="methods" className="mb-9 grid scroll-mt-4 gap-3 sm:grid-cols-3">
-                {methods.map(({ mode, icon: Icon, title, text }) => {
-                  const isLocked = !isSignedIn && mode !== 'resume';
-
-                  const cardContent = (
-                    <div className="group min-h-[176px] rounded-2xl p-5 text-left backdrop-blur border border-transparent bg-white/55 hover:border-[#567C8D]/40 hover:bg-white sm:min-h-[220px] transition duration-300 relative h-full">
-                      <div className="mb-5 flex items-center justify-between">
-                        <div className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${isLocked ? 'bg-slate-200 text-slate-400' : 'bg-[#C8D9E6] text-[#567C8D]'}`}>
-                          {isLocked ? <Lock size={20} /> : <Icon size={22} />}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {isLocked ? (
-                            <span className="inline-flex items-center gap-1 rounded bg-[#E2E8F0] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#64748B] ring-1 ring-slate-300">
-                              <Lock size={10} /> Sign In
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center rounded bg-[#F5EFEB] text-[#2F4156] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ring-[#C8D9E6]">
-                              {mode === 'scratch' ? 'Free' : mode === 'resume' ? 'Grow AI' : 'Best match'}
-                            </span>
-                          )}
-                          <ArrowRight size={15} className="text-[#567C8D] transition group-hover:translate-x-1" />
-                        </div>
-                      </div>
-                      <h3 className="cs-display font-extrabold text-[#2F4156]">{title}</h3>
-                      <p className="mt-2 text-sm font-semibold leading-6 text-[#567C8D]">
-                        {isLocked ? "Please sign in to unlock this build option." : text}
-                      </p>
-                    </div>
-                  );
-
-                  if (isLocked) {
-                    return (
-                      <SignInButton mode="modal" key={title}>
-                        <div className="cursor-pointer relative h-full">
-                          {cardContent}
-                        </div>
-                      </SignInButton>
-                    );
-                  }
-
-                  return (
-                    <button key={title} onClick={() => startBuilderForMode(mode)} className="w-full text-left focus:outline-none h-full">
-                      {cardContent}
+                <div className="mb-6 grid gap-3 sm:grid-cols-3">
+                  <div>
+                    <button
+                      onClick={openBuilderStart}
+                      className="group inline-flex w-full min-h-[46px] items-center justify-between rounded-[12px] border border-[#0F1C2E] bg-[#0F1C2E] px-5 text-[13.5px] font-black text-white shadow-[0_14px_30px_rgba(15,28,46,0.16)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#16263d]"
+                    >
+                      <span>Start Building</span>
+                      <ArrowRight size={20} className="transition duration-300 group-hover:translate-x-1" />
                     </button>
-                  );
-                })}
+                  </div>
+                  <div>
+                    <button
+                      onClick={() => setIsVideoModalOpen(true)}
+                      className="group inline-flex w-full min-h-[46px] items-center justify-between rounded-[12px] border border-[#C8D9E6] bg-white px-5 text-[13.5px] font-black text-[#0F1C2E] shadow-[0_14px_28px_rgba(47,65,86,0.09)] transition duration-300 hover:-translate-y-0.5 hover:border-[#9DB5C6] hover:bg-white"
+                    >
+                      <span>How it works</span>
+                      <Play size={18} className="text-[#0F1C2E] fill-current transition duration-300 group-hover:scale-105" />
+                    </button>
+                  </div>
+                </div>
+
+                <div id="methods" className="mb-9 grid scroll-mt-4 gap-3 sm:grid-cols-3">
+                  {methods.map(({ mode, icon: Icon, title, text }) => {
+                    const isLocked = !isSignedIn && mode !== 'resume';
+
+                    const cardContent = (
+                      <div className="group min-h-[176px] rounded-2xl p-5 text-left backdrop-blur border border-transparent bg-white/55 hover:border-[#567C8D]/40 hover:bg-white sm:min-h-[220px] transition duration-300 relative h-full">
+                        <div className="mb-5 flex items-center justify-between">
+                          <div className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${isLocked ? 'bg-slate-200 text-slate-400' : 'bg-[#C8D9E6] text-[#567C8D]'}`}>
+                            {isLocked ? <Lock size={20} /> : <Icon size={22} />}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {isLocked ? (
+                              <span className="inline-flex items-center gap-1 rounded bg-[#E2E8F0] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#64748B] ring-1 ring-slate-300">
+                                <Lock size={10} /> Sign In
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center rounded bg-[#F5EFEB] text-[#2F4156] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ring-[#C8D9E6]">
+                                {mode === 'scratch' ? 'Free' : mode === 'resume' ? 'Grow AI' : 'Best match'}
+                              </span>
+                            )}
+                            <ArrowRight size={15} className="text-[#567C8D] transition group-hover:translate-x-1" />
+                          </div>
+                        </div>
+                        <h3 className="cs-display font-extrabold text-[#2F4156]">{title}</h3>
+                        <p className="mt-2 text-sm font-semibold leading-6 text-[#567C8D]">
+                          {isLocked ? "Please sign in to unlock this build option." : text}
+                        </p>
+                      </div>
+                    );
+
+                    if (isLocked) {
+                      return (
+                        <SignInButton mode="modal" key={title}>
+                          <div className="cursor-pointer relative h-full">
+                            {cardContent}
+                          </div>
+                        </SignInButton>
+                      );
+                    }
+
+                    return (
+                      <button key={title} onClick={() => startBuilderForMode(mode)} className="w-full text-left focus:outline-none h-full">
+                        {cardContent}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex flex-wrap gap-6 border-t border-[#C8D9E6] pt-6">
+                  {heroStats.map((stat) => {
+                    const Icon = stat.icon;
+                    return (
+                      <div key={stat.label} className="flex items-center gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#C8D9E6] bg-white/80 text-[#567C8D] shadow-sm">
+                          <Icon size={18} />
+                        </div>
+
+                        <div>
+                          <p className="cs-display text-2xl font-extrabold text-[#2F4156]">{stat.value}</p>
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#567C8D]">{stat.label}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="flex flex-wrap gap-6 border-t border-[#C8D9E6] pt-6">
-                {heroStats.map((stat) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div key={stat.label} className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#C8D9E6] bg-white/80 text-[#567C8D] shadow-sm">
-                        <Icon size={18} />
-                      </div>
-
-                      <div>
-                        <p className="cs-display text-2xl font-extrabold text-[#2F4156]">{stat.value}</p>
-                        <p className="text-xs font-black uppercase tracking-[0.16em] text-[#567C8D]">{stat.label}</p>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="relative z-10 lg:translate-y-2" data-scroll-reveal>
+                <CoverLetterGenie />
               </div>
-            </div>
-
-            <div className="relative z-10 lg:translate-y-2" data-scroll-reveal>
-              <CoverLetterGenie />
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
         <LazyLandingSection minHeight="520px">
           <CoverLetterAssistant />

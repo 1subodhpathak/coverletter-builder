@@ -9,7 +9,9 @@ import {
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
-import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, useAuth } from '@clerk/clerk-react';
+import CustomUserButton from '../components/common/CustomUserButton';
+import TokenBadgeWidget from '../components/common/TokenBadgeWidget';
 import BlueLogo from '../assets/logos/BlueGray.png';
 
 const ManualDetailsStep = lazy(() => import('../components/generator/ManualDetailsStep'));
@@ -426,7 +428,10 @@ const Builder = () => {
                   </SignInButton>
                 </SignedOut>
                 <SignedIn>
-                  <UserButton afterSignOutUrl="/" />
+                  <div className="flex items-center gap-2">
+                    {/* <TokenBadgeWidget isLightTheme={true} /> */}
+                    <CustomUserButton />
+                  </div>
                 </SignedIn>
               </div>
               <button
