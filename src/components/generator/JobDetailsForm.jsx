@@ -8,10 +8,11 @@ const JobDetails = () => {
     jobDescription, setJobDescription, 
     companyName, setCompanyName,
     tone, setTone,
-    resumeText, setGeneratedLetter, setStep, setIsGenerating 
+    resumeText, setGeneratedLetter, setStep, setIsGenerating, isGenerating
   } = useStore();
 
   const handleGenerate = async () => {
+    if (isGenerating) return;
     if (!jobDescription || !companyName) return alert("Please fill in the details");
     
     setIsGenerating(true);

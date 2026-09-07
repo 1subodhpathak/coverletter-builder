@@ -31,7 +31,7 @@ const ResumeUploader = () => {
   const [error, setError] = useState('');
 
   const processFile = async (file) => {
-    if (!file) return;
+    if (!file || isLoading) return;
 
     if (file.type !== 'application/pdf') {
       setError('Please upload a PDF file.');
@@ -95,7 +95,7 @@ const ResumeUploader = () => {
   };
 
   const useStoredResume = async (storedResume) => {
-    if (!storedResume?.text) return;
+    if (!storedResume?.text || isLoading) return;
 
     try {
       setIsLoading(true);
@@ -140,6 +140,7 @@ const ResumeUploader = () => {
   };
 
 
+
   const onDragOver = useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -157,7 +158,26 @@ const ResumeUploader = () => {
   }, [creationMode]);
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-[#F5EFEB] px-5 py-8 lg:px-8">
+    <div className="relative min-h-[calc(100vh-80px)] bg-[#F5EFEB] px-5 py-8 lg:px-8">
+      {isLoading && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/30 transition-all duration-300"
+          style={{ backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}
+        >
+          <div className="flex flex-col items-center gap-4 rounded-3xl bg-white p-8 shadow-2xl border border-[#C8D9E6] max-w-sm w-full mx-4 text-center">
+            <span className="h-12 w-12 animate-spin rounded-full border-4 border-[#C8D9E6] border-t-[#2F4156]" />
+            <h3 className="text-lg font-black text-[#2F4156]">
+              {status}
+            </h3>
+            <p className="text-sm font-medium text-[#567C8D]">
+              {status.toLowerCase().includes('draft')
+                ? 'Grow AI is analyzing your experience and crafting your executive cover letter...'
+                : 'Reading resume text and extracting key experience points...'}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         <section className="rounded-2xl border border-[#C8D9E6] bg-white p-6 shadow-sm lg:p-8">
           <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[#C8D9E6]/55 text-[#2F4156]">
@@ -209,7 +229,14 @@ const ResumeUploader = () => {
                 type="file"
                 accept=".pdf"
                 className="hidden"
-                onChange={(e) => processFile(e.target.files[0])}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    processFile(file);
+                    e.target.value = '';
+                  }
+                }}
               />
 
               {isLoading ? (

@@ -79,6 +79,7 @@ const JobDetails = () => {
   };
 
   const handleGenerate = async () => {
+    if (isGenerating) return;
     if (!companyName || !jobDescription.trim()) {
       setError('Please fill in both the company name and job description.');
       return;

@@ -13,11 +13,16 @@ import { SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/cler
 import CustomUserButton from '../components/common/CustomUserButton';
 import BlueLogo from '../assets/logos/BlueGray.png';
 
-const ManualDetailsStep = lazy(() => import('../components/generator/ManualDetailsStep'));
-const ResumeUploader = lazy(() => import('../components/generator/ResumeUploader'));
-const JobDetails = lazy(() => import('../components/generator/JobDetails'));
+import ManualDetailsStep from '../components/generator/ManualDetailsStep';
+import ResumeUploader from '../components/generator/ResumeUploader';
+import JobDetails from '../components/generator/JobDetails';
+
 const Editor = lazy(() => import('../components/editor/Editor'));
 const AnimatedHeroBackground = lazy(() => import('../components/landing/AnimatedHeroBackground'));
+
+// Preload Editor bundle in background so it's ready instantly when needed
+const preloadEditor = () => import('../components/editor/Editor');
+
 
 const builderToolkitItems = [
   {
@@ -247,6 +252,10 @@ const Builder = () => {
     setGeneratedLetter,
     resetBuilder,
   } = useStore();
+
+  React.useEffect(() => {
+    preloadEditor();
+  }, []);
 
   React.useEffect(() => {
     if (!user?.id) return;
@@ -660,24 +669,12 @@ const Builder = () => {
               className="w-full"
             >
               {step === 0 && <CreationStart onChoose={chooseMode} isSignedIn={isSignedIn} />}
-              {step === 1 && (
-                <Suspense fallback={<StepFallback />}>
-                  <ManualDetailsStep />
-                </Suspense>
-              )}
-              {step === 2 && (
-                <Suspense fallback={<StepFallback />}>
-                  <ResumeUploader />
-                </Suspense>
-              )}
-              {step === 3 && (
-                <Suspense fallback={<StepFallback />}>
-                  <JobDetails />
-                </Suspense>
-              )}
+              {step === 1 && <ManualDetailsStep />}
+              {step === 2 && <ResumeUploader />}
+              {step === 3 && <JobDetails />}
               {step === 4 && (
                 <div className="bg-[#F5EFEB]">
-                  <Suspense fallback={<StepFallback tinted />}>
+                  <Suspense fallback={<StepFallback message="Opening Cover Letter Studio..." tinted />}>
                     <Editor guideTarget={editorGuideTarget} />
                   </Suspense>
                 </div>
@@ -690,8 +687,21 @@ const Builder = () => {
   );
 };
 
-const StepFallback = ({ tinted = false }) => (
-  <div className={`min-h-[60vh] w-full ${tinted ? 'bg-[#F5EFEB]' : ''}`} />
+const StepFallback = ({ tinted = false, message = "Loading workspace..." }) => (
+  <div className={`flex min-h-[calc(100vh-80px)] w-full flex-col items-center justify-center p-8 text-center ${tinted ? 'bg-[#F5EFEB]' : 'bg-[#F5EFEB]/50'}`}>
+    <div className="flex flex-col items-center gap-4 rounded-3xl border border-[#C8D9E6] bg-white p-8 shadow-xl max-w-sm w-full mx-4">
+      <div className="relative flex h-14 w-14 items-center justify-center">
+        <span className="absolute h-14 w-14 animate-ping rounded-full bg-[#567C8D]/20" />
+        <span className="h-12 w-12 animate-spin rounded-full border-4 border-[#C8D9E6] border-t-[#2F4156]" />
+      </div>
+      <div>
+        <h3 className="text-lg font-black text-[#2F4156]">{message}</h3>
+        <p className="mt-1 text-xs font-semibold text-[#567C8D]">
+          Preparing your cover letter workspace...
+        </p>
+      </div>
+    </div>
+  </div>
 );
 
 const CreationStart = ({ onChoose, isSignedIn }) => {

@@ -233,6 +233,9 @@ const requestCoverLetterDraft = async (prompt) =>
     max_tokens: 900,
   });
 
+// In-flight request deduplication map to prevent parallel duplicate calls
+const inFlightCoverLetterRequests = new Map();
+
 export const generateCoverLetter = async ({ jobDescription, resumeText, companyName, targetRole, recipientName, recipientTitle, signatureName, currentJobTitle, experienceYears, experienceMonths, tone }) => {
   const safeCompanyName = typeof companyName === 'string' ? companyName.trim() : '';
   const safeTargetRole = typeof targetRole === 'string' ? targetRole.trim() : '';
@@ -252,40 +255,31 @@ export const generateCoverLetter = async ({ jobDescription, resumeText, companyN
     return '<p>Please provide a resume and/or job description to generate a tailored letter.</p>';
   }
 
-  const cleanedResume = cleanResumeText(resumeText || '');
-  const cleanedJobDescription = (jobDescription || '')
-    .replace(/\s+/g, ' ')
-    .replace(/https?:\/\/\S+/g, '')
-    .trim()
-    .slice(0, 3000);
-  const isResumeOnly = cleanedResume && !cleanedJobDescription;
-  const { priorityLines: jdPriorityLines, keywordLine: jdKeywordLine } = extractJobDescriptionSignals(jobDescription || '');
+  const dedupKey = JSON.stringify({
+    res: (resumeText || '').slice(0, 200),
+    jd: (jobDescription || '').slice(0, 200),
+    comp: safeCompanyName,
+    role: safeTargetRole,
+    rec: safeRecipientName,
+    tone: tone || 'Professional',
+  });
 
-  try {
-    const basePrompt = createGenerationPrompt({
-      cleanedResume,
-      cleanedJobDescription,
-      jdPriorityLines,
-      jdKeywordLine,
-      safeCompanyName,
-      safeTargetRole,
-      safeRecipientName,
-      safeRecipientTitle,
-      safeSignatureName,
-      safeCurrentJobTitle,
-      safeExperienceSummary,
-      tone,
-      isResumeOnly,
-    });
+  if (inFlightCoverLetterRequests.has(dedupKey)) {
+    return inFlightCoverLetterRequests.get(dedupKey);
+  }
 
-    let completion = await requestCoverLetterDraft(basePrompt);
-    let normalizedHtml = normalizeGeneratedHtml(completion.choices[0]?.message?.content, {
-      companyName: safeCompanyName,
-      recipientName: safeRecipientName,
-    });
+  const generationPromise = (async () => {
+    const cleanedResume = cleanResumeText(resumeText || '');
+    const cleanedJobDescription = (jobDescription || '')
+      .replace(/\s+/g, ' ')
+      .replace(/https?:\/\/\S+/g, '')
+      .trim()
+      .slice(0, 3000);
+    const isResumeOnly = cleanedResume && !cleanedJobDescription;
+    const { priorityLines: jdPriorityLines, keywordLine: jdKeywordLine } = extractJobDescriptionSignals(jobDescription || '');
 
-    if (isGenericOpening(normalizedHtml)) {
-      const retryPrompt = createGenerationPrompt({
+    try {
+      const basePrompt = createGenerationPrompt({
         cleanedResume,
         cleanedJobDescription,
         jdPriorityLines,
@@ -299,37 +293,35 @@ export const generateCoverLetter = async ({ jobDescription, resumeText, companyN
         safeExperienceSummary,
         tone,
         isResumeOnly,
-        extraInstructions: `
-    CORRECTION:
-    Your previous draft used a generic AI-sounding opener.
-    Rewrite the letter from scratch with a sharper, less predictable first paragraph.
-    Avoid any phrasing that sounds like a standard ChatGPT cover letter template.
-    ${!isResumeOnly ? 'Make the revised version even more tightly mapped to the job description priorities and recruiter expectations for this role.' : ''}
-        `,
       });
 
-      completion = await requestCoverLetterDraft(retryPrompt);
-      normalizedHtml = normalizeGeneratedHtml(completion.choices[0]?.message?.content, {
+      const completion = await requestCoverLetterDraft(basePrompt);
+      const normalizedHtml = normalizeGeneratedHtml(completion.choices[0]?.message?.content, {
         companyName: safeCompanyName,
         recipientName: safeRecipientName,
       });
+
+      const usage = completion.usage || {};
+      recordCareerSenseUsage({
+        feature: resumeText && jobDescription ? 'Executive Resume + JD Map' : 'Executive Analysis',
+        label: companyName ? `Cover letter for ${companyName}` : 'Executive letter draft',
+        model: completion.model || 'llama-3.3-70b-versatile',
+        inputPoints: usage.prompt_tokens,
+        outputPoints: usage.completion_tokens,
+        totalPoints: usage.total_tokens,
+      });
+
+      return normalizedHtml || "<p>Error generating content.</p>";
+    } catch (error) {
+      console.error("AI Generation Error:", error);
+      return `<p>Failed to generate letter. Error: ${error.message}</p>`;
+    } finally {
+      setTimeout(() => inFlightCoverLetterRequests.delete(dedupKey), 4000);
     }
+  })();
 
-    const usage = completion.usage || {};
-    recordCareerSenseUsage({
-      feature: resumeText && jobDescription ? 'Executive Resume + JD Map' : 'Executive Analysis',
-      label: companyName ? `Cover letter for ${companyName}` : 'Executive letter draft',
-      model: completion.model || 'llama-3.3-70b-versatile',
-      inputPoints: usage.prompt_tokens,
-      outputPoints: usage.completion_tokens,
-      totalPoints: usage.total_tokens,
-    });
-
-    return normalizedHtml || "<p>Error generating content.</p>";
-  } catch (error) {
-    console.error("AI Generation Error:", error);
-    return `<p>Failed to generate letter. Error: ${error.message}</p>`;
-  }
+  inFlightCoverLetterRequests.set(dedupKey, generationPromise);
+  return generationPromise;
 };
 
 const normalizeGeneratedHtml = (html = '', { companyName = '', recipientName = '' } = {}) => {
