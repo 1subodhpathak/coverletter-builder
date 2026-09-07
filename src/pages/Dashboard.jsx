@@ -28,9 +28,8 @@ import { templateCount } from '../components/templates/templateCatalog';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
 import { useStore } from '../store/useStore';
 import { extractTextFromPDF, hasUsablePdfText, parseResumeData } from '../services/pdfService';
-import { SignedIn, SignedOut, SignInButton, useAuth } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/clerk-react';
 import CustomUserButton from '../components/common/CustomUserButton';
-import TokenBadgeWidget from '../components/common/TokenBadgeWidget';
 import BlueLogo from '../assets/logos/BlueGray.png';
 
 const TemplateLibraryPage = lazy(() =>
@@ -77,9 +76,28 @@ const Dashboard = () => {
   const loadSavedLetter = useStore((state) => state.loadSavedLetter);
   const deleteSavedLetter = useStore((state) => state.deleteSavedLetter);
 
+  const { user } = useUser();
+  const [subData, setSubData] = useState({ plan: 'free', tokensRemaining: 10000 });
   const [activeView, setActiveView] = useState('dashboard');
   const [creditUsage, setCreditUsage] = useState(() => getCareerSenseUsage(savedLetters));
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const fetchSub = async () => {
+      try {
+        const apiBase = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_BASE_URL || 'https://server.datasenseai.com';
+        const res = await fetch(`${apiBase}/careersense/subscription/status?clerkId=${user.id}`);
+        const data = await res.json();
+        if (data.success) {
+          setSubData({ plan: data.plan || 'free', tokensRemaining: data.tokensRemaining ?? 10000 });
+        }
+      } catch (err) {
+        console.error('Error fetching subscription in Dashboard:', err);
+      }
+    };
+    fetchSub();
+  }, [user?.id]);
 
   useEffect(() => {
     setCreditUsage(getCareerSenseUsage(savedLetters));
@@ -322,11 +340,11 @@ const Dashboard = () => {
                 })}
               </nav>
 
-              {/* Footer space inside drawer (points & estimation) */}
+              {/* Footer space inside drawer (tokens & estimation) */}
               <div className="border-t border-[#C8D9E6] pt-4 mt-auto space-y-2">
                 <div className="flex items-center justify-between rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 py-2 text-[11px] font-bold text-[#567C8D]">
-                  <span className="flex items-center gap-1.5"><Zap size={12} /> Points Used</span>
-                  <span className="text-[#2F4156]">{formatPoints(creditUsage.totalPoints)}</span>
+                  <span className="flex items-center gap-1.5"><Zap size={12} /> AI Tokens Remaining</span>
+                  <span className="text-[#2F4156]">{(subData.tokensRemaining ?? 10000).toLocaleString()}</span>
                 </div>
                 <div className="flex items-center justify-between rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 py-2 text-[11px] font-bold text-[#567C8D]">
                   <span className="flex items-center gap-1.5"><CreditCard size={12} /> Cost</span>
@@ -361,8 +379,8 @@ const Dashboard = () => {
                     <Star className="h-3.5 w-3.5" fill="currentColor" />
                   </div>
                   <div className="flex flex-col text-left leading-none">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">CS Points Used</p>
-                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatPoints(creditUsage.totalPoints)}</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">AI Tokens Remaining</p>
+                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 10000).toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
@@ -391,7 +409,6 @@ const Dashboard = () => {
               </SignedOut>
               <SignedIn>
                 <div className="flex items-center gap-2">
-                  {/* <TokenBadgeWidget isLightTheme={true} /> */}
                   <CustomUserButton />
                 </div>
               </SignedIn>
@@ -631,7 +648,7 @@ const Dashboard = () => {
           )}
           {activeView === 'templates' && <TemplatesView />}
           {activeView === 'resumes' && <ResumeView />}
-          {activeView === 'credits' && <CreditsView usage={creditUsage} />}
+          {activeView === 'credits' && <CreditsView usage={creditUsage} subData={subData} />}
           {activeView === 'profile' && <ProfileView />}
         </div>
       </main>
@@ -718,8 +735,9 @@ const ActionItem = ({ text, action, isDone, onClick }) => (
     </div>
     <button
       onClick={onClick}
-      disabled={isDone}
-      className={`shrink-0 text-[12px] font-bold transition ${isDone ? 'cursor-not-allowed text-[#567C8D]/40' : 'text-[#567C8D] hover:text-[#2F4156]'
+      className={`h-9 shrink-0 rounded-xl px-4 text-[12px] font-bold transition ${isDone
+          ? 'border border-[#C8D9E6] bg-white text-[#567C8D] hover:bg-[#F5EFEB]'
+          : 'bg-[#2F4156] text-white hover:bg-[#233244]'
         }`}
     >
       {action}
@@ -727,9 +745,30 @@ const ActionItem = ({ text, action, isDone, onClick }) => (
   </div>
 );
 
-const ProgressBar = ({ percent, colorClass = 'bg-[#2F4156]' }) => (
-  <div className="h-2 w-full overflow-hidden rounded-full bg-[#C8D9E6]/55">
-    <div className={`h-full rounded-full transition-all duration-500 ${colorClass}`} style={{ width: `${Math.min(percent, 100)}%` }}></div>
+const PipelineStat = ({ label, value }) => (
+  <div className="flex items-center justify-between rounded-xl border border-[#C8D9E6] bg-white px-3.5 py-2.5 text-[12px]">
+    <span className="font-semibold text-[#567C8D]">{label}</span>
+    <span className="font-bold text-[#2F4156]">{value}</span>
+  </div>
+);
+
+const ProgressMetric = ({ label, value, width, helper }) => (
+  <div>
+    <div className="mb-2 flex items-center justify-between text-[11px] font-bold">
+      <span className="text-[#567C8D]">{label}</span>
+      <span className="text-[#2F4156]">{value}</span>
+    </div>
+    <ProgressBar width={width} />
+    <p className="mt-1.5 text-[10px] text-[#567C8D]">{helper}</p>
+  </div>
+);
+
+const ProgressBar = ({ percent, width }) => (
+  <div className="h-2 w-full overflow-hidden rounded-full bg-[#C8D9E6]/45">
+    <div
+      className="h-full rounded-full bg-[#567C8D] transition-all duration-500"
+      style={{ width: width || `${percent}%` }}
+    />
   </div>
 );
 
@@ -739,15 +778,8 @@ const MetricBar = ({ label, value, width, helper, colorClass = 'bg-[#2F4156]' })
       <span>{label}</span>
       <span>{value}</span>
     </div>
-    <ProgressBar percent={Number.parseFloat(width) || 0} colorClass={colorClass} />
+    <ProgressBar percent={Number.parseFloat(width) || 0} width={width} />
     <p className="mt-1.5 text-[11px] font-medium text-[#567C8D]">{helper}</p>
-  </div>
-);
-
-const PipelineStat = ({ label, value }) => (
-  <div className="flex items-center justify-between border-b border-[#C8D9E6]/55 pb-3 last:border-0 last:pb-0">
-    <span className="text-[13px] font-medium text-[#567C8D]">{label}</span>
-    <span className="text-[13px] font-bold text-[#2F4156]">{value}</span>
   </div>
 );
 
@@ -762,49 +794,61 @@ const EmptyState = ({ title, description }) => (
 );
 
 const ListView = ({ title, description, items, emptyText, onOpen, onDelete }) => (
-  <section className="rounded-[24px] border border-white/70 bg-white/82 p-5 shadow-[0_18px_48px_rgba(47,65,86,0.08)] backdrop-blur-xl sm:p-6">
-    <div className="mb-6">
-      <h2 className="text-xl font-extrabold tracking-tight text-[#2F4156]">{title}</h2>
-      <p className="mt-1 text-[13px] text-[#567C8D]">{description}</p>
-    </div>
-
-    {items.length === 0 ? (
-      <EmptyState title={emptyText} description="Every cover letter you build in the editor is stored here automatically." />
-    ) : (
-      <div className="divide-y divide-[#C8D9E6]/55 border-t border-[#C8D9E6]/55">
-        {items.map((item) => (
-          <div key={item.id} className="flex flex-col gap-2 py-3 first:pt-4 last:pb-0 md:flex-row md:items-center md:justify-between group">
-            <button onClick={() => onOpen?.(item.id)} className="flex flex-1 items-start gap-3 text-left">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#C8D9E6] bg-[#F5EFEB] text-[#567C8D] transition-colors group-hover:bg-[#C8D9E6]/45 group-hover:text-[#2F4156]">
-                <FileText size={16} strokeWidth={2} />
-              </div>
-              <div>
-                <p className="text-[14px] font-bold text-[#2F4156] transition-colors group-hover:text-[#567C8D]">{item.title}</p>
-                <p className="mt-0.5 text-[12px] text-[#567C8D]">{item.company} · Updated {formatDate(item.updatedAt)}</p>
-              </div>
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="w-fit rounded-full border border-[#C8D9E6] bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#567C8D]">
-                Saved
-              </span>
-              <button
-                onClick={() => onDelete?.(item.id)}
-                className="rounded-xl border border-[#C8D9E6] bg-white p-1.5 text-[#567C8D] shadow-sm transition hover:bg-red-50 hover:text-red-600"
-                aria-label={`Delete ${item.title}`}
-                title={`Delete ${item.title}`}
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-          </div>
-        ))}
+  <section className="space-y-4">
+    <div className="overflow-hidden rounded-[24px] border border-white/70 bg-white/82 shadow-[0_18px_48px_rgba(47,65,86,0.08)] backdrop-blur-xl">
+      <div className="border-b border-[#C8D9E6] p-4 sm:p-6">
+        <h2 className="text-xl font-extrabold tracking-tight text-[#2F4156]">{title}</h2>
+        <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-[#567C8D]">{description}</p>
       </div>
-    )}
+
+      {items.length > 0 ? (
+        <div className="divide-y divide-[#C8D9E6]/55 bg-white/50">
+          {items.map((item) => (
+            <div key={item.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#C8D9E6] bg-[#F5EFEB] text-[#567C8D]">
+                  <FileText size={18} strokeWidth={2} />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-bold text-[#2F4156]">{item.title}</h3>
+                  <p className="mt-0.5 text-[12px] text-[#567C8D]">{item.company} · {formatDate(item.updatedAt)}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <button
+                  onClick={() => onOpen(item.id)}
+                  className="inline-flex h-9 items-center gap-2 rounded-xl bg-[#2F4156] px-4 text-[12px] font-bold text-white transition hover:bg-[#233244]"
+                >
+                  <PenLine size={13} /> Edit
+                </button>
+                <button
+                  onClick={() => onDelete(item.id)}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition hover:bg-rose-100"
+                  title="Delete"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <EmptyState title="No items found" description={emptyText} />
+      )}
+    </div>
   </section>
 );
 
 const TemplatesView = () => (
-  <Suspense fallback={<div className="min-h-[60vh] rounded-2xl border border-slate-200 bg-white shadow-sm" />}>
+  <Suspense
+    fallback={
+      <div className="flex h-[400px] flex-col items-center justify-center gap-3">
+        <Loader2 className="animate-spin text-[#567C8D]" size={28} />
+        <p className="text-[13px] font-bold text-[#567C8D]">Loading template studio...</p>
+      </div>
+    }
+  >
     <TemplateLibraryPage />
   </Suspense>
 );
@@ -816,6 +860,7 @@ const ResumeView = () => {
   const addStoredJobDescription = useStore((state) => state.addStoredJobDescription);
   const deleteStoredResume = useStore((state) => state.deleteStoredResume);
   const deleteStoredJobDescription = useStore((state) => state.deleteStoredJobDescription);
+
   const [isUploadingResume, setIsUploadingResume] = useState(false);
   const [isUploadingJobDescription, setIsUploadingJobDescription] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -964,7 +1009,7 @@ const DocumentListCard = ({ title, description, items, emptyText, onDelete }) =>
   </section>
 );
 
-const CreditsView = ({ usage }) => {
+const CreditsView = ({ usage, subData }) => {
   const records = usage.records || [];
 
   return (
@@ -974,14 +1019,14 @@ const CreditsView = ({ usage }) => {
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#567C8D]">Platform Metrics</p>
           <h2 className="text-xl font-extrabold tracking-tight text-[#2F4156]">Usage & Billing Ledger</h2>
           <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-[#567C8D]">
-            Track computational activity across analysis, mapping, and document generation.
+            Track AI tokens remaining, subscription tier, and overall billing across cover letters.
           </p>
         </div>
 
         <div className="grid gap-3 bg-[#F5EFEB]/55 p-4 sm:gap-4 sm:p-6 md:grid-cols-3">
-          <CreditStat label="Current Balance" value={formatUsd(usage.totalBillUsd)} helper="Settled" tone="teal" />
-          <CreditStat label="Skills Points Earned" value={formatPoints(usage.totalPoints)} helper="Earned from cover letters" tone="ink" />
-          <CreditStat label="Active Operational Tier" value="Free Pool" helper="Quota Limited" tone="mist" />
+          <CreditStat label="Current Balance" value={formatUsd(usage.totalBillUsd)} helper="Recorded API Estimate" tone="teal" />
+          <CreditStat label="AI Tokens Remaining" value={(subData?.tokensRemaining ?? 10000).toLocaleString()} helper="CareerSense Reverse Balance" tone="ink" />
+          <CreditStat label="Active Operational Tier" value={`${(subData?.plan || 'free').toUpperCase()} Plan`} helper="CareerSense Subscription" tone="mist" />
         </div>
       </div>
 

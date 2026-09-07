@@ -120,7 +120,7 @@ const Home = () => {
           </nav>
 
           <div className="flex flex-1 items-center justify-end gap-2 sm:flex-none">
-            <UsagePill label="Career Points Used" value={formatPoints(usage.totalPoints)} />
+            <UsagePill label="AI Tokens Remaining" value={formatPoints(usage.totalPoints)} />
             <UsagePill label="Total Bill" value={formatUsd(usage.totalBillUsd)} />
             <button onClick={() => navigate('/dashboard')} className="cs-button-secondary hidden rounded-lg px-4 py-2 text-sm font-black hover:bg-white xl:block">
               Dashboard

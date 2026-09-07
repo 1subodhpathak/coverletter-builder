@@ -9,9 +9,8 @@ import {
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
-import { SignedIn, SignedOut, SignInButton, useAuth } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/clerk-react';
 import CustomUserButton from '../components/common/CustomUserButton';
-import TokenBadgeWidget from '../components/common/TokenBadgeWidget';
 import BlueLogo from '../assets/logos/BlueGray.png';
 
 const ManualDetailsStep = lazy(() => import('../components/generator/ManualDetailsStep'));
@@ -234,6 +233,8 @@ const creationContentByMode = {
 const Builder = () => {
   const navigate = useNavigate();
   const { isSignedIn } = useAuth();
+  const { user } = useUser();
+  const [subData, setSubData] = React.useState({ plan: 'free', tokensRemaining: 10000 });
   const [isHelpOpen, setIsHelpOpen] = React.useState(false);
   const [editorGuideTarget, setEditorGuideTarget] = React.useState(null);
   const [creditUsage, setCreditUsage] = React.useState(() => getCareerSenseUsage());
@@ -246,6 +247,23 @@ const Builder = () => {
     setGeneratedLetter,
     resetBuilder,
   } = useStore();
+
+  React.useEffect(() => {
+    if (!user?.id) return;
+    const fetchSub = async () => {
+      try {
+        const apiBase = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_BASE_URL || 'https://server.datasenseai.com';
+        const res = await fetch(`${apiBase}/careersense/subscription/status?clerkId=${user.id}`);
+        const data = await res.json();
+        if (data.success) {
+          setSubData({ plan: data.plan || 'free', tokensRemaining: data.tokensRemaining ?? 10000 });
+        }
+      } catch (err) {
+        console.error('Error fetching subscription status in Builder:', err);
+      }
+    };
+    fetchSub();
+  }, [user?.id]);
 
   React.useEffect(() => {
     const refreshUsage = () => setCreditUsage(getCareerSenseUsage());
@@ -395,8 +413,8 @@ const Builder = () => {
                         <Star className="h-3.5 w-3.5" fill="currentColor" />
                       </div>
                       <div className="flex flex-col text-left leading-none">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">CS Points Used</p>
-                        <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatPoints(creditUsage.totalPoints)}</p>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">AI Tokens Remaining</p>
+                        <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 10000).toLocaleString()}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
@@ -429,7 +447,6 @@ const Builder = () => {
                 </SignedOut>
                 <SignedIn>
                   <div className="flex items-center gap-2">
-                    {/* <TokenBadgeWidget isLightTheme={true} /> */}
                     <CustomUserButton />
                   </div>
                 </SignedIn>
@@ -520,8 +537,8 @@ const Builder = () => {
                 <div className="mt-3 grid gap-2">
                   <MobileInfoPill
                     icon={Zap}
-                    label="Career Points Used"
-                    value={formatPoints(creditUsage.totalPoints)}
+                    label="AI Tokens Remaining"
+                    value={(subData.tokensRemaining ?? 10000).toLocaleString()}
                   />
                   <MobileInfoPill
                     icon={FileText}

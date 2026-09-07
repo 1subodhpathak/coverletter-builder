@@ -20,9 +20,8 @@ import CoverLetterGenie from '../components/landing/CoverLetterGenie';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
 import { useStore } from '../store/useStore';
 import { templateCount } from '../components/templates/templateCatalog';
-import { SignedIn, SignedOut, SignInButton, useAuth } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/clerk-react';
 import CustomUserButton from '../components/common/CustomUserButton';
-import TokenBadgeWidget from '../components/common/TokenBadgeWidget';
 import { motion, AnimatePresence } from 'framer-motion';
 import coverLetterVideo from '../assets/CoverLetter1.mp4';
 import BlueLogo from '../assets/logos/BlueGray.png';
@@ -75,6 +74,8 @@ const HERO_WORDS = ['Smarter', 'Faster', 'Sharper'];
 const Home = () => {
   const navigate = useNavigate();
   const { isSignedIn } = useAuth();
+  const { user } = useUser();
+  const [subData, setSubData] = useState({ plan: 'free', tokensRemaining: 10000 });
   const resetBuilder = useStore((state) => state.resetBuilder);
   const setCreationMode = useStore((state) => state.setCreationMode);
   const setGeneratedLetter = useStore((state) => state.setGeneratedLetter);
@@ -86,6 +87,23 @@ const Home = () => {
   const [scrollShade, setScrollShade] = useState(0);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const fetchSub = async () => {
+      try {
+        const apiBase = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_BASE_URL || 'https://server.datasenseai.com';
+        const res = await fetch(`${apiBase}/careersense/subscription/status?clerkId=${user.id}`);
+        const data = await res.json();
+        if (data.success) {
+          setSubData({ plan: data.plan || 'free', tokensRemaining: data.tokensRemaining ?? 10000 });
+        }
+      } catch (err) {
+        console.error('Error fetching subscription status in Home:', err);
+      }
+    };
+    fetchSub();
+  }, [user?.id]);
 
   useEffect(() => {
     const refreshUsage = () => setUsage(getCareerSenseUsage(savedLetters));
@@ -224,8 +242,8 @@ const Home = () => {
                     <Star className="h-3.5 w-3.5" fill="currentColor" />
                   </div>
                   <div className="flex flex-col text-left leading-none">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">CS Points Used</p>
-                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatPoints(usage.totalPoints)}</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">AI Tokens Remaining</p>
+                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 10000).toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
@@ -255,7 +273,6 @@ const Home = () => {
             </SignedOut>
             <SignedIn>
               <div className="flex items-center gap-2">
-                {/* <TokenBadgeWidget isLightTheme={true} /> */}
                 <CustomUserButton />
               </div>
             </SignedIn>
@@ -288,8 +305,8 @@ const Home = () => {
             <SignedIn>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <UsagePill
-                  label="Career Points Used"
-                  value={formatPoints(usage.totalPoints)}
+                  label="AI Tokens Remaining"
+                  value={(subData.tokensRemaining ?? 10000).toLocaleString()}
                   mobile
                 />
                 <UsagePill
