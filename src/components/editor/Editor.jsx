@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../store/useStore';
-import { generateCoverLetter } from '../../services/groqService';
 import LoadingSkeleton from '../landing/LoadingSkeleton';
-import { useClerk } from '@clerk/clerk-react';
+import { useClerk, useUser } from '@clerk/clerk-react';
+import DownloadGateModal from '../common/DownloadGateModal';
+import { checkDownloadPass } from '../../services/downloadGateService';
 
 // --- TEMPLATE IMPORTS ---
 import ModernTemplate from '../templates/ModernTemplate';
@@ -52,12 +53,14 @@ const Editor = ({ guideTarget }) => {
     upsertSavedLetter,
     clerkUserId, clerkGetToken
   } = useStore();
+  const { user: clerkUser } = useUser();
   
   // --- LOCAL UI STATE ---
   const [activeTab, setActiveTab] = useState('profile'); 
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [isDownloadGateOpen, setIsDownloadGateOpen] = useState(false);
   const [templateSearch, setTemplateSearch] = useState('');
 
   // AI REGENERATION STATE
@@ -787,13 +790,7 @@ const Editor = ({ guideTarget }) => {
     }
   };
 
-  const handleDownload = async () => {
-    if (!clerkUserId) {
-      alert("Please sign in first to export your cover letter.");
-      clerk.openSignIn({});
-      return;
-    }
-
+  const executeDownload = async () => {
     const sourceElement =
       previewModalFrameRef.current?.querySelector('#cover-letter-preview') ||
       previewFrameRef.current?.querySelector('#cover-letter-preview') ||
@@ -919,26 +916,20 @@ const Editor = ({ guideTarget }) => {
         title.textContent = filename;
         head.appendChild(title);
 
-        cloneActiveStylesheets().forEach((node) => {
-          head.appendChild(node);
-        });
+        const clonedStyles = cloneActiveStylesheets();
+        clonedStyles.forEach((styleNode) => head.appendChild(styleNode));
 
         const printStyles = printDocument.createElement('style');
         printStyles.textContent = `
-          @page {
-            size: A4;
-            margin: 0;
-          }
-
           html, body {
-            margin: 0;
-            padding: 0;
-            background: #ffffff;
-          }
-
-          body {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            width: 210mm !important;
+            min-height: 297mm !important;
+            box-sizing: border-box !important;
           }
 
           .print-root {
@@ -946,32 +937,32 @@ const Editor = ({ guideTarget }) => {
             min-height: 297mm;
             margin: 0 auto;
             background: #ffffff;
-            overflow: hidden;
+            box-sizing: border-box;
+            overflow: visible;
           }
 
           .print-fit-shell {
             width: 210mm;
             min-height: 297mm;
-            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            box-sizing: border-box;
+            overflow: visible;
           }
 
           #cover-letter-preview {
             width: 210mm !important;
             min-height: 297mm !important;
-            height: auto !important;
-            max-height: none !important;
+            max-width: 210mm !important;
             margin: 0 !important;
-            box-sizing: border-box !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
             box-shadow: none !important;
-            filter: none !important;
-            overflow: hidden !important;
-            background: #ffffff !important;
-            background-color: #ffffff !important;
-          }
-
-          #cover-letter-preview[data-export-mode="print"] {
-            background: #ffffff !important;
-            background-color: #ffffff !important;
+            border: none !important;
+            border-radius: 0 !important;
+            overflow: visible !important;
+            box-sizing: border-box !important;
           }
 
           #cover-letter-preview[data-template="modern-block"][data-export-mode="print"] .modern-block-sidebar {
@@ -1112,6 +1103,26 @@ const Editor = ({ guideTarget }) => {
     } catch (error) {
       console.error('Print/PDF export failed:', error);
     }
+  };
+
+  const handleDownload = async () => {
+    if (!clerkUserId) {
+      alert("Please sign in first to export your cover letter.");
+      clerk.openSignIn({});
+      return;
+    }
+
+    try {
+      const passCheck = await checkDownloadPass(clerkUserId, "cover_letter_pdf", selectedTemplate || "default");
+      if (!passCheck.canDownload) {
+        setIsDownloadGateOpen(true);
+        return;
+      }
+    } catch (e) {
+      console.warn("Download pass verification check error:", e);
+    }
+
+    await executeDownload();
   };
 
   const renderSelectedTemplate = (updateBody = handleBodyUpdate, options = {}) => {
@@ -2017,6 +2028,16 @@ const Editor = ({ guideTarget }) => {
             </div>
         </div>
       </div>
+
+      <DownloadGateModal
+        isOpen={isDownloadGateOpen}
+        onClose={() => setIsDownloadGateOpen(false)}
+        clerkUser={clerkUser}
+        resourceType="cover_letter_pdf"
+        resourceId={selectedTemplate || "default"}
+        resourceName="Cover Letter PDF"
+        onSuccessDownload={executeDownload}
+      />
     </div>
   );
 };
