@@ -1023,10 +1023,11 @@ const CreditsView = ({ usage, subData }) => {
           </p>
         </div>
 
-        <div className="grid gap-3 bg-[#F5EFEB]/55 p-4 sm:gap-4 sm:p-6 md:grid-cols-3">
-          <CreditStat label="Current Balance" value={formatUsd(usage.totalBillUsd)} helper="Recorded API Estimate" tone="teal" />
+        <div className="grid gap-3 bg-[#F5EFEB]/55 p-4 sm:gap-4 sm:p-6 sm:grid-cols-2 xl:grid-cols-4">
           <CreditStat label="AI Tokens Remaining" value={(subData?.tokensRemaining ?? 10000).toLocaleString()} helper="CareerSense Reverse Balance" tone="ink" />
-          <CreditStat label="Active Operational Tier" value={`${(subData?.plan || 'free').toUpperCase()} Plan`} helper="CareerSense Subscription" tone="mist" />
+          <CreditStat label="Lifetime tokens used" value={(usage.totalPoints || 0).toLocaleString()} helper="Total Platform Consumption" tone="mist" />
+          <CreditStat label="Lifetime bills" value={formatUsd(usage.totalBillUsd)} helper="Recorded Activity API Estimate" tone="teal" />
+          <CreditStat label="Active Operational Tier" value={`${(subData?.plan || 'free').toUpperCase()} Plan`} helper="CareerSense Subscription" tone="amber" />
         </div>
       </div>
 
