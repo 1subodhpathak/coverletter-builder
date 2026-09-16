@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'careersense_points_usage';
-const POINTS_PER_USD = 100000;
+const POINTS_PER_USD = 20000;
 
 const canUseStorage = () => typeof window !== 'undefined' && window.localStorage;
 

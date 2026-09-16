@@ -22,6 +22,7 @@ import {
   X,
   Zap,
   Star,
+  ArrowUpRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { templateCount } from '../components/templates/templateCatalog';
@@ -77,7 +78,7 @@ const Dashboard = () => {
   const deleteSavedLetter = useStore((state) => state.deleteSavedLetter);
 
   const { user } = useUser();
-  const [subData, setSubData] = useState({ plan: 'free', tokensRemaining: 10000 });
+  const [subData, setSubData] = useState({ plan: 'free', tokensRemaining: 30000 });
   const [activeView, setActiveView] = useState('dashboard');
   const [creditUsage, setCreditUsage] = useState(() => getCareerSenseUsage(savedLetters));
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -90,7 +91,7 @@ const Dashboard = () => {
         const res = await fetch(`${apiBase}/careersense/subscription/status?clerkId=${user.id}`);
         const data = await res.json();
         if (data.success) {
-          setSubData({ plan: data.plan || 'free', tokensRemaining: data.tokensRemaining ?? 10000 });
+          setSubData({ plan: data.plan || 'free', tokensRemaining: data.tokensRemaining ?? 30000 });
         }
       } catch (err) {
         console.error('Error fetching subscription in Dashboard:', err);
@@ -344,7 +345,7 @@ const Dashboard = () => {
               <div className="border-t border-[#C8D9E6] pt-4 mt-auto space-y-2">
                 <div className="flex items-center justify-between rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 py-2 text-[11px] font-bold text-[#567C8D]">
                   <span className="flex items-center gap-1.5"><Zap size={12} /> AI Tokens Remaining</span>
-                  <span className="text-[#2F4156]">{(subData.tokensRemaining ?? 10000).toLocaleString()}</span>
+                  <span className="text-[#2F4156]">{(subData.tokensRemaining ?? 30000).toLocaleString()}</span>
                 </div>
                 <div className="flex items-center justify-between rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 py-2 text-[11px] font-bold text-[#567C8D]">
                   <span className="flex items-center gap-1.5"><CreditCard size={12} /> Cost</span>
@@ -380,7 +381,7 @@ const Dashboard = () => {
                   </div>
                   <div className="flex flex-col text-left leading-none">
                     <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">AI Tokens Remaining</p>
-                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 10000).toLocaleString()}</p>
+                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 30000).toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
@@ -1024,10 +1025,10 @@ const CreditsView = ({ usage, subData }) => {
         </div>
 
         <div className="grid gap-3 bg-[#F5EFEB]/55 p-4 sm:gap-4 sm:p-6 sm:grid-cols-2 xl:grid-cols-4">
-          <CreditStat label="AI Tokens Remaining" value={(subData?.tokensRemaining ?? 10000).toLocaleString()} helper="CareerSense Reverse Balance" tone="ink" />
+          <CreditStat label="AI Tokens Remaining" value={(subData?.tokensRemaining ?? 30000).toLocaleString()} helper="CareerSense Reverse Balance" tone="ink" />
           <CreditStat label="Lifetime tokens used" value={(usage.totalPoints || 0).toLocaleString()} helper="Total Platform Consumption" tone="mist" />
-          <CreditStat label="Lifetime bills" value={formatUsd(usage.totalBillUsd)} helper="Recorded Activity API Estimate" tone="teal" />
-          <CreditStat label="Active Operational Tier" value={`${(subData?.plan || 'free').toUpperCase()} Plan`} helper="CareerSense Subscription" tone="amber" />
+          <CreditStat label="Lifetime bills" value={formatUsd(usage.totalBillUsd)} helper="Bills are managed by careersenseAi, you dont need to pay" tone="teal" />
+          <CreditStat label="Active Operational Tier" value={`${(subData?.plan || 'free').toUpperCase()} Plan`} helper="CareerSense Subscription" tone="amber" href="https://careersenseai.com/pricing" />
         </div>
       </div>
 
@@ -1077,18 +1078,33 @@ const CreditsView = ({ usage, subData }) => {
   );
 };
 
-const CreditStat = ({ label, value, helper, tone }) => {
+const CreditStat = ({ label, value, helper, tone, href }) => {
   const dotClass =
     tone === 'teal' ? 'bg-[#567C8D]' : tone === 'mist' ? 'bg-[#C8D9E6]' : 'bg-[#2F4156]';
 
   return (
-    <div className="rounded-2xl border border-[#C8D9E6] bg-white p-4 shadow-sm">
-      <div className="mb-3 flex items-center justify-between">
-        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#567C8D]">{label}</p>
-        <span className={`h-1.5 w-1.5 rounded-full ${dotClass}`}></span>
+    <div className="relative flex flex-col justify-between rounded-2xl border border-[#C8D9E6] bg-white p-4 shadow-sm">
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#567C8D]">{label}</p>
+          <span className={`h-1.5 w-1.5 rounded-full ${dotClass}`}></span>
+        </div>
+        <p className="text-2xl font-extrabold tracking-tight text-[#2F4156]">{value}</p>
+        <p className="mt-1 text-[11px] font-medium text-[#567C8D]">{helper}</p>
       </div>
-      <p className="text-2xl font-extrabold tracking-tight text-[#2F4156]">{value}</p>
-      <p className="mt-1 text-[11px] font-medium text-[#567C8D]">{helper}</p>
+      {href && (
+        <div className="mt-3 flex justify-end">
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Upgrade Plan"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D9E6] bg-[#F5EFEB]/60 text-[#2F4156] shadow-xs transition-all duration-200 hover:scale-105 hover:border-[#2F4156] hover:bg-[#2F4156] hover:text-white"
+          >
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </a>
+        </div>
+      )}
     </div>
   );
 };

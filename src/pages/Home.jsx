@@ -75,7 +75,7 @@ const Home = () => {
   const navigate = useNavigate();
   const { isSignedIn } = useAuth();
   const { user } = useUser();
-  const [subData, setSubData] = useState({ plan: 'free', tokensRemaining: 10000 });
+  const [subData, setSubData] = useState({ plan: 'free', tokensRemaining: 30000 });
   const resetBuilder = useStore((state) => state.resetBuilder);
   const setCreationMode = useStore((state) => state.setCreationMode);
   const setGeneratedLetter = useStore((state) => state.setGeneratedLetter);
@@ -96,7 +96,7 @@ const Home = () => {
         const res = await fetch(`${apiBase}/careersense/subscription/status?clerkId=${user.id}`);
         const data = await res.json();
         if (data.success) {
-          setSubData({ plan: data.plan || 'free', tokensRemaining: data.tokensRemaining ?? 10000 });
+          setSubData({ plan: data.plan || 'free', tokensRemaining: data.tokensRemaining ?? 30000 });
         }
       } catch (err) {
         console.error('Error fetching subscription status in Home:', err);
@@ -243,7 +243,7 @@ const Home = () => {
                   </div>
                   <div className="flex flex-col text-left leading-none">
                     <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">AI Tokens Remaining</p>
-                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 10000).toLocaleString()}</p>
+                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 30000).toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
@@ -306,7 +306,7 @@ const Home = () => {
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <UsagePill
                   label="AI Tokens Remaining"
-                  value={(subData.tokensRemaining ?? 10000).toLocaleString()}
+                  value={(subData.tokensRemaining ?? 30000).toLocaleString()}
                   mobile
                 />
                 <UsagePill

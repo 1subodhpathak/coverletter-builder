@@ -239,7 +239,7 @@ const Builder = () => {
   const navigate = useNavigate();
   const { isSignedIn } = useAuth();
   const { user } = useUser();
-  const [subData, setSubData] = React.useState({ plan: 'free', tokensRemaining: 10000 });
+  const [subData, setSubData] = React.useState({ plan: 'free', tokensRemaining: 30000 });
   const [isHelpOpen, setIsHelpOpen] = React.useState(false);
   const [editorGuideTarget, setEditorGuideTarget] = React.useState(null);
   const [creditUsage, setCreditUsage] = React.useState(() => getCareerSenseUsage());
@@ -265,7 +265,7 @@ const Builder = () => {
         const res = await fetch(`${apiBase}/careersense/subscription/status?clerkId=${user.id}`);
         const data = await res.json();
         if (data.success) {
-          setSubData({ plan: data.plan || 'free', tokensRemaining: data.tokensRemaining ?? 10000 });
+          setSubData({ plan: data.plan || 'free', tokensRemaining: data.tokensRemaining ?? 30000 });
         }
       } catch (err) {
         console.error('Error fetching subscription status in Builder:', err);
@@ -423,7 +423,7 @@ const Builder = () => {
                       </div>
                       <div className="flex flex-col text-left leading-none">
                         <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">AI Tokens Remaining</p>
-                        <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 10000).toLocaleString()}</p>
+                        <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 30000).toLocaleString()}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
@@ -547,7 +547,7 @@ const Builder = () => {
                   <MobileInfoPill
                     icon={Zap}
                     label="AI Tokens Remaining"
-                    value={(subData.tokensRemaining ?? 10000).toLocaleString()}
+                    value={(subData.tokensRemaining ?? 30000).toLocaleString()}
                   />
                   <MobileInfoPill
                     icon={FileText}
