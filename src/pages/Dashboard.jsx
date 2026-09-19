@@ -22,7 +22,12 @@ import {
   X,
   Zap,
   Star,
-  ArrowUpRight,
+  ArrowRight,
+  Database,
+  Crown,
+  Lightbulb,
+  HelpCircle,
+  MoreVertical,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { templateCount } from '../components/templates/templateCatalog';
@@ -32,6 +37,8 @@ import { extractTextFromPDF, hasUsablePdfText, parseResumeData } from '../servic
 import { SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/clerk-react';
 import CustomUserButton from '../components/common/CustomUserButton';
 import BlueLogo from '../assets/logos/BlueGray.png';
+import dashboardBackground from '../assets/dashboard.png';
+import DashboardTour from '../components/dashboard/DashboardTour';
 
 const TemplateLibraryPage = lazy(() =>
   import('../components/templates/TemplateGallery').then((module) => ({
@@ -82,6 +89,7 @@ const Dashboard = () => {
   const [activeView, setActiveView] = useState('dashboard');
   const [creditUsage, setCreditUsage] = useState(() => getCareerSenseUsage(savedLetters));
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -211,115 +219,254 @@ const Dashboard = () => {
 
   const activeLabel = navItems.find((item) => item.id === activeView)?.label || 'Overview';
 
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F5EFEB] font-sans text-[#2F4156] selection:bg-[#C8D9E6]">
-      <DashboardBackdrop />
+  const tokenPercent = Math.max(
+    0,
+    Math.min(100, Math.round(((subData.tokensRemaining ?? 30000) / 10000) * 100))
+  );
 
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[248px] border-r border-[#C8D9E6] bg-white/78 px-4 py-5 shadow-[0_24px_60px_rgba(47,65,86,0.08)] backdrop-blur-xl lg:block">
-        <button onClick={() => navigate('/')} className="mb-7 flex items-center gap-3 px-2 text-left transition-opacity hover:opacity-80">
-          <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
-          <div>
-            <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
-              <span className="text-[#2F4156]">Career</span><span className="text-[#567C8D]">Sense</span>
-            </h1>
-            <p className="mt-1 text-[9px] font-black uppercase tracking-[0.22em] text-[#567C8D] whitespace-nowrap">
-              Executive Letters
+  return (
+    <div className="min-h-screen bg-[#F8F3EA] font-sans text-[#102D47] selection:bg-[#E9D49A]/45">
+      {/* =========================================================
+          GLOBAL DASHBOARD HEADER
+          ========================================================= */}
+      <header className="fixed inset-x-0 top-0 z-50 h-[72px] border-b border-white/10 bg-[#082B45]/95 text-white shadow-[0_8px_26px_rgba(3,22,36,0.22)] backdrop-blur-xl">
+        <div className="flex h-full items-center justify-between px-4 sm:px-6 lg:px-7">
+          <button
+            onClick={() => navigate('/')}
+            className="flex min-w-0 items-center gap-3 text-left transition-opacity hover:opacity-80"
+          >
+            <img
+              src={BlueLogo}
+              alt="CareerSense Logo"
+              className="h-11 w-11 shrink-0 object-contain"
+            />
+            <div className="hidden sm:block">
+              <h1 className="text-[25px] font-black leading-none tracking-[-0.045em]">
+                <span className="text-[#F5EFEB]">Career</span>
+                <span className="text-[#E3BA5E]">Sense</span>
+              </h1>
+              <p className="mt-1 text-[9px] font-black uppercase tracking-[0.27em] text-[#AFC7D5]">
+                Executive Letters
+              </p>
+            </div>
+          </button>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              className="hidden h-10 items-center gap-2 px-2 text-[13px] font-semibold text-[#D6E3EA] transition hover:text-white md:inline-flex"
+              onClick={() => {
+                setActiveView('dashboard');
+                setIsTourOpen(true);
+              }}
+            >
+              <HelpCircle size={16} />
+              Help
+            </button>
+
+            <div className="hidden items-center gap-2 lg:flex">
+              <div className="flex h-12 items-center gap-2.5 rounded-[13px] border border-white/15 bg-white/[0.07] px-3 shadow-[0_4px_14px_rgba(2,18,30,0.14)]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF3D9] text-[#EAAA1C]">
+                  <Star size={15} fill="currentColor" />
+                </div>
+                <div className="min-w-[112px] leading-none">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#AFC4D1]">
+                    AI Tokens Remaining
+                  </p>
+                  <p className="mt-1 text-[13px] font-black text-white">
+                    {(subData.tokensRemaining ?? 30000).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex h-12 items-center gap-2.5 rounded-[13px] border border-white/15 bg-white/[0.07] px-3 shadow-[0_4px_14px_rgba(2,18,30,0.14)]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E7F8EF] text-[#0C9A63]">
+                  <span className="text-[13px] font-black">$</span>
+                </div>
+                <div className="min-w-[78px] leading-none">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#AFC4D1]">Bill</p>
+                  <p className="mt-1 text-[13px] font-black text-white">{formatUsd(creditUsage.totalBillUsd)}</p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setActiveView('dashboard')}
+              className="hidden h-11 items-center justify-center rounded-[10px] border border-white/15 bg-white/[0.09] px-4 text-[13px] font-bold text-white shadow-sm transition hover:bg-white/[0.15] sm:inline-flex"
+            >
+              Dashboard
+            </button>
+
+            <button
+              onClick={() => navigate('/')}
+              className="hidden h-11 items-center justify-center gap-2 rounded-[10px] border border-white/15 bg-white/[0.09] px-4 text-[13px] font-bold text-white shadow-sm transition hover:bg-white/[0.15] md:inline-flex"
+            >
+              <ArrowRight size={14} className="rotate-180" />
+              Back
+            </button>
+
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#E3BA5E] px-4 text-[13px] font-bold text-[#082B45] shadow-sm transition hover:bg-[#EDC974]">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+
+            <SignedIn>
+              <CustomUserButton />
+            </SignedIn>
+
+            <button
+              type="button"
+              onClick={() => setIsMobileNavOpen(true)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-white/15 bg-white/[0.09] text-white transition hover:bg-white/[0.15] lg:hidden"
+              aria-label="Open dashboard navigation"
+            >
+              <Menu size={18} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* =========================================================
+          DESKTOP SIDEBAR
+          ========================================================= */}
+      <aside className="fixed bottom-0 left-0 top-[72px] z-40 hidden w-[300px] overflow-hidden bg-[linear-gradient(180deg,#082B45_0%,#061F34_100%)] text-white shadow-[18px_0_50px_rgba(4,29,47,0.12)] lg:flex lg:flex-col">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.14]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px)',
+            backgroundSize: '34px 34px',
+          }}
+        />
+
+        <div className="relative flex h-full flex-col px-5 py-7">
+          <div className="flex items-center gap-3 px-2">
+            <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white/20 bg-[#173F59] text-[18px] font-bold">
+              {profile.photo || user?.imageUrl ? (
+                <img
+                  src={profile.photo || user?.imageUrl}
+                  alt={profile.fullName || 'Profile'}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                userName.charAt(0).toUpperCase()
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[12px] font-medium text-[#C5D6E1]">Welcome back,</p>
+              <p className="truncate font-serif text-[20px] font-semibold tracking-[-0.02em] text-white">
+                {profile.fullName || user?.fullName || 'CareerSense User'}
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-5 px-2 text-[9px] font-bold uppercase tracking-[0.25em] text-[#9BB5C6]">
+            Let&apos;s build your next opportunity
+          </p>
+
+          <nav className="mt-6 space-y-1.5" aria-label="Dashboard" data-tour="navigation">
+            {navItems.map(({ id, label, icon: Icon, badge }) => {
+              const active = activeView === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => handleNav(id)}
+                  className={`group relative flex h-11 w-full items-center justify-between rounded-[12px] px-3.5 text-[13px] font-semibold transition-all ${
+                    active
+                      ? 'bg-gradient-to-r from-[#E2B54B]/30 to-[#E2B54B]/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]'
+                      : 'text-[#DCE8EF] hover:bg-white/[0.08] hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      size={18}
+                      className={active ? 'text-[#F2BD42]' : 'text-[#9BB5C6] group-hover:text-white'}
+                    />
+                    <span>{label}</span>
+                  </div>
+
+                  {badge ? (
+                    <span className="rounded-full bg-[#E2B54B] px-2 py-0.5 text-[10px] font-bold text-[#082B45]">
+                      {badge}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="mt-auto pt-6">
+            <div className="relative overflow-hidden rounded-[14px] border border-white/10 bg-white/[0.06] p-4">
+              <div className="flex items-center gap-2 text-[#E2B54B]">
+                <Sparkles size={16} />
+                <span className="text-[12px] font-bold uppercase tracking-wider">
+                  {subData?.plan && subData.plan !== 'free'
+                    ? `${subData.plan.charAt(0).toUpperCase() + subData.plan.slice(1)} Plan`
+                    : 'Upgrade to Pro'}
+                </span>
+              </div>
+              <p className="mt-1 text-[11px] text-[#C5D6E1]">
+                {subData?.plan && subData.plan !== 'free'
+                  ? 'Manage your subscription and premium access.'
+                  : 'Get more templates, higher AI limits and premium features.'}
+              </p>
+              <a
+                href="https://careersenseai.com/pricing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 flex h-8 w-full items-center justify-center gap-1.5 rounded-[8px] bg-[#E2B54B] text-[12px] font-bold text-[#082B45] shadow-sm transition hover:bg-[#EDC974]"
+              >
+                <span>{subData?.plan && subData.plan !== 'free' ? 'Manage Plan' : 'Upgrade Now'}</span>
+                <ArrowRight size={13} />
+              </a>
+            </div>
+
+            <p className="mt-4 text-center text-[10px] text-[#7A98AB]">
+              Better Resumes, Brighter Futures
             </p>
           </div>
-        </button>
-
-        <nav className="space-y-1" aria-label="Dashboard">
-          {navItems.map(({ id, label, icon: Icon }) => {
-            const active = activeView === id;
-            return (
-              <button
-                key={id}
-                onClick={() => handleNav(id)}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-all duration-200 ${active
-                  ? 'bg-[#C8D9E6]/55 text-[#2F4156] shadow-sm'
-                  : 'text-[#567C8D] hover:bg-white/70 hover:text-[#2F4156]'
-                  }`}
-              >
-                <Icon size={16} strokeWidth={active ? 2.5 : 2} />
-                {label}
-              </button>
-            );
-          })}
-        </nav>
+        </div>
       </aside>
 
-      {/* Mobile Menu Drawer Overlay */}
+      {/* =========================================================
+          MOBILE DRAWER
+          ========================================================= */}
       <AnimatePresence>
         {isMobileNavOpen && (
-          <div className="fixed inset-0 z-50 flex lg:hidden">
-            {/* Backdrop overlay */}
+          <div className="fixed inset-0 z-50 lg:hidden">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileNavOpen(false)}
-              className="fixed inset-0 bg-[#2F4156]/40 backdrop-blur-xs"
+              className="absolute inset-0 bg-[#061F34]/55 backdrop-blur-sm"
             />
 
-            {/* Sliding Drawer Panel (Left-side full height) */}
-            <motion.div
+            <motion.aside
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="relative flex w-full max-w-[300px] flex-col bg-white p-6 shadow-2xl border-r border-[#C8D9E6] h-full"
+              transition={{ type: 'spring', damping: 28, stiffness: 250 }}
+              className="relative flex h-full w-[290px] flex-col bg-[#082B45] px-5 py-5 text-white shadow-2xl"
             >
-
-              {/* Header containing Logo & Close button */}
-              <div className="flex items-center justify-between mb-8">
-                <button
-                  onClick={() => {
-                    setIsMobileNavOpen(false);
-                    navigate('/');
-                  }}
-                  className="flex items-center gap-3 text-left transition-opacity hover:opacity-80"
-                >
-                  <img
-                    src={BlueLogo}
-                    alt="CareerSense Logo"
-                    className="h-10 w-10 object-contain rounded-2xl shrink-0"
-                  />
-                  <div>
-                    <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
-                      <span className="text-[#2F4156]">Career</span>
-                      <span className="text-[#567C8D]">Sense</span>
-                    </h1>
-                    <p className="mt-1 text-[9px] font-black uppercase tracking-[0.22em] text-[#567C8D] whitespace-nowrap">
-                      Executive Letters
-                    </p>
-                  </div>
-                </button>
-
-                {/* Close button */}
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <img src={BlueLogo} alt="CareerSense" className="h-9 w-9 object-contain" />
+                  <span className="text-[18px] font-black">CareerSense</span>
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsMobileNavOpen(false)}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#C8D9E6] bg-white text-[#2F4156] transition hover:bg-slate-50 focus:outline-none"
-                  aria-label="Close navigation menu"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/15"
                 >
-                  <X size={18} />
+                  <X size={17} />
                 </button>
               </div>
 
-              {/* Initialize Builder CTA inside mobile drawer */}
-              <button
-                onClick={() => {
-                  startBuilder();
-                  setIsMobileNavOpen(false);
-                }}
-                className="mb-5 flex w-full h-11 items-center justify-center gap-2 rounded-xl bg-[#2F4156] text-[13px] font-bold text-white transition hover:bg-[#233244] shadow-sm"
-              >
-                <PenLine size={14} />
-                Initialize Builder
-              </button>
-
-              {/* Navigation Items list */}
-              <nav className="space-y-1.5 flex-1" aria-label="Mobile Navigation">
+              <nav className="space-y-1.5">
                 {navItems.map(({ id, label, icon: Icon }) => {
                   const active = activeView === id;
                   return (
@@ -329,309 +476,273 @@ const Dashboard = () => {
                         handleNav(id);
                         setIsMobileNavOpen(false);
                       }}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-[14px] font-bold transition-all duration-200 ${active
-                          ? 'bg-[#C8D9E6]/55 text-[#2F4156] shadow-sm'
-                          : 'text-[#567C8D] hover:bg-slate-50 hover:text-[#2F4156]'
-                        }`}
+                      className={`flex h-11 w-full items-center gap-3 rounded-[10px] px-3 text-[13px] font-semibold ${
+                        active ? 'bg-[#E2B54B]/30 text-white' : 'text-[#DCE8EF]'
+                      }`}
                     >
-                      <Icon size={16} strokeWidth={active ? 2.5 : 2} />
+                      <Icon size={17} className={active ? 'text-[#F2BD42]' : ''} />
                       {label}
                     </button>
                   );
                 })}
               </nav>
 
-              {/* Footer space inside drawer (tokens & estimation) */}
-              <div className="border-t border-[#C8D9E6] pt-4 mt-auto space-y-2">
-                <div className="flex items-center justify-between rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 py-2 text-[11px] font-bold text-[#567C8D]">
-                  <span className="flex items-center gap-1.5"><Zap size={12} /> AI Tokens Remaining</span>
-                  <span className="text-[#2F4156]">{(subData.tokensRemaining ?? 30000).toLocaleString()}</span>
-                </div>
-                <div className="flex items-center justify-between rounded-xl border border-[#C8D9E6] bg-slate-50 px-3 py-2 text-[11px] font-bold text-[#567C8D]">
-                  <span className="flex items-center gap-1.5"><CreditCard size={12} /> Cost</span>
-                  <span className="text-[#2F4156]">{formatUsd(creditUsage.totalBillUsd)}</span>
-                </div>
-              </div>
-
-            </motion.div>
+              <button
+                onClick={() => {
+                  startBuilder();
+                  setIsMobileNavOpen(false);
+                }}
+                className="mt-auto flex h-11 items-center justify-center gap-2 rounded-[10px] bg-[#F0B83E] text-[13px] font-bold text-[#0A304B]"
+              >
+                <PenLine size={15} />
+                Create Cover Letter
+              </button>
+            </motion.aside>
           </div>
         )}
       </AnimatePresence>
 
-      <main className="relative lg:ml-[248px]">
-        <header className="sticky top-0 z-30 border-b border-[#C8D9E6] bg-white/72 backdrop-blur-xl">
-          <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setIsMobileNavOpen(true)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#C8D9E6] bg-white text-[#2F4156] transition hover:bg-slate-50 focus:outline-none lg:hidden"
-                aria-label="Open navigation menu"
-              >
-                <Menu size={18} />
-              </button>
-              <h1 className="text-[17px] font-bold tracking-tight text-[#2F4156]">{activeLabel}</h1>
-            </div>
+      {/* =========================================================
+          MAIN WORKSPACE
+          ========================================================= */}
+      <main className="relative min-h-screen pt-[72px] lg:ml-[300px]">
+        <DashboardBackdrop />
 
-            <div className="flex items-center gap-3">
-              <div className="hidden items-center gap-2 lg:flex">
-                <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-500 shrink-0">
-                    <Star className="h-3.5 w-3.5" fill="currentColor" />
-                  </div>
-                  <div className="flex flex-col text-left leading-none">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">AI Tokens Remaining</p>
-                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 30000).toLocaleString()}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shrink-0">
-                    <span className="text-xs font-black">$</span>
-                  </div>
-                  <div className="flex flex-col text-left leading-none">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">Bill</p>
-                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatUsd(creditUsage.totalBillUsd)}</p>
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={startBuilder}
-                className="hidden h-10 items-center justify-center gap-2 rounded-xl bg-[#2F4156] px-5 text-[13px] font-bold text-white transition hover:bg-[#233244] lg:inline-flex"
-              >
-                <PenLine size={14} />
-                Initialize Builder
-              </button>
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="inline-flex h-10 items-center justify-center rounded-xl bg-[#2F4156] px-5 text-[13px] font-bold text-white hover:bg-[#233244] shadow-sm transition">
-                    Sign In
-                  </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <div className="flex items-center gap-2">
-                  <CustomUserButton />
-                </div>
-              </SignedIn>
-            </div>
-          </div>
-        </header>
-
-        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+        <div className="relative z-10 mx-auto max-w-[1500px] px-4 py-5 sm:px-6 lg:px-8">
           {activeView === 'dashboard' && (
-            <div className="space-y-6">
-              <section className="overflow-hidden rounded-[28px] border border-white/60 bg-[linear-gradient(135deg,rgba(255,255,255,0.68),rgba(200,217,230,0.22))] shadow-[0_24px_70px_rgba(47,65,86,0.12)] backdrop-blur-xl">
-                <div className="grid gap-6 p-6 lg:grid-cols-[1.08fr_0.92fr] lg:p-8">
-                  <div className="flex flex-col justify-center">
-                    <div className="mb-5 inline-flex w-fit items-center gap-2 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#567C8D]">
-                      Dashboard Overview
-                    </div>
-                    <h2 className="text-3xl font-extrabold tracking-tight text-[#2F4156] md:text-4xl">
-                      Welcome back, <span className="text-[#567C8D]">{userName}</span>.
-                    </h2>
-                    <p className="mt-3 max-w-xl text-[14px] leading-relaxed text-[#567C8D]">
-                      Your workspace is live. Resume storage, job-description storage, cover letters, profile completion,
-                      and template usage are all now pulled from the real saved data in your builder.
-                    </p>
-                    <div className="mt-6 flex flex-wrap gap-3">
-                      <button
-                        onClick={startBuilder}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#2F4156] px-5 text-[13px] font-bold text-white transition hover:bg-[#233244]"
-                      >
-                        <PenLine size={14} />
-                        Initialize Builder
-                      </button>
-                      <button
-                        onClick={() => setActiveView('templates')}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#C8D9E6] bg-white/80 px-5 text-[13px] font-bold text-[#2F4156] transition hover:bg-white"
-                      >
-                        <LayoutTemplate size={14} />
-                        Browse Templates
-                      </button>
-                    </div>
-                  </div>
+            <div className="dashboard-overview flex min-h-[calc(100vh-112px)] flex-col">
+              {/* Greeting */}
+              <section className="mb-5 shrink-0" data-tour="overview">
+                <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#B17B22]">
+                  Dashboard
+                </p>
+                <h2 className="mt-2 font-serif text-[36px] font-semibold leading-[1.05] tracking-[-0.035em] text-[#102D47] lg:text-[40px]">
+                  Good to see you again, {userName}!
+                </h2>
+                <p className="mt-2 text-[13px] font-medium text-[#31546B]">
+                  Here&apos;s an overview of your progress and everything you need to create stronger cover letters.
+                </p>
+              </section>
 
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    {stats.map((stat) => (
-                      <HeroMetric key={stat.label} title={stat.label} value={stat.value} subtitle={stat.helper} />
-                    ))}
+              {/* 4 dashboard metrics */}
+              <section className="grid shrink-0 gap-3 sm:grid-cols-2 xl:grid-cols-4" data-tour="metrics">
+                <OverviewMetricCard
+                  icon={FileText}
+                  title="Cover Letters Created"
+                  value={savedLetters.length}
+                  helper={savedLetters.length ? 'Saved in My Letters' : 'Create your first letter'}
+                  tone="blue"
+                />
+                <OverviewMetricCard
+                  icon={Database}
+                  title="Data Sources"
+                  value={`${clampedDataSources} / ${MAX_DATA_SOURCES}`}
+                  percent={dataSourcePercent}
+                  helper={`${dataSourcePercent}%`}
+                  tone="green"
+                />
+                <OverviewMetricCard
+                  icon={LayoutTemplate}
+                  title="Templates Used"
+                  value={`${configuredTemplates} / ${templateCount}`}
+                  percent={templatePercent}
+                  helper={`${templatePercent}%`}
+                  tone="gold"
+                />
+                <OverviewMetricCard
+                  icon={UserRound}
+                  title="Profile Completeness"
+                  value={`${profileCompleteness}%`}
+                  percent={profileCompleteness}
+                  tone="purple"
+                />
+              </section>
+
+              {/* Primary actions */}
+              <section className="mt-4 grid shrink-0 gap-3 xl:grid-cols-[1.45fr_1fr]" data-tour="actions">
+                <div className="flex min-h-[96px] items-center justify-between gap-4 rounded-[16px] border border-[#E1E4E2] bg-white/94 px-5 py-4 shadow-[0_12px_32px_rgba(55,49,39,0.08)]">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#FFF1D8] text-[#A86F12]">
+                      <PenLine size={25} />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-[15px] font-bold text-[#102D47]">Create a New Cover Letter</h3>
+                      <p className="mt-1 text-[11px] font-medium text-[#668093]">
+                        Turn your experience into opportunities with a tailored cover letter.
+                      </p>
+                    </div>
                   </div>
+                  <button
+                    onClick={startBuilder}
+                    className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-[9px] bg-[#0B3A67] px-5 text-[12px] font-bold text-white shadow-[0_8px_18px_rgba(11,58,103,.16)] transition hover:bg-[#082F55]"
+                  >
+                    Get Started
+                    <ArrowRight size={14} />
+                  </button>
+                </div>
+
+                <div className="flex min-h-[96px] items-center justify-between gap-4 rounded-[16px] border border-[#E1E4E2] bg-white/94 px-5 py-4 shadow-[0_12px_32px_rgba(55,49,39,0.08)]">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#EAF3FF] text-[#1760C8]">
+                      <LayoutTemplate size={25} />
+                    </div>
+                    <div>
+                      <h3 className="text-[15px] font-bold text-[#102D47]">Explore Templates</h3>
+                      <p className="mt-1 text-[11px] font-medium text-[#668093]">
+                        Choose from professionally designed templates.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setActiveView('templates')}
+                    className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-[9px] border border-[#C8D9E6] bg-white px-4 text-[11px] font-bold text-[#0D58B8] transition hover:bg-[#F5F9FD]"
+                  >
+                    Browse Templates
+                    <ArrowRight size={13} />
+                  </button>
                 </div>
               </section>
 
-              <section className="grid gap-6 xl:grid-cols-[1fr_344px]">
-                <div className="space-y-6">
-                  <section className="flex flex-col gap-4 rounded-[24px] border border-white/70 bg-white/82 p-5 shadow-[0_18px_48px_rgba(47,65,86,0.08)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-[#C8D9E6]/50 text-xl font-bold text-[#2F4156]">
-                        {userName.charAt(0).toUpperCase()}
-                        <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#567C8D] text-white ring-2 ring-white">
-                          <Sparkles size={10} />
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="text-[16px] font-bold text-[#2F4156]">{profile.fullName || 'Complete Your Profile'}</h3>
-                        <p className="mt-0.5 text-[13px] text-[#567C8D]">{profile.currentJobTitle || 'Add your current job title to personalize drafts'}</p>
-                      </div>
+              {/* Bottom dashboard area */}
+              <section className="mt-4 grid min-h-0 flex-1 gap-3 xl:grid-cols-[1.45fr_1fr]">
+                {/* Recent Cover Letters */}
+                <div className="min-h-0 rounded-[16px] border border-[#E1E4E2] bg-white/95 p-4 shadow-[0_12px_32px_rgba(55,49,39,0.08)]" data-tour="recent">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileText size={17} className="text-[#B57B16]" />
+                      <h3 className="text-[15px] font-bold text-[#102D47]">Recent Cover Letters</h3>
                     </div>
-
-                    <div className="flex w-full flex-col gap-2 sm:w-[230px]">
-                      <div className="flex items-center justify-between text-[11px] font-bold text-[#567C8D]">
-                        <span>{profileCompleteness}% complete</span>
-                        <span>{profileCompletedFields}/{PROFILE_FIELDS.length}</span>
-                      </div>
-                      <ProgressBar percent={profileCompleteness} />
-                    </div>
-
                     <button
-                      onClick={() => setActiveView('profile')}
-                      className="h-10 shrink-0 rounded-xl border border-[#C8D9E6] bg-[#C8D9E6]/35 px-4 text-[13px] font-bold text-[#2F4156] transition hover:bg-[#C8D9E6]/55"
+                      onClick={() => setActiveView('letters')}
+                      className="flex items-center gap-1.5 text-[11px] font-semibold text-[#1760C8] hover:underline"
                     >
-                      Edit Profile
+                      View All
+                      <ArrowRight size={12} />
                     </button>
-                  </section>
+                  </div>
 
-                  <section className="rounded-[24px] border border-white/70 bg-white/82 p-6 shadow-[0_18px_48px_rgba(47,65,86,0.08)] backdrop-blur-xl">
-                    <div className="mb-8 flex items-center justify-between">
-                      <div>
-                        <h3 className="text-[16px] font-bold text-[#2F4156]">Creation Pipeline</h3>
-                        <p className="mt-1 text-[13px] text-[#567C8D]">
-                          Current focus: <span className="font-bold text-[#2F4156]">{pipelineFocus}</span>
-                        </p>
+                  {recentLetters.length === 0 ? (
+                    <div className="flex h-[180px] flex-col items-center justify-center rounded-[12px] border border-dashed border-[#CCD9E2] bg-[#FBFCFD] px-5 text-center">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EEF3F7] text-[#567C8D]">
+                        <FileText size={18} />
                       </div>
+                      <p className="mt-3 text-[13px] font-bold text-[#102D47]">No cover letters yet</p>
+                      <p className="mt-1 text-[11px] text-[#7590A2]">Create your first letter and it will appear here.</p>
                     </div>
-
-                    <div className="relative mb-10 mt-6 flex justify-between px-1 sm:px-4">
-                      <div className="absolute left-5 right-5 top-5 h-px -translate-y-1/2 bg-[#C8D9E6]"></div>
-                      <Step
-                        icon={UserRound}
-                        label="Profile"
-                        status={profileCompleteness === 100 ? 'completed' : 'current'}
-                      />
-                      <Step
-                        icon={UploadCloud}
-                        label="Sources"
-                        status={totalDataSources > 0 ? 'completed' : profileCompleteness === 100 ? 'current' : 'pending'}
-                      />
-                      <Step
-                        icon={LayoutTemplate}
-                        label="Template"
-                        status={configuredTemplates > 0 ? 'completed' : totalDataSources > 0 ? 'current' : 'pending'}
-                      />
-                      <Step
-                        icon={BrainCircuit}
-                        label="Draft"
-                        status={savedLetters.length > 0 ? 'completed' : configuredTemplates > 0 ? 'current' : 'pending'}
-                      />
-                      <Step icon={Check} label="Export" status="pending" />
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="text-[14px] font-bold text-[#2F4156]">Recommended Actions</h4>
-                      {actionItems.map((item) => (
-                        <ActionItem key={item.key} {...item} />
-                      ))}
-                    </div>
-                  </section>
-
-                  <section className="rounded-[24px] border border-white/70 bg-white/82 p-5 shadow-[0_18px_48px_rgba(47,65,86,0.08)] backdrop-blur-xl sm:p-6">
-                    <div className="mb-5 flex items-center justify-between">
-                      <h3 className="text-[16px] font-bold text-[#2F4156]">Recent Letters</h3>
-                      <button onClick={() => setActiveView('letters')} className="text-[12px] font-semibold text-[#567C8D] hover:text-[#2F4156] hover:underline">
-                        View All
-                      </button>
-                    </div>
-
-                    {recentLetters.length === 0 ? (
-                      <EmptyState
-                        title="No saved letters yet"
-                        description="Create a cover letter in the builder and it will appear here automatically."
-                      />
-                    ) : (
-                      <div className="divide-y divide-[#C8D9E6]/55">
-                        {recentLetters.map((letter) => (
-                          <button
-                            key={letter.id}
-                            onClick={() => openSavedLetterInBuilder(letter.id)}
-                            className="group flex w-full flex-col gap-3 py-4 text-left first:pt-0 last:pb-0 md:flex-row md:items-center md:justify-between"
-                          >
-                            <div className="flex items-start gap-4">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#C8D9E6] bg-[#F5EFEB] text-[#567C8D] transition-colors group-hover:bg-[#C8D9E6]/45 group-hover:text-[#2F4156]">
-                                <FileText size={17} strokeWidth={2} />
-                              </div>
-                              <div>
-                                <p className="text-[14px] font-bold text-[#2F4156] transition-colors group-hover:text-[#567C8D]">{letter.title}</p>
-                                <p className="mt-0.5 text-[12px] text-[#567C8D]">{letter.company} · {formatDate(letter.updatedAt)}</p>
-                              </div>
+                  ) : (
+                    <div className="overflow-hidden rounded-[12px] border border-[#D9E4EB]">
+                      {recentLetters.map((letter, index) => (
+                        <button
+                          key={letter.id}
+                          onClick={() => openSavedLetterInBuilder(letter.id)}
+                          className={`group flex min-h-[62px] w-full items-center justify-between gap-4 bg-white px-4 py-2.5 text-left transition hover:bg-[#F9FBFC] ${
+                            index < recentLetters.length - 1 ? 'border-b border-[#E3EBF0]' : ''
+                          }`}
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F1F5F8] text-[#153E59]">
+                              <FileText size={16} />
                             </div>
-                            <span className="w-fit rounded-full border border-[#C8D9E6] bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#567C8D]">
+                            <div className="min-w-0">
+                              <p className="truncate text-[12.5px] font-bold text-[#102D47]">
+                                {letter.title || 'Cover Letter'}
+                              </p>
+                              <p className="mt-0.5 truncate text-[10.5px] text-[#7991A2]">
+                                {letter.company || 'Company'} · {formatDate(letter.updatedAt)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex shrink-0 items-center gap-3">
+                            <span className="rounded-full bg-[#E7F7EF] px-2.5 py-1 text-[9.5px] font-bold text-[#13915D]">
                               Saved
                             </span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </section>
+                            <MoreVertical size={15} className="text-[#6B8495]" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <div className="space-y-6">
-                  <section className="rounded-[24px] border border-white/70 bg-white/82 p-5 shadow-[0_18px_48px_rgba(47,65,86,0.08)] backdrop-blur-xl">
-                    <div className="mb-4 flex items-center justify-between">
-                      <h3 className="text-[14px] font-bold text-[#2F4156]">Profile Snapshot</h3>
-                      <button
-                        onClick={() => setActiveView('profile')}
-                        className="rounded-lg border border-[#C8D9E6] bg-[#F5EFEB] px-2.5 py-1 text-[11px] font-bold text-[#567C8D] transition hover:bg-white"
-                      >
-                        Edit
-                      </button>
+                {/* Plan + usage */}
+                <div className="min-h-0 rounded-[16px] border border-[#E1E4E2] bg-white/95 p-4 shadow-[0_12px_32px_rgba(55,49,39,0.08)]" data-tour="usage">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Crown size={17} className="text-[#B57B16]" />
+                      <h3 className="text-[15px] font-bold text-[#102D47]">Your Plan &amp; Usage</h3>
                     </div>
-                    <div className="flex items-start gap-3 rounded-2xl border border-[#C8D9E6] bg-[#F5EFEB]/55 p-3.5">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#C8D9E6]/65 text-[#2F4156]">
-                        <Target size={16} />
+                    <button
+                      onClick={() => setActiveView('credits')}
+                      className="flex items-center gap-1.5 text-[11px] font-semibold text-[#1760C8] hover:underline"
+                    >
+                      Manage Plan
+                      <ArrowRight size={12} />
+                    </button>
+                  </div>
+
+                  <div className="overflow-hidden rounded-[12px] border border-[#D9E4EB]">
+                    <div className="flex min-h-[62px] items-center justify-between gap-3 border-b border-[#E3EBF0] px-4 py-2.5">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F0F3F6] text-[#173E59]">
+                          <Crown size={16} />
+                        </div>
+                        <div>
+                          <p className="text-[12px] font-bold text-[#102D47]">
+                            {(subData.plan || 'free').charAt(0).toUpperCase() + (subData.plan || 'free').slice(1)} Plan
+                          </p>
+                          <p className="mt-0.5 text-[10px] text-[#7991A2]">
+                            CareerSense subscription
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[13px] font-bold text-[#2F4156]">{profile.currentJobTitle || 'No current job title saved yet'}</p>
-                        <p className="mt-0.5 text-[11px] text-[#567C8D]">{profile.address || 'Location not added yet'}</p>
+                      {(subData.plan || 'free').toLowerCase() === 'free' && (
+                        <button
+                          onClick={() => setActiveView('credits')}
+                          className="h-8 rounded-[8px] bg-[#A56E16] px-4 text-[10.5px] font-bold text-white transition hover:bg-[#8E5D10]"
+                        >
+                          Upgrade
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="px-4 py-3">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <div className="flex items-center gap-2 font-semibold text-[#173E59]">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EAF3FF] text-[#1760C8]">
+                            <Zap size={14} />
+                          </div>
+                          AI Tokens Remaining
+                        </div>
+                        <span className="font-bold text-[#1760C8]">
+                          {(subData.tokensRemaining ?? 30000).toLocaleString()} / 10,000
+                        </span>
                       </div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#E4EEE9]">
+                        <div
+                          className="h-full rounded-full bg-[#13A36D] transition-all duration-500"
+                          style={{ width: `${tokenPercent}%` }}
+                        />
+                      </div>
+                      <p className="mt-1 text-right text-[9.5px] font-bold text-[#13A36D]">{tokenPercent}%</p>
                     </div>
-                  </section>
+                  </div>
 
-                  <section className="rounded-[24px] border border-white/70 bg-white/82 p-6 shadow-[0_18px_48px_rgba(47,65,86,0.08)] backdrop-blur-xl">
-                    <h3 className="mb-6 text-[15px] font-bold text-[#2F4156]">System Metrics</h3>
-
-                    <div className="space-y-5">
-                      <MetricBar
-                        label="Profile Completeness"
-                        value={`${profileCompleteness}%`}
-                        width={`${profileCompleteness}%`}
-                        helper={`${profileCompletedFields} of ${PROFILE_FIELDS.length} fields filled`}
-                      />
-                      <MetricBar
-                        label="Data Sources Attached"
-                        value={`${dataSourcePercent}%`}
-                        width={`${dataSourcePercent}%`}
-                        helper={`${clampedDataSources} of ${MAX_DATA_SOURCES} sources stored`}
-                        colorClass="bg-[#567C8D]"
-                      />
-                      <MetricBar
-                        label="Templates Configured"
-                        value={`${templatePercent}%`}
-                        width={`${templatePercent}%`}
-                        helper={`${configuredTemplates} of ${templateCount} templates used`}
-                      />
+                  <div className="mt-3 flex items-start gap-3 rounded-[12px] border border-[#F0D7A8] bg-[#FFF8EA] p-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F9E8C5] text-[#AE7618]">
+                      <Lightbulb size={16} />
                     </div>
-
-                    <div className="mb-4 mt-8">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#567C8D]">Pipeline Activity</p>
+                    <div>
+                      <p className="text-[11.5px] font-bold text-[#9C6512]">Pro Tip</p>
+                      <p className="mt-0.5 text-[10.5px] leading-[1.45] text-[#5B6670]">
+                        {totalDataSources < 2
+                          ? 'Add more data sources — resumes and job descriptions — to get more tailored cover letters.'
+                          : pipelineFocus === 'Optimization'
+                            ? 'Try a different template and refine your strongest achievements before exporting.'
+                            : `Your current focus is ${pipelineFocus}. Completing it will improve future drafts.`}
+                      </p>
                     </div>
-
-                    <div className="space-y-3">
-                      <PipelineStat label="Saved in workspace" value={savedLetters.length} />
-                      <PipelineStat label="Resumes stored" value={storedResumes.length} />
-                      <PipelineStat label="JDs stored" value={storedJobDescriptions.length} />
-                      <PipelineStat label="Profile fields done" value={`${profileCompletedFields}/${PROFILE_FIELDS.length}`} />
-                    </div>
-                  </section>
+                  </div>
                 </div>
               </section>
             </div>
@@ -647,44 +758,112 @@ const Dashboard = () => {
               onDelete={deleteSavedLetter}
             />
           )}
+
           {activeView === 'templates' && <TemplatesView />}
           {activeView === 'resumes' && <ResumeView />}
           {activeView === 'credits' && <CreditsView usage={creditUsage} subData={subData} />}
           {activeView === 'profile' && <ProfileView />}
         </div>
       </main>
+
+      <DashboardTour open={isTourOpen} onClose={() => setIsTourOpen(false)} />
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600&display=swap');
+
+        @media (min-width: 1024px) and (max-height: 850px) {
+          .dashboard-overview {
+            min-height: calc(100vh - 100px);
+          }
+
+          .dashboard-overview > section:first-child {
+            margin-bottom: 12px;
+          }
+
+          .dashboard-overview h2 {
+            font-size: 34px;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
 const DashboardBackdrop = () => (
-  <div className="pointer-events-none absolute inset-0 overflow-hidden">
-    <div
-      className="absolute inset-0 opacity-55"
-      style={{
-        backgroundImage: `
-          linear-gradient(to right, rgba(86, 124, 141, 0.13) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(86, 124, 141, 0.11) 1px, transparent 1px)
-        `,
-        backgroundSize: '32px 32px',
-      }}
+  <div className="pointer-events-none fixed bottom-0 left-0 right-0 top-[72px] overflow-hidden lg:left-[300px]">
+    <img
+      src={dashboardBackground}
+      alt=""
+      aria-hidden="true"
+      className="absolute inset-0 h-full w-full object-cover object-center"
     />
-    <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(200,217,230,0.78),transparent_26%),radial-gradient(circle_at_82%_14%,rgba(86,124,141,0.12),transparent_30%),radial-gradient(circle_at_72%_74%,rgba(200,217,230,0.26),transparent_34%),linear-gradient(180deg,rgba(245,239,235,0.72),rgba(255,255,255,0.32)_48%,rgba(245,239,235,0.92))]" />
-    <svg className="absolute inset-0 h-full w-full opacity-35">
-      <defs>
-        <linearGradient id="dashboard-flow" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor={BUILDER_COLORS.teal} stopOpacity="0" />
-          <stop offset="40%" stopColor={BUILDER_COLORS.teal} stopOpacity="0.45" />
-          <stop offset="72%" stopColor={BUILDER_COLORS.mist} stopOpacity="0.36" />
-          <stop offset="100%" stopColor={BUILDER_COLORS.paper} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d="M -120 330 C 220 120, 460 260, 760 210 S 1180 240, 1520 30" fill="none" stroke="url(#dashboard-flow)" strokeWidth="1.6" />
-      <path d="M -100 760 C 200 590, 420 520, 760 640 S 1180 780, 1520 500" fill="none" stroke="url(#dashboard-flow)" strokeWidth="1.35" />
-      <path d="M 80 -120 C 340 160, 620 220, 900 160 S 1220 250, 1520 630" fill="none" stroke="url(#dashboard-flow)" strokeWidth="1.1" opacity="0.72" />
-    </svg>
+    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(248,243,234,.90)_0%,rgba(248,243,234,.78)_36%,rgba(248,243,234,.69)_68%,rgba(248,243,234,.76)_100%)]" />
+    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,.12),rgba(248,243,234,.22)_55%,rgba(248,243,234,.42))]" />
   </div>
 );
+
+const OverviewMetricCard = ({ icon: Icon, title, value, helper, percent, tone = 'blue' }) => {
+  const tones = {
+    blue: {
+      card: 'border-[#D2E1EF] bg-[#F8FBFF]/95',
+      icon: 'bg-[#E7F1FF] text-[#1760C8]',
+      bar: 'bg-[#1760C8]',
+      track: 'bg-[#E2EAF2]',
+      helper: 'text-[#239466]',
+    },
+    green: {
+      card: 'border-[#D0E8DB] bg-[#F8FCFA]/95',
+      icon: 'bg-[#E6F6EE] text-[#138B57]',
+      bar: 'bg-[#14A269]',
+      track: 'bg-[#E1EEE7]',
+      helper: 'text-[#138B57]',
+    },
+    gold: {
+      card: 'border-[#EBDDBD] bg-[#FFFCF7]/95',
+      icon: 'bg-[#FFF2D8] text-[#AD7414]',
+      bar: 'bg-[#B47A16]',
+      track: 'bg-[#F1E8D7]',
+      helper: 'text-[#9B6A18]',
+    },
+    purple: {
+      card: 'border-[#DED8F0] bg-[#FBFAFF]/95',
+      icon: 'bg-[#EEEAFE] text-[#49369B]',
+      bar: 'bg-[#49369B]',
+      track: 'bg-[#EBE8F5]',
+      helper: 'text-[#49369B]',
+    },
+  };
+
+  const palette = tones[tone] || tones.blue;
+
+  return (
+    <div className={`min-h-[120px] rounded-[14px] border p-4 shadow-[0_10px_25px_rgba(48,48,40,.06)] ${palette.card}`}>
+      <div className="flex items-center gap-3">
+        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${palette.icon}`}>
+          <Icon size={22} strokeWidth={1.9} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold text-[#23445D]">{title}</p>
+          <p className="mt-1 text-[23px] font-black tracking-[-0.03em] text-[#102D47]">{value}</p>
+        </div>
+      </div>
+
+      {typeof percent === 'number' ? (
+        <div className="mt-3 flex items-center gap-2.5">
+          <div className={`h-2 flex-1 overflow-hidden rounded-full ${palette.track}`}>
+            <div
+              className={`h-full rounded-full ${palette.bar}`}
+              style={{ width: `${Math.max(0, Math.min(100, percent))}%` }}
+            />
+          </div>
+          {helper && <span className={`text-[10px] font-bold ${palette.helper}`}>{helper}</span>}
+        </div>
+      ) : (
+        helper && <p className={`mt-3 text-[10.5px] font-semibold ${palette.helper}`}>{helper}</p>
+      )}
+    </div>
+  );
+};
 
 const HeroMetric = ({ title, value, subtitle }) => (
   <div className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_14px_36px_rgba(47,65,86,0.08)] backdrop-blur-xl">
@@ -1078,33 +1257,18 @@ const CreditsView = ({ usage, subData }) => {
   );
 };
 
-const CreditStat = ({ label, value, helper, tone, href }) => {
+const CreditStat = ({ label, value, helper, tone }) => {
   const dotClass =
     tone === 'teal' ? 'bg-[#567C8D]' : tone === 'mist' ? 'bg-[#C8D9E6]' : 'bg-[#2F4156]';
 
   return (
-    <div className="relative flex flex-col justify-between rounded-2xl border border-[#C8D9E6] bg-white p-4 shadow-sm">
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#567C8D]">{label}</p>
-          <span className={`h-1.5 w-1.5 rounded-full ${dotClass}`}></span>
-        </div>
-        <p className="text-2xl font-extrabold tracking-tight text-[#2F4156]">{value}</p>
-        <p className="mt-1 text-[11px] font-medium text-[#567C8D]">{helper}</p>
+    <div className="rounded-2xl border border-[#C8D9E6] bg-white p-4 shadow-sm">
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#567C8D]">{label}</p>
+        <span className={`h-1.5 w-1.5 rounded-full ${dotClass}`}></span>
       </div>
-      {href && (
-        <div className="mt-3 flex justify-end">
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Upgrade Plan"
-            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-[#C8D9E6] bg-[#F5EFEB]/60 text-[#2F4156] shadow-xs transition-all duration-200 hover:scale-105 hover:border-[#2F4156] hover:bg-[#2F4156] hover:text-white"
-          >
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </a>
-        </div>
-      )}
+      <p className="text-2xl font-extrabold tracking-tight text-[#2F4156]">{value}</p>
+      <p className="mt-1 text-[11px] font-medium text-[#567C8D]">{helper}</p>
     </div>
   );
 };

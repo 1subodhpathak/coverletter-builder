@@ -15,6 +15,12 @@ import {
   X,
   Zap,
   Star,
+  ChevronDown,
+  FileEdit,
+  FileCheck,
+  MessageSquare,
+  Award,
+  ArrowUpRight,
 } from 'lucide-react';
 import CoverLetterGenie from '../components/landing/CoverLetterGenie';
 import { getCareerSenseUsage } from '../services/careerSensePoints';
@@ -25,9 +31,41 @@ import CustomUserButton from '../components/common/CustomUserButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import coverLetterVideo from '../assets/CoverLetter1.mp4';
 import BlueLogo from '../assets/logos/BlueGray.png';
+import heroBackground from '../assets/hero.png';
+import TrustedCompanies from '../components/landing/TrustedCompanies';
+
+const coverLetterCareerTools = [
+  {
+    name: 'AI Resume Builder',
+    desc: 'Craft ATS-friendly resumes in minutes',
+    href: 'https://resume.careersenseai.com/',
+    icon: FileEdit,
+    badge: 'Popular',
+  },
+  {
+    name: 'ATS Score Checker',
+    desc: 'Analyze & optimize resume keyword match',
+    href: 'https://ats.careersenseai.com/',
+    icon: FileCheck,
+    badge: 'AI Powered',
+  },
+  {
+    name: 'Interview Simulator',
+    desc: 'Practice realistic AI voice & chat interviews',
+    href: 'https://careersenseai.com/interview-simulator',
+    icon: MessageSquare,
+  },
+  {
+    name: 'Skill Certification',
+    desc: 'Validate skills & earn verifiable certificates',
+    href: 'https://certifi.careersenseai.com/',
+    icon: Award,
+  },
+];
 
 const AnimatedHeroBackground = lazy(() => import('../components/landing/AnimatedHeroBackground'));
 const CoverLetterAssistant = lazy(() => import('../components/landing/CoverLetterAssistant'));
+const BeforeAfterTransformation = lazy(() => import('../components/landing/BeforeAfterTransformation'));
 const CoverLetterAnatomy = lazy(() => import('../components/landing/CoverLetterAnatomy'));
 const FinalCTA = lazy(() => import('../components/landing/FinalCTA'));
 const Footer = lazy(() => import('../components/landing/Footer'));
@@ -50,15 +88,15 @@ const methods = [
     mode: 'resume',
     icon: UploadCloud,
     title: 'Resume Based Letter',
-    label: 'Grow AI',
-    text: 'Grow analyzes your resume and creates a strong general cover letter.',
+    label: 'Cora AI',
+    text: 'Cora AI analyzes your resume and creates a strong general cover letter.',
   },
   {
     mode: 'resume-job',
     icon: Target,
     title: 'Job-Specific Calibration',
     label: 'Best match',
-    text: 'Grow matches your resume to a role and writes a tailored letter.',
+    text: 'Cora AI matches your resume to a role and writes a tailored letter.',
   },
 ];
 
@@ -87,6 +125,18 @@ const Home = () => {
   const [scrollShade, setScrollShade] = useState(0);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const toolsRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (toolsRef.current && !toolsRef.current.contains(e.target)) {
+        setToolsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -212,53 +262,137 @@ const Home = () => {
     <div className="relative min-h-screen overflow-x-hidden bg-[#F5EFEB] font-sans text-slate-950" style={landingShadeStyle}>
       <LandingBackdrop />
 
-      <header className="relative z-50 w-full border-b border-[#dbe3ef] bg-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
+      <header className="relative z-50 w-full border-b border-white/10 bg-[#082B45]/95 text-white shadow-[0_10px_30px_rgba(3,22,36,0.22)] backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-[1600px] min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-2 sm:px-8 sm:py-3">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
             <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
             <div className="text-left">
               <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
-                <span className="text-[#2F4156]">Career</span><span className="text-[#567C8D]">Sense</span>
+                <span className="text-[#F5EFEB]">Career</span><span className="text-[#E3BA5E]">Sense</span>
               </h1>
-              <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#C8D9E6]">
+              <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#AFC7D5]">
                 Executive Letters
               </p>
             </div>
           </button>
 
-          <nav className="hidden items-center gap-7 text-sm font-extrabold text-[#567C8D] lg:flex" aria-label="Landing">
-            <a href="#methods" className="hover:text-[#2F4156]">Build Options</a>
-            <a href="#cover-letter-questions" className="hover:text-[#2F4156]">Ask Grow</a>
-            <a href="#anatomy" className="hover:text-[#2F4156]">Letter Guide</a>
-            <a href="#templates" className="hover:text-[#2F4156]">Templates</a>
-            <a href="#testimonials" className="hover:text-[#2F4156]">Reviews</a>
+          <nav className="hidden items-center gap-6 text-sm font-extrabold text-[#D6E3EA] lg:flex" aria-label="Landing">
+            <div className="relative" ref={toolsRef}>
+              <button
+                type="button"
+                onClick={() => setToolsOpen((prev) => !prev)}
+                className="flex items-center gap-1.5 transition hover:text-white"
+                aria-expanded={toolsOpen}
+              >
+                <span>Career Tools</span>
+                <ChevronDown
+                  size={15}
+                  className={`transition-transform duration-200 ${toolsOpen ? 'rotate-180 text-[#E3BA5E]' : ''}`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {toolsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ duration: 0.16 }}
+                    style={{ backgroundColor: '#082B45' }}
+                    className="absolute left-0 top-full mt-3 w-80 rounded-2xl border border-white/15 p-2.5 text-white shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50"
+                  >
+                    <div className="mb-2 px-2.5 pt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8EAABF]">
+                      AI Career Suite
+                    </div>
+                    <div className="space-y-1">
+                      {coverLetterCareerTools.map((tool) => {
+                        const Icon = tool.icon;
+                        return (
+                          <a
+                            key={tool.name}
+                            href={tool.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setToolsOpen(false)}
+                            className="group flex items-center justify-between gap-3 rounded-xl p-2.5 transition hover:bg-white/[0.08]"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.08] text-[#E3BA5E] group-hover:bg-[#E3BA5E] group-hover:text-[#082B45] transition">
+                                <Icon size={18} />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[13px] font-bold text-white group-hover:text-[#E3BA5E] transition">
+                                    {tool.name}
+                                  </span>
+                                  {tool.badge && (
+                                    <span className="rounded-full bg-[#E3BA5E]/20 px-2 py-0.5 text-[9px] font-bold text-[#E3BA5E]">
+                                      {tool.badge}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[11px] font-medium text-[#9BB5C6]">
+                                  {tool.desc}
+                                </p>
+                              </div>
+                            </div>
+                            <ArrowUpRight
+                              size={14}
+                              className="text-[#9BB5C6] opacity-0 transition group-hover:opacity-100 group-hover:text-white"
+                            />
+                          </a>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-2 border-t border-white/10 pt-2">
+                      <a
+                        href="https://careersenseai.com/#career-tools"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setToolsOpen(false)}
+                        className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] font-bold text-[#E3BA5E] hover:bg-white/[0.06] transition"
+                      >
+                        <span>Explore all career tools</span>
+                        <ArrowRight size={13} />
+                      </a>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <a href="#methods" className="transition hover:text-white">Build Options</a>
+            <a href="#cover-letter-questions" className="transition hover:text-white"> Ai</a>
+            <a href="#anatomy" className="transition hover:text-white">Letter Guide</a>
+            <a href="#templates" className="transition hover:text-white">Templates</a>
+            <a href="#testimonials" className="transition hover:text-white">Reviews</a>
           </nav>
 
           <div className="flex items-center gap-2">
             <SignedIn>
               <div className="hidden flex-1 items-center justify-end gap-2 sm:flex-none md:flex">
-                <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                <div className="flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.07] px-3 py-1.5 shadow-2xs">
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-500 shrink-0">
                     <Star className="h-3.5 w-3.5" fill="currentColor" />
                   </div>
                   <div className="flex flex-col text-left leading-none">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">AI Tokens Remaining</p>
-                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 30000).toLocaleString()}</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#AFC4D1] leading-tight">AI Tokens Remaining</p>
+                    <p className="mt-0.5 text-xs font-black leading-none text-white">{(subData.tokensRemaining ?? 30000).toLocaleString()}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                <div className="flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.07] px-3 py-1.5 shadow-2xs">
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shrink-0">
                     <span className="text-xs font-black">$</span>
                   </div>
                   <div className="flex flex-col text-left leading-none">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">Bill</p>
-                    <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatUsd(usage.totalBillUsd)}</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#AFC4D1] leading-tight">Bill</p>
+                    <p className="mt-0.5 text-xs font-black leading-none text-white">{formatUsd(usage.totalBillUsd)}</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => navigate('/dashboard')}
-                  className="inline-flex h-9 items-center gap-2 rounded-xl bg-[#2F4156] hover:bg-[#233244] px-4 text-xs font-bold text-white shadow-2xs transition-all active:scale-95 shrink-0"
+                  className="inline-flex h-9 shrink-0 items-center gap-2 rounded-xl bg-[#E3BA5E] px-4 text-xs font-bold text-[#082B45] shadow-2xs transition-all hover:bg-[#EDC974] active:scale-95"
                 >
                   Dashboard
                 </button>
@@ -266,7 +400,7 @@ const Home = () => {
             </SignedIn>
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="inline-flex h-9 items-center justify-center rounded-xl bg-[#2F4156] px-5 text-xs font-bold text-white hover:bg-[#233244] shadow-2xs transition">
+                <button className="inline-flex h-9 items-center justify-center rounded-xl bg-[#E3BA5E] px-5 text-xs font-bold text-[#082B45] shadow-2xs transition hover:bg-[#EDC974]">
                   Sign In
                 </button>
               </SignInButton>
@@ -280,23 +414,57 @@ const Home = () => {
               type="button"
               onClick={() => setIsMobileNavOpen((current) => !current)}
               aria-label={isMobileNavOpen ? 'Close menu' : 'Open menu'}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#C8D9E6] bg-white text-[#2F4156] shadow-2xs transition hover:bg-[#F5EFEB] md:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/[0.09] text-white shadow-2xs transition hover:bg-white/[0.15] md:hidden"
             >
               {isMobileNavOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
         {isMobileNavOpen && (
-          <div className="mt-3 border-t border-[#C8D9E6]/70 pt-3 lg:hidden">
-            <nav className="grid gap-2 text-[12px] font-extrabold uppercase tracking-[0.12em] text-[#567C8D]" aria-label="Landing Mobile">
-              <a href="#methods" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Build Options</a>
-              <a href="#cover-letter-questions" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Ask Grow</a>
-              <a href="#anatomy" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Letter Guide</a>
-              <a href="#templates" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Templates</a>
-              <a href="#testimonials" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-transparent bg-white/55 px-3 py-2 hover:border-[#C8D9E6] hover:text-[#2F4156]">Reviews</a>
+          <div className="border-t border-white/10 px-4 pb-4 pt-3 sm:px-8 lg:hidden">
+            <nav className="grid gap-2 text-[12px] font-extrabold uppercase tracking-[0.12em] text-[#D6E3EA]" aria-label="Landing Mobile">
+              <div className="rounded-lg border border-white/10 bg-white/[0.04] p-2">
+                <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#8EAABF]">
+                  Career Tools
+                </p>
+                <div className="mt-1 space-y-1">
+                  {coverLetterCareerTools.map((tool) => (
+                    <a
+                      key={tool.name}
+                      href={tool.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsMobileNavOpen(false)}
+                      className="flex items-center justify-between rounded-md px-2.5 py-2 text-[12px] font-semibold text-white hover:bg-white/10 transition"
+                    >
+                      <span className="flex items-center gap-2">
+                        <tool.icon size={15} className="text-[#E3BA5E]" />
+                        {tool.name}
+                      </span>
+                      <ArrowUpRight size={13} className="text-[#9BB5C6]" />
+                    </a>
+                  ))}
+                  <a
+                    href="https://careersenseai.com/#career-tools"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsMobileNavOpen(false)}
+                    className="flex items-center justify-between border-t border-white/10 px-2.5 pt-2 text-[11px] font-bold text-[#E3BA5E]"
+                  >
+                    <span>Explore all tools</span>
+                    <ArrowRight size={12} />
+                  </a>
+                </div>
+              </div>
+
+              <a href="#methods" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 transition hover:bg-white/[0.12] hover:text-white">Build Options</a>
+              <a href="#cover-letter-questions" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 transition hover:bg-white/[0.12] hover:text-white"> Ai</a>
+              <a href="#anatomy" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 transition hover:bg-white/[0.12] hover:text-white">Letter Guide</a>
+              <a href="#templates" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 transition hover:bg-white/[0.12] hover:text-white">Templates</a>
+              <a href="#testimonials" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 transition hover:bg-white/[0.12] hover:text-white">Reviews</a>
               <SignedOut>
                 <SignInButton mode="modal">
-                  <button onClick={() => setIsMobileNavOpen(false)} className="w-full text-center rounded-lg bg-[#2F4156] text-white px-3 py-2.5 text-[12px] font-extrabold uppercase tracking-[0.12em] hover:bg-[#233244] transition">
+                  <button onClick={() => setIsMobileNavOpen(false)} className="w-full rounded-lg bg-[#E3BA5E] px-3 py-2.5 text-center text-[12px] font-extrabold uppercase tracking-[0.12em] text-[#082B45] transition hover:bg-[#EDC974]">
                     Sign In
                   </button>
                 </SignInButton>
@@ -320,125 +488,532 @@ const Home = () => {
         )}
       </header>
 
-      <main className="relative z-10">
-        <section className="relative z-10 px-4 pt-10 pb-12 sm:px-6 md:pt-14 md:pb-16 lg:px-8">
-          <div className="mx-auto max-w-[1400px]">
-            <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
-              <div className="relative z-10" data-scroll-reveal>
-                <h1 className="cs-display mb-5 max-w-3xl text-4xl font-extrabold leading-[1.06] tracking-tight text-[#2F4156] sm:text-5xl md:text-6xl lg:text-[3.75rem]">
-                  Build{' '}
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      transition: 'opacity 0.35s ease, transform 0.35s ease',
-                      opacity: heroWordVisible ? 1 : 0,
-                      transform: heroWordVisible ? 'translateY(0px)' : 'translateY(-10px)',
-                    }}
-                    className="text-[#567C8D]"
-                  >
-                    {HERO_WORDS[heroWordIdx]}
-                  </span>
-                  <br />
-                  with Intelligence.
-                </h1>
-                <p className="mb-8 max-w-[640px] text-base font-semibold leading-7 text-[#567C8D] sm:text-[1.08rem] sm:leading-[1.75]">
-                  CareerSense helps senior professionals craft boardroom-ready cover letters from scratch, from a resume, or from a resume matched to an executive job description.
+      <main className="relative z-10 flex w-full flex-col gap-0 overflow-x-clip">
+        <section
+  className="
+    relative isolate overflow-hidden bg-[#F6EFE4]
+    lg:h-[calc(100dvh-82px)]
+    lg:min-h-0
+  "
+  data-scroll-reveal
+  data-hero-section
+>
+  {/* =========================================================
+      HERO BACKGROUND
+      ========================================================= */}
+  <img
+    src={heroBackground}
+    alt=""
+    aria-hidden="true"
+    className="
+      absolute inset-0
+      h-full w-full
+      object-cover
+      object-center
+    "
+  />
+
+  {/* Stronger readability wash on left */}
+  <div
+    className="
+      absolute inset-0
+      bg-[linear-gradient(
+        90deg,
+        rgba(248,241,230,0.99)_0%,
+        rgba(248,241,230,0.97)_31%,
+        rgba(248,241,230,0.84)_46%,
+        rgba(248,241,230,0.30)_61%,
+        rgba(248,241,230,0.03)_78%
+      )]
+    "
+  />
+
+  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,.02),rgba(247,240,229,.10)_70%,rgba(247,240,229,.20))]" />
+
+  <div
+    className="
+      relative z-10 mx-auto
+      grid w-full max-w-[1580px]
+      gap-8 px-5 py-8
+      sm:px-8
+      lg:h-full
+      lg:grid-cols-[0.92fr_1.08fr]
+      lg:items-center
+      lg:px-12
+      lg:py-5
+      xl:px-16
+    "
+  >
+    {/* =========================================================
+        LEFT
+        ========================================================= */}
+    <div className="max-w-[660px] lg:translate-y-[clamp(32px,4.5vh,48px)]">
+
+      {/* Eyebrow */}
+      <div className="mb-4 flex items-center gap-3">
+        <span className="h-px w-7 bg-[#BA8125]" />
+
+        <p className="text-[10px] font-black uppercase tracking-[0.29em] text-[#A56F1D]">
+          Executive Cover Letter Builder
+        </p>
+      </div>
+
+      {/* Main headline */}
+      <h1
+        className="
+          max-w-[620px]
+          font-serif
+          text-[clamp(46px,6.2vh,66px)]
+          font-semibold
+          leading-[0.97]
+          tracking-[-0.045em]
+          text-[#102D47]
+        "
+      >
+        Letters for serious
+        <br />
+        applications.
+      </h1>
+
+      {/* Existing animated words — kept */}
+      <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] font-bold text-[#587488]">
+        <span>Build</span>
+
+        <span
+          style={{
+            display: 'inline-block',
+            transition: 'opacity 0.35s ease, transform 0.35s ease',
+            opacity: heroWordVisible ? 1 : 0,
+            transform: heroWordVisible
+              ? 'translateY(0px)'
+              : 'translateY(-7px)',
+          }}
+          className="text-[#A56F1D]"
+        >
+          {HERO_WORDS[heroWordIdx]}
+        </span>
+
+        <span>with CareerSense intelligence.</span>
+      </div>
+
+      {/* Description */}
+      <p
+        className="
+          mt-4
+          max-w-[590px]
+          text-[15px]
+          font-medium
+          leading-[1.62]
+          text-[#31546B]
+          xl:text-[16px]
+        "
+      >
+        Polished, job-specific cover letters with executive-level structure
+        and intelligent guidance. Go from your experience to a compelling,
+        editable draft in minutes.
+      </p>
+
+      {/* =========================================================
+          CTAs
+          ========================================================= */}
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <button
+          onClick={openBuilderStart}
+          className="
+            group inline-flex
+            h-[50px]
+            min-w-[245px]
+            items-center justify-between
+            rounded-[9px]
+            bg-[#0B3A5B]
+            px-6
+            text-[13px]
+            font-extrabold
+            text-white
+            shadow-[0_10px_24px_rgba(11,58,91,.17)]
+            transition
+            duration-300
+            hover:-translate-y-0.5
+            hover:bg-[#082F4B]
+          "
+        >
+          <span>Start Building Free</span>
+
+          <ArrowRight
+            size={17}
+            className="transition-transform duration-300 group-hover:translate-x-1"
+          />
+        </button>
+
+        <button
+          onClick={() => setIsVideoModalOpen(true)}
+          className="
+            group inline-flex
+            h-[50px]
+            min-w-[220px]
+            items-center justify-center
+            gap-3
+            rounded-[9px]
+            border border-[#9EB1BD]
+            bg-white/60
+            px-5
+            text-[13px]
+            font-extrabold
+            text-[#14344D]
+            backdrop-blur-sm
+            transition
+            duration-300
+            hover:-translate-y-0.5
+            hover:bg-white/90
+          "
+        >
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E8C267] text-[#102D47]">
+            <Play size={11} fill="currentColor" />
+          </span>
+
+          See How It Works
+        </button>
+      </div>
+
+      {/* =========================================================
+          BENEFITS
+          ========================================================= */}
+      <div className="mt-6 grid max-w-[560px] gap-x-7 gap-y-2.5 sm:grid-cols-2">
+        {[
+          'Executive-grade templates',
+          'AI-powered guidance',
+          'Job-specific tailoring',
+          'Download as PDF',
+        ].map((item) => (
+          <div
+            key={item}
+            className="flex items-center gap-2.5 text-[12.5px] font-semibold text-[#294960]"
+          >
+            <span
+              className="
+                flex h-[24px] w-[24px]
+                shrink-0 items-center justify-center
+                rounded-full
+                border border-[#B88627]
+                text-[12px]
+                font-bold
+                text-[#B88627]
+              "
+            >
+              ✓
+            </span>
+
+            {item}
+          </div>
+        ))}
+      </div>
+
+      {/* =========================================================
+          STATS
+          ========================================================= */}
+      <div
+        className="
+          mt-6
+          flex w-full max-w-[650px] flex-wrap
+          gap-x-5 gap-y-3
+          border-t border-[#D7CFC3]
+          pt-5
+          sm:flex-nowrap
+          sm:gap-x-4
+        "
+      >
+        {heroStats.map((stat) => {
+          const Icon = stat.icon;
+
+          return (
+            <div
+              key={stat.label}
+              className="flex min-w-[125px] items-center gap-2.5 sm:min-w-0 sm:flex-1"
+            >
+              <div
+                className="
+                  flex h-10 w-10
+                  shrink-0
+                  items-center justify-center
+                  rounded-[10px]
+                  border border-white/80
+                  bg-[#EDF2F5]/90
+                  text-[#163D59]
+                  shadow-[0_4px_12px_rgba(16,45,71,.05)]
+                "
+              >
+                <Icon size={16} strokeWidth={1.9} />
+              </div>
+
+              <div>
+                <p className="text-[21px] font-black leading-none tracking-[-0.025em] text-[#102D47]">
+                  {stat.value}
                 </p>
 
-                <div className="mb-6 grid gap-3 sm:grid-cols-3">
-                  <div>
-                    <button
-                      onClick={openBuilderStart}
-                      className="group inline-flex w-full min-h-[46px] items-center justify-between rounded-[12px] border border-[#0F1C2E] bg-[#0F1C2E] px-5 text-[13.5px] font-black text-white shadow-[0_14px_30px_rgba(15,28,46,0.16)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#16263d]"
-                    >
-                      <span>Start Building</span>
-                      <ArrowRight size={20} className="transition duration-300 group-hover:translate-x-1" />
-                    </button>
-                  </div>
-                  <div>
-                    <button
-                      onClick={() => setIsVideoModalOpen(true)}
-                      className="group inline-flex w-full min-h-[46px] items-center justify-between rounded-[12px] border border-[#C8D9E6] bg-white px-5 text-[13.5px] font-black text-[#0F1C2E] shadow-[0_14px_28px_rgba(47,65,86,0.09)] transition duration-300 hover:-translate-y-0.5 hover:border-[#9DB5C6] hover:bg-white"
-                    >
-                      <span>How it works</span>
-                      <Play size={18} className="text-[#0F1C2E] fill-current transition duration-300 group-hover:scale-105" />
-                    </button>
-                  </div>
-                </div>
-
-                <div id="methods" className="mb-9 grid scroll-mt-4 gap-3 sm:grid-cols-3">
-                  {methods.map(({ mode, icon: Icon, title, text }) => {
-                    const isLocked = !isSignedIn && mode !== 'resume';
-
-                    const cardContent = (
-                      <div className="group min-h-[176px] rounded-2xl p-5 text-left backdrop-blur border border-transparent bg-white/55 hover:border-[#567C8D]/40 hover:bg-white sm:min-h-[220px] transition duration-300 relative h-full">
-                        <div className="mb-5 flex items-center justify-between">
-                          <div className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${isLocked ? 'bg-slate-200 text-slate-400' : 'bg-[#C8D9E6] text-[#567C8D]'}`}>
-                            {isLocked ? <Lock size={20} /> : <Icon size={22} />}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {isLocked ? (
-                              <span className="inline-flex items-center gap-1 rounded bg-[#E2E8F0] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#64748B] ring-1 ring-slate-300">
-                                <Lock size={10} /> Sign In
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center rounded bg-[#F5EFEB] text-[#2F4156] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ring-[#C8D9E6]">
-                                {mode === 'scratch' ? 'Free' : mode === 'resume' ? 'Grow AI' : 'Best match'}
-                              </span>
-                            )}
-                            <ArrowRight size={15} className="text-[#567C8D] transition group-hover:translate-x-1" />
-                          </div>
-                        </div>
-                        <h3 className="cs-display font-extrabold text-[#2F4156]">{title}</h3>
-                        <p className="mt-2 text-sm font-semibold leading-6 text-[#567C8D]">
-                          {isLocked ? "Please sign in to unlock this build option." : text}
-                        </p>
-                      </div>
-                    );
-
-                    if (isLocked) {
-                      return (
-                        <SignInButton mode="modal" key={title}>
-                          <div className="cursor-pointer relative h-full">
-                            {cardContent}
-                          </div>
-                        </SignInButton>
-                      );
-                    }
-
-                    return (
-                      <button key={title} onClick={() => startBuilderForMode(mode)} className="w-full text-left focus:outline-none h-full">
-                        {cardContent}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="flex flex-wrap gap-6 border-t border-[#C8D9E6] pt-6">
-                  {heroStats.map((stat) => {
-                    const Icon = stat.icon;
-                    return (
-                      <div key={stat.label} className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#C8D9E6] bg-white/80 text-[#567C8D] shadow-sm">
-                          <Icon size={18} />
-                        </div>
-
-                        <div>
-                          <p className="cs-display text-2xl font-extrabold text-[#2F4156]">{stat.value}</p>
-                          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#567C8D]">{stat.label}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="relative z-10 lg:translate-y-2" data-scroll-reveal>
-                <CoverLetterGenie />
+                <p className="mt-1 text-[8.5px] font-black uppercase tracking-[0.14em] text-[#637C8E]">
+                  {stat.label}
+                </p>
               </div>
             </div>
+          );
+        })}
+      </div>
+    </div>
+
+    {/* =========================================================
+        RIGHT VISUAL
+        ========================================================= */}
+    <div className="relative hidden h-full min-h-0 lg:block">
+
+      {/* Builder Card */}
+      <div
+        id="methods"
+        className="
+          absolute
+          right-[1.5%]
+          top-1/2
+          w-[355px]
+          -translate-y-1/2
+          scroll-mt-24
+          overflow-hidden
+          rounded-[18px]
+          border border-[#D9E1E6]
+          bg-white/96
+          p-[18px]
+          shadow-[0_24px_60px_rgba(19,43,60,.18)]
+          backdrop-blur-xl
+          xl:right-[3%]
+          xl:w-[375px]
+        "
+      >
+        {/* Header */}
+        <div className="flex items-start gap-3 border-b border-[#E7ECEF] pb-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[#EAF2F6] text-[#123A57]">
+            <ArrowRight size={17} className="-rotate-45" />
           </div>
-        </section>
+
+          <div>
+            <p className="text-[14px] font-black tracking-[-0.02em] text-[#102D47]">
+              CareerSense Builder
+            </p>
+
+            <p className="mt-0.5 text-[10.5px] font-medium text-[#7A909F]">
+              Turn your experience into impact
+            </p>
+          </div>
+        </div>
+
+        {/* Methods */}
+        <div className="mt-4 space-y-2.5">
+          {methods.map(({ mode, icon: Icon, title, text }, index) => {
+            const isLocked = !isSignedIn && mode !== 'resume';
+
+            const methodContent = (
+              <div
+                className="
+                  group flex
+                  min-h-[86px]
+                  w-full
+                  items-center gap-3
+                  rounded-[11px]
+                  border border-[#E1E8EC]
+                  bg-white
+                  px-3.5 py-3
+                  text-left
+                  shadow-[0_3px_10px_rgba(16,45,71,.035)]
+                  transition
+                  hover:border-[#BFD0DB]
+                  hover:bg-[#FAFCFD]
+                "
+              >
+                <div
+                  className={`
+                    flex h-10 w-10
+                    shrink-0
+                    items-center justify-center
+                    rounded-[9px]
+                    ${
+                      isLocked
+                        ? 'bg-[#EEF0F2] text-[#9CAAB3]'
+                        : index === 2
+                          ? 'bg-[#FFF1D5] text-[#B17A1C]'
+                          : 'bg-[#EDF3F6] text-[#254B65]'
+                    }
+                  `}
+                >
+                  {isLocked ? (
+                    <Lock size={16} />
+                  ) : (
+                    <Icon size={17} />
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-[11.5px] font-extrabold text-[#15364E]">
+                      {title}
+                    </p>
+
+                    {isLocked ? (
+                      <span className="shrink-0 text-[8px] font-black uppercase tracking-[0.11em] text-[#8A9DAA]">
+                        Sign In
+                      </span>
+                    ) : (
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#15956A] text-[9px] font-black text-white">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="mt-1 line-clamp-2 text-[9.5px] font-medium leading-[1.4] text-[#7B909E]">
+                    {isLocked
+                      ? 'Sign in to unlock this build option.'
+                      : text}
+                  </p>
+                </div>
+              </div>
+            );
+
+            if (isLocked) {
+              return (
+                <SignInButton mode="modal" key={title}>
+                  <div className="cursor-pointer">
+                    {methodContent}
+                  </div>
+                </SignInButton>
+              );
+            }
+
+            return (
+              <button
+                key={title}
+                onClick={() => startBuilderForMode(mode)}
+                className="block w-full focus:outline-none"
+              >
+                {methodContent}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* CTA */}
+        <button
+          onClick={openBuilderStart}
+          className="
+            group mt-4
+            flex h-[50px] w-full
+            items-center justify-center
+            gap-3
+            rounded-[10px]
+            bg-[#0B304B]
+            text-[12.5px]
+            font-extrabold
+            text-white
+            shadow-[0_9px_20px_rgba(11,48,75,.17)]
+            transition
+            hover:bg-[#08283F]
+          "
+        >
+          Generate My Letter
+
+          <ArrowRight
+            size={15}
+            className="transition-transform group-hover:translate-x-1"
+          />
+        </button>
+      </div>
+    </div>
+
+    {/* =========================================================
+        MOBILE METHODS
+        ========================================================= */}
+    <div
+      id="methods-mobile"
+      className="grid scroll-mt-24 gap-3 sm:grid-cols-3 lg:hidden"
+    >
+      {methods.map(({ mode, icon: Icon, title, text }) => {
+        const isLocked = !isSignedIn && mode !== 'resume';
+
+        const card = (
+          <div className="h-full rounded-[14px] border border-[#D4DEE4] bg-white/90 p-4 text-left shadow-sm backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <div
+                className={`
+                  flex h-10 w-10
+                  items-center justify-center
+                  rounded-[10px]
+                  ${
+                    isLocked
+                      ? 'bg-slate-100 text-slate-400'
+                      : 'bg-[#EAF2F6] text-[#254B65]'
+                  }
+                `}
+              >
+                {isLocked ? (
+                  <Lock size={17} />
+                ) : (
+                  <Icon size={18} />
+                )}
+              </div>
+
+              <ArrowRight size={15} className="text-[#6F8797]" />
+            </div>
+
+            <h3 className="mt-4 text-[14px] font-extrabold text-[#15364E]">
+              {title}
+            </h3>
+
+            <p className="mt-1.5 text-[11px] font-medium leading-[1.5] text-[#708796]">
+              {isLocked
+                ? 'Please sign in to unlock this build option.'
+                : text}
+            </p>
+          </div>
+        );
+
+        if (isLocked) {
+          return (
+            <SignInButton mode="modal" key={title}>
+              <div className="cursor-pointer">
+                {card}
+              </div>
+            </SignInButton>
+          );
+        }
+
+        return (
+          <button
+            key={title}
+            onClick={() => startBuilderForMode(mode)}
+            className="h-full w-full focus:outline-none"
+          >
+            {card}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+
+  {/* Extra compression for laptops with limited vertical space */}
+  <style>{`
+    @media (min-width: 1024px) and (max-height: 820px) {
+      [data-hero-section] > div {
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+    }
+  `}</style>
+</section>
+
+        <TrustedCompanies />
+
+        <LazyLandingSection id="templates" minHeight="620px">
+          <TemplateShowcase />
+        </LazyLandingSection>
+
+        <LazyLandingSection minHeight="440px">
+          <BeforeAfterTransformation />
+        </LazyLandingSection>
 
         <LazyLandingSection minHeight="520px">
           <CoverLetterAssistant />
@@ -446,10 +1021,6 @@ const Home = () => {
 
         <LazyLandingSection id="anatomy" minHeight="620px">
           <CoverLetterAnatomy />
-        </LazyLandingSection>
-
-        <LazyLandingSection id="templates" minHeight="620px">
-          <TemplateShowcase />
         </LazyLandingSection>
 
         <LazyLandingSection minHeight="520px">
@@ -557,7 +1128,7 @@ const useIsMobileViewport = () => {
 };
 
 const ScrollReveal = ({ children, id }) => (
-  <div id={id} data-scroll-reveal>
+  <div id={id} className="w-full shrink-0" data-scroll-reveal>
     {children}
   </div>
 );
@@ -598,7 +1169,7 @@ const LazyLandingSection = ({ children, id, minHeight, reveal = true }) => {
       <div ref={ref}>{content}</div>
     </ScrollReveal>
   ) : (
-    <div ref={ref} id={id}>
+    <div ref={ref} id={id} className="w-full shrink-0">
       {content}
     </div>
   );

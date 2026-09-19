@@ -31,7 +31,7 @@ const JobDetails = () => {
       setGeneratedLetter(letter);
     } catch (error) {
       console.error("Generation failed", error);
-      alert("Failed to generate letter. Please check your API key.");
+      alert(error.isOutOfTokens ? error.message : "Failed to generate cover letter. Please try again.");
       setStep(2); // Go back if error
     } finally {
       setIsGenerating(false);

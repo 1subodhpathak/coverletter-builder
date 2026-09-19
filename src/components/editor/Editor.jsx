@@ -4,7 +4,10 @@ import { useStore } from '../../store/useStore';
 import LoadingSkeleton from '../landing/LoadingSkeleton';
 import { useClerk, useUser } from '@clerk/clerk-react';
 import DownloadGateModal from '../common/DownloadGateModal';
+import TokenExhaustedModal from '../common/TokenExhaustedModal';
+import { generateCoverLetter } from '../../services/groqService';
 import { checkDownloadPass } from '../../services/downloadGateService';
+import editorBackground from '../../assets/editor.png';
 
 // --- TEMPLATE IMPORTS ---
 import ModernTemplate from '../templates/ModernTemplate';
@@ -67,20 +70,22 @@ const Editor = ({ guideTarget }) => {
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [aiTone, setAiTone] = useState('Professional');
   const [pendingRebuiltLetter, setPendingRebuiltLetter] = useState('');
+  const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
+  const [tokenModalMessage, setTokenModalMessage] = useState('');
   const [newSkill, setNewSkill] = useState('');
   const [isSkillDropdownOpen, setIsSkillDropdownOpen] = useState(false);
   const [activeSkillSuggestionIndex, setActiveSkillSuggestionIndex] = useState(0);
   const [selectedScratchOptions, setSelectedScratchOptions] = useState(() => (
     Object.fromEntries(scratchParagraphSections.map((section) => [section.id, 0]))
   ));
-  const [sidebarWidth, setSidebarWidth] = useState(340);
+  const [sidebarWidth, setSidebarWidth] = useState(380);
   const [isResizingSidebar, setIsResizingSidebar] = useState(false);
   const [activeFontSize, setActiveFontSize] = useState(14);
   const [pageFitStatus, setPageFitStatus] = useState({ level: 'safe', overflowPx: 0 });
   const lastEditorSelection = useRef(null);
   const skillInputRef = useRef(null);
   const skillDropdownRef = useRef(null);
-  const sidebarResizeState = useRef({ startX: 0, startWidth: 340 });
+  const sidebarResizeState = useRef({ startX: 0, startWidth: 380 });
   const pendingSelectionOffsetsRef = useRef(null);
   const previewFrameRef = useRef(null);
   const previewModalFrameRef = useRef(null);
@@ -372,8 +377,13 @@ const Editor = ({ guideTarget }) => {
         setIsCompareOpen(true);
       }
     } catch (error) {
-      console.error(error);
-      alert("Failed to regenerate. Check API Key.");
+      console.error('AI Regeneration failed:', error);
+      if (error.isOutOfTokens || /insufficient|token|credit|quota|balance|limit|upgrade/i.test(error.message)) {
+        setTokenModalMessage(error.message);
+        setIsTokenModalOpen(true);
+      } else {
+        alert(error.message || 'Failed to regenerate cover letter. Please try again.');
+      }
     } finally {
       setIsRegenerating(false);
     }
@@ -1162,18 +1172,51 @@ const Editor = ({ guideTarget }) => {
   };
 
   const renderLivePreview = (id) => {
+    const previewProfile = {
+      ...canvasProfile,
+      fullName: canvasProfile.fullName || 'Avery Morgan',
+      email: canvasProfile.email || 'avery.morgan@email.com',
+      phone: canvasProfile.phone || '+1 415 555 0184',
+      address: canvasProfile.address || 'San Francisco, CA',
+      linkedinPortfolio: canvasProfile.linkedinPortfolio || 'linkedin.com/in/averymorgan',
+      currentJobTitle: canvasProfile.currentJobTitle || 'Director of Strategy & Operations',
+      experienceYears: canvasProfile.experienceYears || '10',
+      experienceMonths: canvasProfile.experienceMonths || '0',
+      headline: canvasProfile.headline || 'Strategy · Operations · Transformation',
+      targetRole: canvasProfile.targetRole || canvasRecipient.targetRole || 'Vice President of Operations',
+      showPhoto: true,
+    };
+    const previewRecipient = {
+      ...canvasRecipient,
+      name: canvasRecipient.name || 'Jordan Lee',
+      title: canvasRecipient.title || 'Chief People Officer',
+      company: canvasRecipient.company || 'Northstar Technologies',
+      address: canvasRecipient.address || 'New York, NY',
+      targetRole: canvasRecipient.targetRole || 'Vice President of Operations',
+    };
+    const previewSignature = {
+      ...canvasSignature,
+      text: canvasSignature.text || previewProfile.fullName,
+      closing: canvasSignature.closing || 'Sincerely,',
+      enabled: true,
+    };
+    const previewSkills = skills.length > 0
+      ? skills
+      : ['Operational Strategy', 'Business Transformation', 'Team Leadership', 'Revenue Growth'];
     const previewBody = `
-      ${canvasRecipient.name ? `<p>Dear ${canvasRecipient.name},</p>` : ''}
-      <p>I am writing to express my strong interest in the open position${canvasRecipient.company ? ` at <strong>${canvasRecipient.company}</strong>` : ''}. As an experienced professional with a proven track record of success, I am eager to contribute my skills in strategic planning and project management to your team.</p>
+      <p>Dear ${previewRecipient.name},</p>
+      <p>I am excited to apply for the <strong>${previewRecipient.targetRole}</strong> position at <strong>${previewRecipient.company}</strong>. Over the past decade, I have led cross-functional teams through complex operational transformations, turning ambitious strategy into measurable business results.</p>
+      <p>In my current role, I redesigned planning and delivery systems that improved execution speed by 28% while strengthening accountability across product, finance, and commercial teams. I would welcome the opportunity to bring this disciplined, people-centered approach to ${previewRecipient.company}.</p>
+      <p>Thank you for your consideration. I look forward to discussing how my experience can support your organization’s next stage of growth.</p>
     `;
 
     const props = { 
         body: previewBody, 
         design: { ...design, fontSize: 10, margins: 1 }, 
-        profile: canvasProfile, 
-        signature: canvasSignature, 
-        recipient: canvasRecipient, 
-        skills, 
+        profile: previewProfile, 
+        signature: previewSignature, 
+        recipient: previewRecipient, 
+        skills: previewSkills, 
         onUpdateBody: () => {} 
     };
 
@@ -1197,17 +1240,41 @@ const Editor = ({ guideTarget }) => {
   };
 
   return (
-    <div className="relative top-0 flex min-h-[calc(100vh-80px)] flex-col bg-[#f8fafc] font-sans selection:bg-[#0a66c2]/20 lg:h-[calc(100vh-80px)] lg:flex-row lg:overflow-hidden">
+    <div className="relative top-0 flex min-h-[calc(100vh-80px)] flex-col bg-[#F6F1E9] font-sans text-[#16344B] selection:bg-[#D9E7EF] lg:h-[calc(100vh-80px)] lg:flex-row lg:overflow-hidden">
       
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Allura&family=Dancing+Script:wght@400..700&family=Great+Vibes&family=Kaushan+Script&family=Marck+Script&family=Monsieur+La+Doulaise&family=Parisienne&family=Petit+Formal+Script&family=Qwigley&family=Sacramento&family=Satisfy&family=Tangerine:wght@400;700&family=Yellowtail&display=swap');
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Lato:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600;700&family=Nunito:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;600;700&family=Raleway:wght@400;600;700&family=Roboto:wght@400;500;700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap');
-          
-          .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lato:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600;700&family=Nunito:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;600;700&family=Raleway:wght@400;600;700&family=Roboto:wght@400;500;700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap');
+
+          .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
           .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-          .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-          .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+          .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(86,124,141,.28); border-radius: 999px; }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(86,124,141,.48); }
+
+          .editor-panel {
+            background: rgba(255, 253, 249, 0.98);
+            border-color: #E5DED4;
+          }
+          .editor-panel input[type="text"],
+          .editor-panel input[type="number"],
+          .editor-panel input[type="url"],
+          .editor-panel textarea,
+          .editor-panel select {
+            border-color: #DCE5EA !important;
+            background: rgba(255,255,255,.92) !important;
+            color: #18354C !important;
+            border-radius: 10px !important;
+            box-shadow: 0 1px 1px rgba(19,52,75,.02) !important;
+          }
+          .editor-panel input:focus,
+          .editor-panel textarea:focus,
+          .editor-panel select:focus {
+            border-color: #7B9AA9 !important;
+            box-shadow: 0 0 0 3px rgba(200,217,230,.38) !important;
+          }
+          .editor-panel label { color: #607F90; }
+
           .document-scale-frame {
             --document-scale: 0.36;
             --document-frame-width: 286px;
@@ -1250,32 +1317,37 @@ const Editor = ({ guideTarget }) => {
           }
           @media (min-width: 768px) {
             .document-scale-frame {
-              --document-scale: 0.8;
-              --document-frame-width: 635px;
-              --document-frame-height: 898px;
+              --document-scale: 0.78;
+              --document-frame-width: 619px;
+              --document-frame-height: 876px;
             }
           }
           @media (min-width: 1024px) {
+            .document-scale-frame {
+              --document-scale: 0.82;
+              --document-frame-width: 651px;
+              --document-frame-height: 921px;
+            }
+          }
+          @media (min-width: 1280px) {
             .document-scale-frame {
               --document-scale: 0.9;
               --document-frame-width: 715px;
               --document-frame-height: 1011px;
             }
           }
-          @media (min-width: 1280px) {
+          @media (min-width: 1536px) {
             .document-scale-frame {
-              --document-scale: 1;
-              --document-frame-width: 794px;
-              --document-frame-height: 1123px;
+              --document-scale: 0.96;
+              --document-frame-width: 762px;
+              --document-frame-height: 1078px;
             }
           }
           @media (max-width: 640px) {
             .editor-panel input,
             .editor-panel select,
             .editor-panel textarea,
-            .editor-panel button {
-              min-height: 44px;
-            }
+            .editor-panel button { min-height: 44px; }
           }
         `}
       </style>
@@ -1464,20 +1536,21 @@ const Editor = ({ guideTarget }) => {
 
       {/* --- SIDEBAR (CONTROLS) --- */}
       <div
-        className="editor-panel z-10 flex max-h-[72vh] w-full shrink-0 flex-col border-b border-slate-200 bg-white shadow-sm lg:relative lg:h-full lg:max-h-none lg:w-[var(--sidebar-width)] lg:min-w-[var(--sidebar-width)] lg:border-b-0 lg:border-r"
+        data-editor-tour="sidebar"
+        className="editor-panel z-10 flex max-h-[72vh] w-full shrink-0 flex-col border-b border-[#E5DED4] bg-[#FFFDF9] shadow-[8px_0_26px_rgba(37,52,67,0.05)] lg:relative lg:h-full lg:max-h-none lg:w-[var(--sidebar-width)] lg:min-w-[var(--sidebar-width)] lg:border-b-0 lg:border-r"
         style={{ '--sidebar-width': `${sidebarWidth}px` }}
       >
         <div className="px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
-            <div className="flex bg-slate-100/80 p-1 rounded-md border border-slate-200/50">
-              <button onClick={() => setActiveTab('profile')} className={`flex-1 py-1.5 rounded text-[12px] font-bold flex items-center justify-center gap-1.5 transition-all ${activeTab === 'profile' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}><User size={14} /> Data</button>
-              <button onClick={() => setActiveTab('design')} className={`flex-1 py-1.5 rounded text-[12px] font-bold flex items-center justify-center gap-1.5 transition-all ${activeTab === 'design' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}><Palette size={14} /> Style</button>
+            <div data-editor-tour="workspace-tabs" className="flex rounded-[13px] border border-[#E3DBCF] bg-[#F5F0E8] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,.75)]">
+              <button onClick={() => setActiveTab('profile')} className={`flex-1 rounded-[9px] py-2 text-[12px] font-bold flex items-center justify-center gap-1.5 transition-all ${activeTab === 'profile' ? 'bg-[#103851] text-white shadow-[0_5px_14px_rgba(16,56,81,.16)]' : 'text-[#648394] hover:text-[#17364D]'}`}><User size={14} /> Data</button>
+              <button onClick={() => setActiveTab('design')} className={`flex-1 rounded-[9px] py-2 text-[12px] font-bold flex items-center justify-center gap-1.5 transition-all ${activeTab === 'design' ? 'bg-[#103851] text-white shadow-[0_5px_14px_rgba(16,56,81,.16)]' : 'text-[#648394] hover:text-[#17364D]'}`}><Palette size={14} /> Style</button>
               {isScratchMode ? (
                 <button
                   onClick={() => setActiveTab('starter-kit')}
-                  className={`flex-1 py-1.5 rounded text-[12px] font-bold flex items-center justify-center gap-1.5 transition-all ${
+                  className={`flex-1 rounded-[9px] py-2 text-[12px] font-bold flex items-center justify-center gap-1.5 transition-all ${
                     activeTab === 'starter-kit'
-                      ? 'bg-white text-[#0a66c2] shadow-sm ring-1 ring-slate-200'
-                      : 'text-slate-500 hover:text-slate-700'
+                      ? 'bg-[#103851] text-white shadow-[0_5px_14px_rgba(16,56,81,.16)]'
+                      : 'text-[#648394] hover:text-[#17364D]'
                   }`}
                 >
                   <Sparkles size={14} className={activeTab === 'starter-kit' ? 'fill-current' : ''} /> Starter Kit
@@ -1486,10 +1559,10 @@ const Editor = ({ guideTarget }) => {
                 <button
                   onClick={() => setActiveTab('ai')}
                   title="Open Engine"
-                  className={`flex-1 py-1.5 rounded text-[12px] font-bold flex items-center justify-center gap-1.5 transition-all ${
+                  className={`flex-1 rounded-[9px] py-2 text-[12px] font-bold flex items-center justify-center gap-1.5 transition-all ${
                     activeTab === 'ai'
-                      ? 'bg-white text-[#0a66c2] shadow-sm ring-1 ring-slate-200'
-                      : 'text-slate-500 hover:text-slate-700'
+                      ? 'bg-[#103851] text-white shadow-[0_5px_14px_rgba(16,56,81,.16)]'
+                      : 'text-[#648394] hover:text-[#17364D]'
                   }`}
                 >
                   <Zap size={14} className={activeTab === 'ai' ? 'fill-current' : ''} /> Engine
@@ -1518,7 +1591,7 @@ const Editor = ({ guideTarget }) => {
                     exit={{ opacity: 0, x: 10 }}
                     className="space-y-6"
                   >
-                      <div className="rounded-md border border-[#C8D9E6] bg-[#F5EFEB]/70 p-3 text-[12px] font-semibold leading-5 text-[#567C8D]">
+                      <div className="rounded-[12px] border border-[#E2C98D] bg-[#FBF5E8] p-3.5 text-[12px] font-medium leading-5 text-[#775B27] shadow-[0_1px_0_rgba(255,255,255,.7)_inset]">
                         These fields only use manual input. Resume uploads and job descriptions will not fill them automatically. If you want a field hidden on the canvas, keep a single blank space in that field.
                       </div>
 
@@ -1527,7 +1600,7 @@ const Editor = ({ guideTarget }) => {
                               <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Camera size={14} /> Profile Picture</h3>
                               <label className="relative inline-flex items-center cursor-pointer">
                                   <input type="checkbox" className="sr-only peer" checked={profile.showPhoto} onChange={(e) => updateProfile({ showPhoto: e.target.checked })} />
-                                  <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:bg-[#0a66c2] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full"></div>
+                                  <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:bg-[#103851] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full"></div>
                               </label>
                           </div>
                           {profile.showPhoto && (
@@ -1620,7 +1693,7 @@ const Editor = ({ guideTarget }) => {
                               <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Signature</h3>
                               <label className="relative inline-flex items-center cursor-pointer">
                                   <input type="checkbox" className="sr-only peer" checked={signature.enabled} onChange={(e) => updateSignature({ enabled: e.target.checked })} />
-                                  <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:bg-[#0a66c2] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full"></div>
+                                  <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:bg-[#103851] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full"></div>
                               </label>
                           </div>
                           <div className="space-y-3 rounded-md border border-slate-200 bg-slate-50/50 p-3">
@@ -1691,7 +1764,7 @@ const Editor = ({ guideTarget }) => {
                     exit={{ opacity: 0, x: 10 }}
                     className="space-y-8"
                   >
-                      <button onClick={() => setIsTemplateModalOpen(true)} className="w-full py-4 border border-dashed border-slate-300 bg-slate-50 rounded-lg flex flex-col items-center justify-center gap-2 hover:bg-[#eef6ff] hover:border-[#0a66c2]/40 hover:text-[#0a66c2] text-slate-600 transition-all group">
+                      <button data-editor-tour="template-layout" onClick={() => setIsTemplateModalOpen(true)} className="w-full py-4 border border-dashed border-slate-300 bg-slate-50 rounded-lg flex flex-col items-center justify-center gap-2 hover:bg-[#eef6ff] hover:border-[#0a66c2]/40 hover:text-[#0a66c2] text-slate-600 transition-all group">
                            <div className="bg-white p-2 rounded border border-slate-200 shadow-sm transition-colors"><Layout size={18} /></div>
                            <span className="text-[13px] font-bold text-slate-900 group-hover:text-[#0a66c2]">Change Template Layout</span>
                            <span className="text-[11px] text-slate-500 font-medium">Current: {currentTemplateMeta?.name}</span>
@@ -1946,18 +2019,18 @@ const Editor = ({ guideTarget }) => {
             </AnimatePresence>
         </div>
 
-        <div className="space-y-2 border-t border-slate-200 bg-slate-50/50 p-4 sm:p-5">
-          <button onClick={() => setIsPreviewOpen(true)} className="w-full py-2 bg-white border border-slate-200 text-slate-700 rounded-md text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-all shadow-sm"><Eye size={16} /> Print Preview</button>
+        <div data-editor-tour="export-actions" className="space-y-2 border-t border-[#E7E0D6] bg-[#FFFDF9]/95 p-4 sm:p-5">
+          <button onClick={() => setIsPreviewOpen(true)} className="flex w-full items-center justify-center gap-2 rounded-[10px] border border-[#DDD6CB] bg-white py-2.5 text-[13px] font-bold text-[#36576A] shadow-[0_2px_8px_rgba(31,51,68,.04)] transition-all hover:border-[#B9CAD3] hover:bg-[#FAFCFD]"><Eye size={16} /> Print Preview</button>
           <motion.button 
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             onClick={handleDownload} 
-            className="w-full py-2 bg-[#0a66c2] hover:bg-[#004182] text-white rounded-md text-[13px] font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
+            className="flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#103851] py-2.5 text-[13px] font-bold text-white shadow-[0_8px_18px_rgba(16,56,81,.16)] transition-all hover:bg-[#0B2F45]"
           >
             <Download size={16} /> Print / Save PDF
           </motion.button>
-          <div className="pt-2 mt-2 border-t border-slate-200">
-            <button onClick={() => setStep(2)} className="w-full py-2 text-slate-500 rounded-md text-[12px] font-semibold flex items-center justify-center gap-1 hover:text-slate-800 transition-all"><ChevronLeft size={14} /> Back to Parameters</button>
+          <div className="mt-2 border-t border-[#E7E0D6] pt-2">
+            <button onClick={() => setStep(2)} className="flex w-full items-center justify-center gap-1 rounded-md py-2 text-[12px] font-semibold text-[#78909D] transition-all hover:text-[#17364D]"><ChevronLeft size={14} /> Back to Parameters</button>
           </div>
         </div>
         <button
@@ -1965,38 +2038,46 @@ const Editor = ({ guideTarget }) => {
           aria-label="Resize sidebar"
           onMouseDown={handleSidebarResizeStart}
           className={`group absolute right-0 top-0 hidden h-full w-3 translate-x-1/2 cursor-col-resize items-stretch justify-center lg:flex ${
-            isResizingSidebar ? 'bg-[#C8D9E6]/55' : 'bg-transparent hover:bg-[#C8D9E6]/35'
+            isResizingSidebar ? 'bg-[#D8E4EA]/65' : 'bg-transparent hover:bg-[#D8E4EA]/45'
           }`}
         >
-          <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-slate-200 transition-colors group-hover:bg-[#567C8D]/45" />
-          <span className="absolute left-1/2 top-1/2 h-12 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_8px_20px_rgba(47,65,86,0.16)] ring-1 ring-slate-200 transition-all group-hover:h-16 group-hover:bg-[#F5EFEB]" />
+          <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#D6E0E5] transition-colors group-hover:bg-[#567C8D]/45" />
+          <span className="absolute left-1/2 top-1/2 h-12 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_8px_20px_rgba(47,65,86,0.16)] ring-1 ring-slate-200 transition-all group-hover:h-16 group-hover:bg-[#F8F3EC]" />
         </button>
       </div>
 
       {/* --- PREVIEW AREA --- */}
-      <div className="relative flex min-h-[78vh] flex-1 flex-col overflow-hidden bg-[#f8fafc] lg:min-h-0">
+      <div className="relative flex min-h-[78vh] flex-1 flex-col overflow-hidden bg-[#F5EFE6] lg:min-h-0">
         <EditorToolbar runCommand={runEditorCommand} activeFontSize={activeFontSize} />
-        <div className="relative flex flex-1 justify-center overflow-auto p-2 pt-20 custom-scrollbar sm:p-6 sm:pt-24 lg:p-12 lg:pt-28">
-            <div className="absolute inset-0 opacity-[0.4] pointer-events-none" style={{ backgroundImage: 'linear-gradient(to right, rgba(100, 116, 139, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(100, 116, 139, 0.1) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+        <div
+          className="relative flex flex-1 justify-center overflow-auto p-2 pt-20 custom-scrollbar sm:p-6 sm:pt-24 lg:p-10 lg:pt-24"
+          style={{
+            backgroundImage: `linear-gradient(rgba(248,244,237,.16), rgba(248,244,237,.16)), url(${editorBackground})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        >
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.08),rgba(255,255,255,0)_58%)]"></div>
             <div className="pointer-events-none absolute inset-x-0 top-2 z-20 flex items-center justify-center px-3 sm:top-3 lg:top-4">
-              <div className="pointer-events-auto inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
+              <div data-editor-tour="template-switcher" className="pointer-events-auto inline-flex items-center gap-3 rounded-full border border-[#E4DBCF] bg-white/95 px-3 py-2 shadow-[0_12px_34px_rgba(50,58,65,.10)] backdrop-blur-md">
                 <button
                   type="button"
                   onClick={() => cycleTemplate(-1)}
                   aria-label="Previous template"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-colors hover:border-[#0a66c2]/30 hover:bg-[#eef6ff] hover:text-[#0a66c2]"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-[#E4DDD3] bg-[#FFFEFC] text-[#6D8795] transition-colors hover:border-[#C8B27C] hover:bg-[#FBF7EE] hover:text-[#A77A25]"
                 >
                   <ChevronLeft size={16} />
                 </button>
                 <div className="min-w-[140px] text-center">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Canvas Template</p>
-                  <p className="text-[12px] font-bold text-slate-900">{currentTemplateMeta?.name}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#B4832E]">Canvas Template</p>
+                  <p className="text-[12px] font-bold text-[#17364D]">{currentTemplateMeta?.name}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => cycleTemplate(1)}
                   aria-label="Next template"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-colors hover:border-[#0a66c2]/30 hover:bg-[#eef6ff] hover:text-[#0a66c2]"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-[#E4DDD3] bg-[#FFFEFC] text-[#6D8795] transition-colors hover:border-[#C8B27C] hover:bg-[#FBF7EE] hover:text-[#A77A25]"
                 >
                   <ChevronLeft size={16} className="rotate-180" />
                 </button>
@@ -2008,23 +2089,11 @@ const Editor = ({ guideTarget }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 ref={previewFrameRef}
-                className="document-scale-frame border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-300"
+                data-editor-tour="canvas"
+                className="document-scale-content origin-top transition-transform duration-200"
               >
-                 <div className="document-scale-content">
-                   {renderSelectedTemplate()}
-                 </div>
+                {renderSelectedTemplate()}
               </motion.div>
-              {pageFitNotice && (
-                <div className={`mt-4 w-full max-w-[715px] rounded-lg border px-4 py-3 text-[12px] font-medium leading-5 shadow-sm ${pageFitNotice.tone}`}>
-                  <div className="flex items-start gap-2.5">
-                    <AlertTriangle size={15} className="mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-bold">{pageFitNotice.title}</p>
-                      <p>{pageFitNotice.detail}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
         </div>
       </div>
@@ -2037,6 +2106,12 @@ const Editor = ({ guideTarget }) => {
         resourceId={selectedTemplate || "default"}
         resourceName="Cover Letter PDF"
         onSuccessDownload={executeDownload}
+      />
+
+      <TokenExhaustedModal
+        isOpen={isTokenModalOpen}
+        onClose={() => setIsTokenModalOpen(false)}
+        message={tokenModalMessage}
       />
     </div>
   );
@@ -2057,28 +2132,32 @@ const EditorToolbar = ({ runCommand, activeFontSize }) => {
   ];
 
   return (
-    <div className="relative z-20 flex min-h-14 flex-col items-start justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:px-6 sm:py-2">
+    <div data-editor-tour="toolbar" className="relative z-20 flex min-h-14 flex-col items-start justify-between gap-3 border-b border-[#E8E0D5] bg-white/95 px-4 py-3 shadow-[0_5px_18px_rgba(39,53,65,.04)] backdrop-blur-xl sm:flex-row sm:items-center sm:px-6 sm:py-2.5">
       <div className="min-w-0">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-[#0a66c2] leading-none">Editor Canvas</p>
-        <p className="mt-1 text-[12px] font-medium text-slate-500">Select text directly on the document to apply formatting.</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#B4832E] leading-none">Editor Canvas</p>
+        <p className="mt-1.5 text-[12px] font-medium text-[#78909D]">Select text directly on the document to apply formatting.</p>
       </div>
+
       <div className="flex w-full flex-wrap items-center gap-1.5 sm:w-auto sm:justify-end">
-        {buttons.map(({ label, icon: Icon, text, command }) => (
-          <button
-            key={label}
-            type="button"
-            title={label}
-            aria-label={label}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              runCommand(command);
-            }}
-            className="flex h-8 min-w-8 items-center justify-center rounded-md border border-slate-200 bg-white px-2 text-slate-600 transition-colors hover:border-[#0a66c2]/30 hover:bg-[#eef6ff] hover:text-[#0a66c2]"
-          >
-            {Icon ? <Icon size={15} strokeWidth={2} /> : <span className="text-[11px] font-black">{text}</span>}
-          </button>
-        ))}
-        <div className="flex h-8 items-center gap-1 rounded-md border border-slate-200 bg-white px-1.5 text-slate-600">
+        <div className="flex items-center gap-1 rounded-[12px] border border-[#E5DED4] bg-[#FBF8F3] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,.8)]">
+          {buttons.map(({ label, icon: Icon, text, command }) => (
+            <button
+              key={label}
+              type="button"
+              title={label}
+              aria-label={label}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                runCommand(command);
+              }}
+              className="flex h-8 min-w-8 items-center justify-center rounded-[8px] border border-transparent bg-transparent px-2 text-[#58788A] transition-all hover:border-[#E2D7C7] hover:bg-white hover:text-[#17364D] hover:shadow-sm"
+            >
+              {Icon ? <Icon size={15} strokeWidth={2} /> : <span className="text-[11px] font-black">{text}</span>}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex h-10 items-center gap-1 rounded-[12px] border border-[#E5DED4] bg-[#FBF8F3] px-1.5 text-[#58788A]">
           <button
             type="button"
             title="Decrease font size"
@@ -2087,7 +2166,7 @@ const EditorToolbar = ({ runCommand, activeFontSize }) => {
               e.preventDefault();
               runCommand('decreaseFontSize');
             }}
-            className="flex h-6 min-w-8 items-center justify-center rounded border border-slate-200 bg-slate-50 px-1.5 text-[11px] font-black transition-colors hover:border-[#0a66c2]/30 hover:bg-[#eef6ff] hover:text-[#0a66c2]"
+            className="flex h-7 min-w-8 items-center justify-center rounded-[7px] border border-transparent px-1.5 text-[11px] font-black transition-all hover:border-[#E2D7C7] hover:bg-white hover:text-[#17364D]"
           >
             A-
           </button>
@@ -2099,17 +2178,18 @@ const EditorToolbar = ({ runCommand, activeFontSize }) => {
               e.preventDefault();
               runCommand('increaseFontSize');
             }}
-            className="flex h-6 min-w-8 items-center justify-center rounded border border-slate-200 bg-slate-50 px-1.5 text-[11px] font-black transition-colors hover:border-[#0a66c2]/30 hover:bg-[#eef6ff] hover:text-[#0a66c2]"
+            className="flex h-7 min-w-8 items-center justify-center rounded-[7px] border border-transparent px-1.5 text-[11px] font-black transition-all hover:border-[#E2D7C7] hover:bg-white hover:text-[#17364D]"
           >
             A+
           </button>
         </div>
-        <label className="flex h-8 items-center gap-1 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-black text-slate-600">
+
+        <label className="flex h-10 items-center gap-1.5 rounded-[12px] border border-[#E5DED4] bg-[#FBF8F3] px-2.5 text-[11px] font-black text-[#58788A]">
           Size
           <select
             value={String(activeFontSize)}
             aria-label="Font size"
-            className="h-6 rounded border border-slate-200 bg-slate-50 px-1 text-[11px] font-black text-slate-700 outline-none focus:border-[#0a66c2]"
+            className="h-7 rounded-[7px] border border-[#DDD6CB] bg-white px-1.5 text-[11px] font-black text-[#17364D] outline-none focus:border-[#AEBFC8]"
             onChange={(e) => {
               if (!e.target.value) return;
               runCommand('setFontSize', e.target.value);

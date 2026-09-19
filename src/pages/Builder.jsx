@@ -12,13 +12,14 @@ import { getCareerSenseUsage } from '../services/careerSensePoints';
 import { SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/clerk-react';
 import CustomUserButton from '../components/common/CustomUserButton';
 import BlueLogo from '../assets/logos/BlueGray.png';
+import builderBackground from '../assets/builder.png';
 
 import ManualDetailsStep from '../components/generator/ManualDetailsStep';
 import ResumeUploader from '../components/generator/ResumeUploader';
 import JobDetails from '../components/generator/JobDetails';
+import EditorTour from '../components/editor/EditorTour';
 
 const Editor = lazy(() => import('../components/editor/Editor'));
-const AnimatedHeroBackground = lazy(() => import('../components/landing/AnimatedHeroBackground'));
 
 // Preload Editor bundle in background so it's ready instantly when needed
 const preloadEditor = () => import('../components/editor/Editor');
@@ -131,106 +132,90 @@ const creationOptions = [
     mode: 'scratch',
     title: 'Start from Scratch',
     badge: 'Manual',
-    badgeStyle: 'bg-[#F5EFEB] text-[#2F4156] ring-1 ring-[#C8D9E6]',
+    badgeStyle: 'bg-[#EAF1FF] text-[#2864C7]',
     icon: PenLine,
-    description: 'Skip the AI and jump straight into our editor with a blank, professional template.',
-    features: ['Full control', 'Ready-to-use templates']
+    description: 'Skip AI generation and jump directly into the editor with a clean professional template.',
+    features: ['Full writing control', 'Professional templates']
   },
   {
     mode: 'resume',
     title: 'Resume Based Letter',
     badge: 'Fastest',
-    badgeStyle: 'bg-[#C8D9E6] text-[#2F4156] ring-1 ring-[#567C8D]/20',
+    badgeStyle: 'bg-[#DDF7EE] text-[#107A64]',
     icon: UploadCloud,
-    description: "Upload your resume, and we'll create a strong, professional cover letter highlighting your general experience.",
+    description: 'Upload your resume and CareerSense will prepare a professional draft around your experience and strongest achievements.',
     features: ['Highlights your skills', 'Professional tone']
   },
   {
     mode: 'resume-job',
     title: 'Job-Specific Calibration',
-    badge: 'Highly Recommended',
-    badgeStyle: 'bg-[#567C8D]/10 text-[#2F4156] ring-1 ring-[#567C8D]/25',
+    badge: 'Best Match',
+    badgeStyle: 'bg-[#FFF1D7] text-[#946313]',
     icon: Target,
-    description: "Upload your resume and the job posting. We'll write a letter tailored exactly to what the employer is looking for.",
+    description: 'Upload your resume and target job description to create the most relevant and precisely tailored cover letter.',
     features: ['Keywords matched', 'Tailored to the role']
   },
 ];
 
 const creationContentByMode = {
   default: {
-    eyebrow: 'Getting Started',
-    title: 'Choose how to build',
-    accent: 'your cover letter.',
+    eyebrow: 'Cover Letter Builder',
+    title: 'Turn your experience into',
+    accent: 'opportunity.',
     description:
-      'Pick a starting point below. For the best results, we highly recommend uploading both your resume and the job description to create a perfectly tailored letter.',
+      'Create a compelling, professional cover letter tailored to your target job. Start from scratch, use your resume, or let AI match it to a specific role.',
     supportItems: [
       {
-        icon: LayoutTemplate,
-        title: 'ATS-Friendly Designs',
-        text: 'Clean layouts designed to easily pass through screening software.',
+        icon: FileText,
+        title: 'Professional Templates',
+        text: 'Modern, ATS-friendly designs',
       },
       {
-        icon: Sparkles,
-        title: 'Smart Writing',
-        text: 'Automatically highlights your best achievements and relevant skills.',
+        icon: Zap,
+        title: 'AI-Powered Suggestions',
+        text: 'Tailored to your experience',
+      },
+      {
+        icon: Target,
+        title: 'Job-Ready Output',
+        text: 'Make a stronger impression',
       },
     ],
   },
   scratch: {
-    eyebrow: 'Manual Build',
-    title: 'Start from Scratch',
-    accent: 'with full control.',
+    eyebrow: 'Cover Letter Builder',
+    title: 'Write with complete',
+    accent: 'control.',
     description:
-      'Choose this path when you want to write manually, shape every sentence yourself, and build the letter directly inside the editor.',
+      'Start with a professional structure and shape every sentence yourself. This path gives you complete ownership of the final letter.',
     supportItems: [
-      {
-        icon: LayoutTemplate,
-        title: 'Flexible Templates',
-        text: 'Jump into polished layouts immediately without waiting for AI generation.',
-      },
-      {
-        icon: Sparkles,
-        title: 'Manual Precision',
-        text: 'Best when you already know the exact tone, structure, and message you want.',
-      },
+      { icon: LayoutTemplate, title: 'Professional Templates', text: 'Start from a polished layout' },
+      { icon: PenLine, title: 'Manual Precision', text: 'Control every line and detail' },
+      { icon: CheckCircle2, title: 'Ready to Refine', text: 'Edit and export when ready' },
     ],
   },
   resume: {
-    eyebrow: 'Resume Powered',
+    eyebrow: 'Cover Letter Builder',
     title: 'Turn your resume into',
-    accent: 'a Cover letter.',
+    accent: 'a stronger story.',
     description:
-      'Hover here when speed matters. We use your resume to create a professional letter that reflects your broader experience and strengths.',
+      'Use your resume to create a professional first draft that brings your experience, strengths, and achievements into a clear narrative.',
     supportItems: [
-      {
-        icon: LayoutTemplate,
-        title: 'ATS-Friendly Framing',
-        text: 'Your experience is organized into a clean structure that is easy to scan and refine.',
-      },
-      {
-        icon: Sparkles,
-        title: 'Stronger First Version',
-        text: 'A quick way to surface your top achievements before you make final edits.',
-      },
+      { icon: FileText, title: 'Experience Led', text: 'Built around your resume' },
+      { icon: Sparkles, title: 'Smart Suggestions', text: 'Surfaces relevant strengths' },
+      { icon: Zap, title: 'Faster First Draft', text: 'Get to editing sooner' },
     ],
   },
   'resume-job': {
-    eyebrow: 'Best Match',
-    title: 'Match your resume to',
+    eyebrow: 'Cover Letter Builder',
+    title: 'Match your experience to',
     accent: 'the exact role.',
     description:
-      'This is the most tailored option. Add both your resume and the job description so the left draft starts closer to what the employer is actually asking for.',
+      'Combine your resume with the job description to create the most relevant version, aligned to the role, employer language, and key requirements.',
     supportItems: [
-      {
-        icon: LayoutTemplate,
-        title: 'Keyword Alignment',
-        text: 'The draft can reflect the language, priorities, and role expectations from the posting.',
-      },
-      {
-        icon: Sparkles,
-        title: 'Sharper Personalization',
-        text: 'Best for targeted applications where relevance and specificity matter most.',
-      },
+      { icon: Target, title: 'Role Alignment', text: 'Focused on the target position' },
+      { icon: Sparkles, title: 'Keyword Matching', text: 'Reflects job-post language' },
+      { icon: CheckCircle2, title: 'Sharper Relevance', text: 'Designed for targeted applications' },
     ],
   },
 };
@@ -241,6 +226,7 @@ const Builder = () => {
   const { user } = useUser();
   const [subData, setSubData] = React.useState({ plan: 'free', tokensRemaining: 30000 });
   const [isHelpOpen, setIsHelpOpen] = React.useState(false);
+  const [isEditorTourOpen, setIsEditorTourOpen] = React.useState(false);
   const [editorGuideTarget, setEditorGuideTarget] = React.useState(null);
   const [creditUsage, setCreditUsage] = React.useState(() => getCareerSenseUsage());
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
@@ -330,6 +316,15 @@ const Builder = () => {
   };
 
   const isEditorStep = step === 4;
+
+  const openHelp = () => {
+    setIsMobileNavOpen(false);
+    if (isEditorStep) {
+      setIsEditorTourOpen(true);
+      return;
+    }
+    setIsHelpOpen(true);
+  };
   const helpItems = isEditorStep ? editorToolkitItems : builderToolkitItems;
   const helpTitle = isEditorStep ? 'Cover Letter Editor Guide' : 'Cover Letter Builder Guide';
   const helpSubtitle = isEditorStep ? 'Everything to check before you export' : 'What data you should prepare for the best result';
@@ -357,8 +352,9 @@ const Builder = () => {
 
   return (
     <div className="relative min-h-screen bg-[#F5EFEB] font-sans text-[#2F4156] selection:bg-[#C8D9E6]">
-      {/* HEADER */}
-      <header className="relative z-50 w-full border-b border-[#C8D9E6] bg-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+      {/* Keep navigation inside the active builder flow; the start screen is immersive. */}
+      {step > 0 && (
+      <header className="relative z-50 w-full border-b border-white/10 bg-[#082B45]/95 text-white shadow-[0_8px_28px_rgba(3,22,36,0.22)] backdrop-blur-xl">
         <div className="mx-auto w-full px-4 py-2 sm:px-6">
           <div className="flex min-h-16 flex-wrap lg:flex-nowrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3 sm:gap-6">
@@ -366,14 +362,14 @@ const Builder = () => {
                 <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
                 <div className="text-left">
                   <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
-                    <span className="text-[#2F4156]">Career</span><span className="text-[#567C8D]">Sense</span>
+                    <span className="text-[#F5EFEB]">Career</span><span className="text-[#E3BA5E]">Sense</span>
                   </h1>
-                  <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#C8D9E6]">
+                  <p className="mt-1 text-[9px] font-black uppercase tracking-[0.28em] text-[#AFC7D5]">
                     Executive Letters
                   </p>
                 </div>
               </button>
-              <div className="hidden h-6 w-px bg-[#C8D9E6] md:block" />
+              <div className="hidden h-6 w-px bg-white/20 md:block" />
               {step > 0 && (
                 <div className="hidden min-w-0 items-center lg:flex">
                   {steps.map((item, index) => {
@@ -381,23 +377,23 @@ const Builder = () => {
                     const done = step > item.num;
                     return (
                       <React.Fragment key={item.label}>
-                        <div className={`flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 xl:px-3 xl:py-1.5 transition-colors ${active ? 'bg-[#C8D9E6]/50' : ''}`}>
+                        <div className={`flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 xl:px-3 xl:py-1.5 transition-colors ${active ? 'bg-white/[0.12]' : ''}`}>
                           <div
                             className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${active
-                              ? 'bg-[#2F4156] text-white shadow-sm'
+                              ? 'bg-[#E3BA5E] text-[#082B45] shadow-sm'
                               : done
-                                ? 'bg-[#567C8D] text-white'
-                                : 'bg-[#C8D9E6] text-[#567C8D]'
+                                ? 'bg-[#6D91A5] text-white'
+                                : 'bg-white/15 text-[#C9D9E3]'
                               }`}
                           >
                             {done ? <Check size={10} strokeWidth={3} /> : item.num}
                           </div>
-                          <span className={`text-[12px] font-semibold ${active ? 'text-[#2F4156]' : 'text-[#567C8D]'}`}>
+                          <span className={`text-[12px] font-semibold ${active ? 'text-white' : 'text-[#C9D9E3]'}`}>
                             {item.label}
                           </span>
                         </div>
                         {index < steps.length - 1 && (
-                          <div className={`mx-1.5 h-px w-3 xl:w-6 ${done ? 'bg-[#567C8D]' : 'bg-[#C8D9E6]'}`} />
+                          <div className={`mx-1.5 h-px w-3 xl:w-6 ${done ? 'bg-[#6D91A5]' : 'bg-white/20'}`} />
                         )}
                       </React.Fragment>
                     );
@@ -409,47 +405,47 @@ const Builder = () => {
             <div className="flex items-center gap-2 xl:gap-3">
               <div className="hidden items-center gap-2 xl:gap-3 md:flex">
                 <button
-                  onClick={() => setIsHelpOpen(true)}
-                  className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-1.5 xl:px-2 text-[12px] font-semibold text-[#567C8D] transition-colors hover:text-[#2F4156] focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]"
+                  onClick={openHelp}
+                  className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-1.5 xl:px-2 text-[12px] font-semibold text-[#D6E3EA] transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30"
                   aria-label="Open help toolkit"
                 >
                   <LifeBuoy size={14} /> Help
                 </button>
                 <SignedIn>
                   <div className="hidden items-center gap-2 xl:flex">
-                    <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                    <div className="flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.07] px-3 py-1.5 shadow-2xs">
                       <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-500 shrink-0">
                         <Star className="h-3.5 w-3.5" fill="currentColor" />
                       </div>
                       <div className="flex flex-col text-left leading-none">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">AI Tokens Remaining</p>
-                        <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{(subData.tokensRemaining ?? 30000).toLocaleString()}</p>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#AFC4D1] leading-tight">AI Tokens Remaining</p>
+                        <p className="text-xs font-black text-white leading-none mt-0.5">{(subData.tokensRemaining ?? 30000).toLocaleString()}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 shadow-2xs">
+                    <div className="flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.07] px-3 py-1.5 shadow-2xs">
                       <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shrink-0">
                         <span className="text-xs font-black">$</span>
                       </div>
                       <div className="flex flex-col text-left leading-none">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-tight">Bill</p>
-                        <p className="text-xs font-black text-slate-900 leading-none mt-0.5">{formatUsd(creditUsage.totalBillUsd)}</p>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#AFC4D1] leading-tight">Bill</p>
+                        <p className="text-xs font-black text-white leading-none mt-0.5">{formatUsd(creditUsage.totalBillUsd)}</p>
                       </div>
                     </div>
                   </div>
                   <button
                     onClick={() => navigate('/dashboard')}
-                    className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-[#2F4156] shadow-sm transition-all hover:bg-[#F5EFEB] hover:shadow focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]"
+                    className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.09] px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-white shadow-sm transition-all hover:bg-white/[0.15] focus:outline-none focus:ring-2 focus:ring-white/30"
                   >
                     Dashboard
                   </button>
                 </SignedIn>
-                <button onClick={handleBack} className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-white px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-[#2F4156] shadow-sm transition-all hover:bg-[#F5EFEB] hover:shadow focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]">
+                <button onClick={handleBack} className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.09] px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-white shadow-sm transition-all hover:bg-white/[0.15] focus:outline-none focus:ring-2 focus:ring-white/30">
                   <ArrowLeft size={14} />
                   Back
                 </button>
                 <SignedOut>
                   <SignInButton mode="modal">
-                    <button className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#2F4156] px-4 text-[12px] font-bold text-white shadow-sm hover:bg-[#233244] transition focus:outline-none focus:ring-2 focus:ring-[#C8D9E6]">
+                    <button className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#E3BA5E] px-4 text-[12px] font-bold text-[#082B45] shadow-sm transition hover:bg-[#EDC974] focus:outline-none focus:ring-2 focus:ring-white/30">
                       Sign In
                     </button>
                   </SignInButton>
@@ -465,14 +461,14 @@ const Builder = () => {
                 onClick={() => setIsMobileNavOpen((current) => !current)}
                 aria-label={isMobileNavOpen ? 'Close builder menu' : 'Open builder menu'}
                 aria-expanded={isMobileNavOpen}
-                className="flex h-11 w-11 items-center justify-center rounded-md border border-[#C8D9E6] bg-white text-[#2F4156] shadow-sm transition hover:bg-[#F5EFEB] md:hidden"
+                className="flex h-11 w-11 items-center justify-center rounded-md border border-white/15 bg-white/[0.09] text-white shadow-sm transition hover:bg-white/[0.15] md:hidden"
               >
                 {isMobileNavOpen ? <X size={19} /> : <Menu size={19} />}
               </button>
             </div>
           </div>
           {isMobileNavOpen && (
-            <div className="border-t border-[#C8D9E6] pt-3 md:hidden">
+            <div className="border-t border-white/10 pt-3 md:hidden">
               {step > 0 && (
                 <div className="mb-3 flex flex-wrap gap-2">
                   {steps.map((item) => {
@@ -482,10 +478,10 @@ const Builder = () => {
                       <div
                         key={item.label}
                         className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-semibold ${active
-                          ? 'bg-[#C8D9E6]/50 text-[#2F4156]'
+                          ? 'bg-[#E3BA5E] text-[#082B45]'
                           : done
-                            ? 'bg-[#567C8D] text-white'
-                            : 'bg-[#F5EFEB] text-[#567C8D]'
+                            ? 'bg-[#6D91A5] text-white'
+                            : 'bg-white/10 text-[#D6E3EA]'
                           }`}
                       >
                         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/80 text-[10px] font-bold text-inherit">
@@ -500,10 +496,9 @@ const Builder = () => {
               <div className="grid gap-2">
                 <button
                   onClick={() => {
-                    setIsMobileNavOpen(false);
-                    setIsHelpOpen(true);
+                    openHelp();
                   }}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-md border border-[#C8D9E6] bg-white px-3 py-2 text-[12px] font-bold text-[#2F4156] shadow-sm"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/15 bg-white/[0.08] px-3 py-2 text-[12px] font-bold text-white shadow-sm"
                 >
                   <LifeBuoy size={14} />
                   Help
@@ -514,7 +509,7 @@ const Builder = () => {
                       setIsMobileNavOpen(false);
                       navigate('/dashboard');
                     }}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-md border border-[#C8D9E6] bg-white px-3 py-2 text-[12px] font-bold text-[#2F4156] shadow-sm"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/15 bg-white/[0.08] px-3 py-2 text-[12px] font-bold text-white shadow-sm"
                   >
                     <LayoutTemplate size={14} />
                     Dashboard
@@ -525,7 +520,7 @@ const Builder = () => {
                     setIsMobileNavOpen(false);
                     handleBack();
                   }}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-md border border-[#C8D9E6] bg-white px-3 py-2 text-[12px] font-bold text-[#2F4156] shadow-sm"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/15 bg-white/[0.08] px-3 py-2 text-[12px] font-bold text-white shadow-sm"
                 >
                   <ArrowLeft size={14} />
                   Back
@@ -534,7 +529,7 @@ const Builder = () => {
                   <SignInButton mode="modal">
                     <button
                       onClick={() => setIsMobileNavOpen(false)}
-                      className="inline-flex min-h-11 w-full items-center gap-2 rounded-md bg-[#2F4156] px-3 py-2 text-[12px] font-bold text-white shadow-sm hover:bg-[#233244] transition"
+                      className="inline-flex min-h-11 w-full items-center gap-2 rounded-md bg-[#E3BA5E] px-3 py-2 text-[12px] font-bold text-[#082B45] shadow-sm transition hover:bg-[#EDC974]"
                     >
                       <User size={14} />
                       Sign In
@@ -560,6 +555,7 @@ const Builder = () => {
           )}
         </div>
       </header>
+      )}
 
       <AnimatePresence>
         {isHelpOpen && (
@@ -567,55 +563,55 @@ const Builder = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[80] flex items-end justify-center bg-slate-900/60 p-3 backdrop-blur-sm sm:items-center sm:p-4"
+            className="fixed inset-0 z-[80] flex items-end justify-center bg-[#020E18]/80 p-3 backdrop-blur-md sm:items-center sm:p-4"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.96, y: 18 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 18 }}
-              className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-[#C8D9E6] bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)]"
+              className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[18px] border border-[#46657A] bg-[#071F32] text-white shadow-[0_30px_100px_rgba(0,0,0,0.48)] sm:max-h-[calc(100dvh-2rem)]"
             >
-              <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[#C8D9E6] bg-[#F5EFEB] px-4 py-3 sm:px-5 sm:py-4">
+              <div className="flex shrink-0 items-start justify-between gap-4 border-b border-white/10 bg-[#082B45] px-4 py-3 sm:px-5 sm:py-4">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#567C8D] sm:text-[11px] sm:tracking-[0.16em]">{helpTitle}</p>
-                  <h2 className="mt-1 text-base font-black text-[#2F4156] sm:text-lg">{helpSubtitle}</h2>
-                  <p className="mt-2 max-w-2xl text-[12px] font-semibold leading-5 text-[#567C8D]">{helpSummary}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#E3BA5E] sm:text-[11px] sm:tracking-[0.16em]">{helpTitle}</p>
+                  <h2 className="mt-1 text-base font-black text-[#F8F4EC] sm:text-lg">{helpSubtitle}</h2>
+                  <p className="mt-2 max-w-2xl text-[12px] font-semibold leading-5 text-[#B9CDD8]">{helpSummary}</p>
                 </div>
                 <button
                   onClick={() => setIsHelpOpen(false)}
-                  className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-[#C8D9E6] bg-white text-xl leading-none text-[#567C8D] transition hover:bg-[#F5EFEB] hover:text-[#2F4156]"
+                  className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/15 bg-white/[0.08] text-xl leading-none text-[#D6E3EA] transition hover:bg-white/[0.15] hover:text-white"
                   aria-label="Close builder help"
                 >
                   ×
                 </button>
               </div>
 
-              <div className="border-b border-[#C8D9E6] bg-white px-4 py-3 sm:px-5">
+              <div className="border-b border-white/10 bg-[#0A2940] px-4 py-3 sm:px-5">
                 <div className="grid gap-2 sm:grid-cols-3">
                   {helpQuickFacts.map((item) => (
-                    <div key={item.label} className="rounded-lg border border-[#C8D9E6] bg-[#F8FBFD] px-3 py-2.5">
-                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#567C8D]">{item.label}</p>
-                      <p className="mt-1 text-[12px] font-bold text-[#2F4156]">{item.value}</p>
+                    <div key={item.label} className="rounded-lg border border-white/10 bg-white/[0.055] px-3 py-2.5">
+                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#E3BA5E]">{item.label}</p>
+                      <p className="mt-1 text-[12px] font-bold text-[#F5EFEB]">{item.value}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="grid flex-1 gap-3 overflow-y-auto p-4 sm:grid-cols-2 sm:p-5">
+              <div className="grid flex-1 gap-3 overflow-y-auto bg-[#071F32] p-4 [scrollbar-color:#54758A_transparent] [scrollbar-width:thin] sm:grid-cols-2 sm:p-5">
                 {helpItems.map((item) => {
                   const { title, text, icon: Icon, actionLabel, targetTab, bullets } = item;
                   return (
-                    <div key={title} className="rounded-lg border border-[#C8D9E6] bg-white p-3 shadow-sm sm:p-4">
-                      <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-md bg-[#C8D9E6]/55 text-[#2F4156] sm:mb-3">
+                    <div key={title} className="rounded-xl border border-white/10 bg-white/[0.055] p-3 shadow-[0_8px_22px_rgba(0,0,0,0.12)] sm:p-4">
+                      <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg border border-[#E3BA5E]/30 bg-[#E3BA5E]/10 text-[#E7C56F] sm:mb-3">
                         <Icon size={18} />
                       </div>
-                      <h3 className="text-sm font-black text-[#2F4156]">{title}</h3>
-                      <p className="mt-1 text-xs font-semibold leading-5 text-[#567C8D]">{text}</p>
+                      <h3 className="text-sm font-black text-[#F8F4EC]">{title}</h3>
+                      <p className="mt-1 text-xs font-semibold leading-5 text-[#AFC4D1]">{text}</p>
                       {bullets?.length > 0 && (
                         <div className="mt-3 space-y-2">
                           {bullets.map((bullet) => (
-                            <div key={bullet} className="flex items-start gap-2 text-[11px] font-semibold leading-5 text-[#2F4156]">
-                              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#567C8D]" />
+                            <div key={bullet} className="flex items-start gap-2 text-[11px] font-semibold leading-5 text-[#D6E3EA]">
+                              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#E3BA5E]" />
                               <span>{bullet}</span>
                             </div>
                           ))}
@@ -624,7 +620,7 @@ const Builder = () => {
                       {targetTab && (
                         <button
                           onClick={() => runHelpAction(item)}
-                          className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[#C8D9E6] bg-[#F5EFEB] px-3 py-2 text-[11px] font-black text-[#2F4156] transition hover:border-[#567C8D]/50 hover:bg-[#C8D9E6]/45"
+                          className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[#E3BA5E]/35 bg-[#E3BA5E]/10 px-3 py-2 text-[11px] font-black text-[#F1CF79] transition hover:border-[#E3BA5E]/60 hover:bg-[#E3BA5E]/15"
                         >
                           {actionLabel}
                           <ChevronRight size={13} />
@@ -635,10 +631,10 @@ const Builder = () => {
                 })}
               </div>
 
-              <div className="shrink-0 border-t border-[#C8D9E6] bg-[#F5EFEB] px-4 py-3 sm:px-5 sm:py-4">
+              <div className="shrink-0 border-t border-white/10 bg-[#061A2A] px-4 py-3 sm:px-5 sm:py-4">
                 <button
                   onClick={() => setIsHelpOpen(false)}
-                  className="min-h-11 w-full rounded-md bg-[#2F4156] px-4 py-2.5 text-sm font-black text-white transition hover:bg-[#567C8D]"
+                  className="min-h-11 w-full rounded-lg bg-[#E3BA5E] px-4 py-2.5 text-sm font-black text-[#082B45] shadow-[0_8px_20px_rgba(0,0,0,0.18)] transition hover:bg-[#EDC974]"
                 >
                   Got it
                 </button>
@@ -648,15 +644,13 @@ const Builder = () => {
         )}
       </AnimatePresence>
 
-      <main className="relative min-h-screen overflow-hidden">
-        {step === 0 && (
-          <div className="absolute inset-0 z-0 overflow-hidden">
-            <Suspense fallback={<StepFallback tinted />}>
-              <AnimatedHeroBackground />
-            </Suspense>
-          </div>
-        )}
+      <EditorTour
+        open={isEditorTourOpen && isEditorStep}
+        onClose={() => setIsEditorTourOpen(false)}
+        onNavigate={(tab) => setEditorGuideTarget({ tab, id: Date.now() })}
+      />
 
+      <main className={`relative overflow-hidden ${step === 0 ? 'min-h-dvh bg-[#F6F8FB]' : 'min-h-screen lg:h-[calc(100dvh-81px)] lg:min-h-0'}`}>
         <div className="relative z-10 h-full">
           <AnimatePresence mode="wait">
             <motion.div
@@ -666,9 +660,9 @@ const Builder = () => {
               animate="animate"
               exit="exit"
               transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="w-full"
+              className="h-full w-full"
             >
-              {step === 0 && <CreationStart onChoose={chooseMode} isSignedIn={isSignedIn} />}
+              {step === 0 && <CreationStart onChoose={chooseMode} isSignedIn={isSignedIn} onHelp={openHelp} onBack={handleBack} />}
               {step === 1 && <ManualDetailsStep />}
               {step === 2 && <ResumeUploader />}
               {step === 3 && <JobDetails />}
@@ -704,139 +698,265 @@ const StepFallback = ({ tinted = false, message = "Loading workspace..." }) => (
   </div>
 );
 
-const CreationStart = ({ onChoose, isSignedIn }) => {
+const CreationStart = ({ onChoose, isSignedIn, onHelp, onBack }) => {
   const defaultMode = 'default';
   const [previewMode, setPreviewMode] = React.useState(defaultMode);
   const activeContent = creationContentByMode[previewMode] ?? creationContentByMode[defaultMode];
 
   return (
-    <div className="mx-auto max-w-8xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-24">
-      <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-24">
-        <div className="flex flex-col justify-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={previewMode}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.22 }}
-            >
-              <div className="mb-6 inline-flex items-center gap-2 rounded-md border border-[#C8D9E6] bg-white/90 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#567C8D] shadow-sm backdrop-blur-md">
-                <Zap size={14} className="fill-current text-[#567C8D]" />
-                {activeContent.eyebrow}
-              </div>
+    <section className="min-h-dvh w-full bg-[#F6F8FB] lg:h-dvh lg:min-h-0">
+      <div className="grid min-h-dvh w-full lg:h-full lg:min-h-0 lg:grid-cols-[39%_61%]">
+        {/* LEFT EXPERIENCE PANEL */}
+        <aside
+          className="relative isolate flex min-h-[680px] overflow-hidden bg-[#09243B] text-white lg:min-h-0"
+          style={{
+            backgroundImage: `linear-gradient(180deg, rgba(5, 30, 53, 0.46) 0%, rgba(5, 25, 45, 0.66) 55%, rgba(4, 18, 33, 0.84) 100%), url(${builderBackground})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+          }}
+        >
+          <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(7,32,55,0.18),rgba(7,32,55,0.03))]" />
 
-              <h1 className="cs-display text-3xl font-extrabold leading-[1.1] tracking-tight text-[#2F4156] sm:text-5xl">
-                {activeContent.title} <br />
-                <span className="text-[#567C8D]">{activeContent.accent}</span>
-              </h1>
-
-              <p className="mt-6 max-w-lg text-[16px] leading-relaxed text-[#567C8D]">
-                {activeContent.description}
-              </p>
-
-              <div className="mt-8 grid max-w-lg gap-5 border-t border-[#C8D9E6] pt-7 sm:grid-cols-2 sm:gap-6 sm:pt-8">
-                {activeContent.supportItems.map(({ icon: Icon, title, text }) => (
-                  <div key={title} className="flex flex-col gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded border border-[#C8D9E6] bg-white/90 text-[#2F4156] shadow-sm">
-                      <Icon size={16} />
-                    </div>
-                    <h4 className="text-[13px] font-bold text-[#2F4156]">{title}</h4>
-                    <p className="text-[12px] leading-relaxed text-[#567C8D]">{text}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        <div className="flex flex-col gap-5">
-          {creationOptions.map(({ mode, title, badge, badgeStyle, icon: Icon, description, features }, index) => {
-            const isLocked = !isSignedIn && mode !== 'resume';
-
-            const cardContent = (
-              <div className={`relative flex flex-col gap-5 rounded-xl border bg-white/95 p-6 shadow-sm backdrop-blur-md transition-all duration-300 sm:flex-row ${index === 2 ? 'border-[#567C8D]/40 shadow-[0_18px_45px_rgba(47,65,86,0.12)]' : 'border-[#C8D9E6] group-hover:border-[#567C8D]/30 group-hover:shadow-[0_18px_45px_rgba(47,65,86,0.1)]'}`}>
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border transition-colors ${isLocked ? 'border-slate-300 bg-slate-100 text-slate-400' :
-                  index === 2
-                    ? 'border-[#567C8D]/25 bg-[#C8D9E6]/55 text-[#2F4156]'
-                    : 'border-[#C8D9E6] bg-[#F5EFEB]/60 text-[#567C8D] group-hover:bg-[#C8D9E6]/30'
-                  }`}>
-                  {isLocked ? <Lock size={20} /> : <Icon size={22} strokeWidth={2} />}
+          <div className="flex w-full flex-col px-7 py-8 sm:px-10 sm:py-10 lg:px-[6.1%] lg:py-[clamp(20px,3.2vh,40px)] xl:px-[9.5%]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={previewMode}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="flex h-full flex-col"
+              >
+                <div className="inline-flex w-fit items-center gap-2.5 rounded-full border border-white/45 bg-[#112F4A]/55 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#F7CC69] shadow-[0_6px_24px_rgba(0,0,0,0.08)] backdrop-blur-sm sm:px-5 sm:text-[12px]">
+                  <Sparkles size={15} strokeWidth={2.2} />
+                  {activeContent.eyebrow}
                 </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="mb-2 flex flex-wrap items-center gap-3">
-                    <h3 className="text-[16px] font-bold text-[#2F4156]">{title}</h3>
-                    {isLocked ? (
-                      <span className="inline-flex items-center gap-1 rounded bg-[#E2E8F0] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#64748B] ring-1 ring-slate-300">
-                        <Lock size={10} /> Sign In
-                      </span>
-                    ) : (
-                      <span className={`inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${badgeStyle}`}>
-                        {badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mb-4 pr-8 text-[13px] leading-relaxed text-[#567C8D]">
-                    {isLocked ? "Sign in to unlock this creation method." : description}
+                <div className="mt-7 max-w-[585px] lg:mt-[clamp(16px,2.3vh,26px)]">
+                  <h1 className="cs-display max-w-[570px] text-[28px] font-extrabold leading-[1.01] tracking-[-0.04em] text-white sm:text-[32px] lg:text-[clamp(38px,5.3vh,50px)]">
+                    {activeContent.title}
+                    <span className="mt-1 block text-[#F6D17B]">{activeContent.accent}</span>
+                  </h1>
+
+                  <p className="mt-6 max-w-[565px] text-[15px] font-medium leading-7 text-[#D9E3EC] sm:text-[17px] lg:mt-[clamp(14px,2vh,22px)] lg:text-[clamp(14px,1vw,17px)] lg:leading-[1.6]">
+                    {activeContent.description}
                   </p>
+                </div>
 
-                  <div className="flex flex-wrap items-center gap-3">
-                    {features.map((feature, i) => (
-                      <div key={i} className="flex items-center gap-1.5 text-[11px] font-semibold text-[#567C8D]">
-                        <Check size={12} className="text-[#567C8D]" />
-                        {feature}
+                <div className="mt-8 grid max-w-[575px] grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6 lg:mt-[clamp(18px,2.8vh,30px)] lg:gap-6">
+                  {activeContent.supportItems.map(({ icon: Icon, title, text }) => (
+                    <div key={title} className="min-w-0">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full border border-white/[0.06] bg-[#173A5B]/90 text-[#E8EEF5] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-sm lg:h-12 lg:w-12">
+                        <Icon size={25} strokeWidth={1.8} />
                       </div>
-                    ))}
+                      <h3 className="mt-3.5 text-[14px] font-bold leading-[1.25] text-white lg:mt-2.5 lg:text-[14px]">
+                        {title}
+                      </h3>
+                      <p className="mt-2 text-[12px] font-medium leading-[1.45] text-[#B8C8D8] lg:mt-1.5 lg:text-[12px]">
+                        {text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-auto hidden max-w-[545px] pb-1 pt-8 sm:block lg:pt-[clamp(16px,2.6vh,28px)]">
+                  <div className="flex items-start gap-4">
+                    <div className="shrink-0 font-serif text-[42px] font-bold leading-none text-[#F6D17B]">“</div>
+                    <div className="pt-1">
+                      <p className="text-[13px] italic leading-[1.55] text-[#D8E1EA] sm:text-[14px]">
+                        A great cover letter can open doors.<br />
+                        We help you write one that gets noticed.
+                      </p>
+                      <div className="mt-4 flex items-center gap-3">
+                        <span className="h-px w-9 bg-[#C79B54]" />
+                        <span className="text-[11px] font-bold tracking-[0.28em] text-[#E7EDF4]">CareerSense</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </aside>
 
-                <div className="absolute right-6 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-[#C8D9E6] bg-white/90 text-[#567C8D] opacity-0 shadow-sm transition-all duration-300 group-hover:translate-x-1 group-hover:border-[#567C8D]/30 group-hover:text-[#2F4156] group-hover:opacity-100 sm:flex">
-                  <ChevronRight size={16} strokeWidth={2.5} />
-                </div>
+        {/* RIGHT BUILD OPTIONS */}
+        <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[radial-gradient(circle_at_80%_8%,rgba(229,236,244,0.72),transparent_34%),linear-gradient(180deg,#FBFCFE_0%,#F5F7FA_100%)] px-5 py-7 sm:px-8 sm:py-9 lg:h-full lg:min-h-0 lg:px-[5.2%] lg:py-[clamp(16px,2.6vh,32px)] xl:px-[5.1%]">
+          <div className="mx-auto flex w-full max-w-[1030px] flex-1 flex-col">
+            <div className="grid grid-cols-[1fr_auto] items-start gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[#D7DFE8] bg-white/80 px-3 text-[12px] font-bold text-[#243A52] shadow-[0_3px_12px_rgba(25,43,64,0.05)] transition hover:border-[#BFCBD8] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8CBE0]/50"
+                  aria-label="Back to dashboard"
+                >
+                  <ArrowLeft size={14} />
+                  <span>Back</span>
+                </button>
+                <span className="hidden h-5 w-px bg-[#D5DDE6] sm:block" />
+                <p className="hidden text-[10px] font-extrabold uppercase tracking-[0.34em] text-[#5D7088] sm:block sm:text-[11px]">
+                  Build Options
+                </p>
               </div>
-            );
 
-            if (isLocked) {
-              return (
-                <SignInButton mode="modal" key={mode}>
+              <div className="hidden items-center justify-center gap-0 sm:flex">
+                <span className="h-4 w-4 rounded-full border-[4px] border-[#C8DFFF] bg-[#2B70D6] shadow-[0_0_0_1px_rgba(43,112,214,0.08)]" />
+                <span className="h-px w-14 bg-[#C6CDD6]" />
+                <span className="h-4 w-4 rounded-full bg-[#C7CDD5]" />
+                <span className="h-px w-14 bg-[#C6CDD6]" />
+                <span className="h-4 w-4 rounded-full bg-[#8999AE]" />
+              </div>
+
+              <button
+                type="button"
+                onClick={onHelp}
+                className="justify-self-end text-[13px] font-semibold text-[#2769C7] transition hover:text-[#174D9A] focus:outline-none"
+                aria-label="Need help choosing a cover letter build option"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-current text-[11px] font-extrabold">?</span>
+                  <span className="hidden md:inline">Need help choosing?</span>
+                </span>
+              </button>
+            </div>
+
+            <div className="mt-4 sm:mt-5 lg:mt-[clamp(10px,1.5vh,18px)]">
+              <h2 className="cs-display text-[30px] font-extrabold leading-[1.04] tracking-[-0.035em] text-[#0D1730] sm:text-[36px] lg:text-[clamp(30px,4.6vh,40px)]">
+                Choose your starting point
+              </h2>
+              <p className="mt-2.5 text-[14px] font-medium text-[#75869C] sm:text-[15px] lg:text-[16px]">
+                You can add, redesign and refine everything later.
+              </p>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-4 lg:mt-[clamp(16px,2.3vh,24px)] lg:gap-[clamp(10px,1.6vh,16px)]">
+              {creationOptions.map(({ mode, title, badge, badgeStyle, icon: Icon, description, features }, index) => {
+                const isLocked = !isSignedIn && mode !== 'resume';
+
+                const cardContent = (
                   <div
+                    className={`relative flex min-h-[145px] items-center gap-4 overflow-hidden rounded-[20px] border bg-white px-5 py-5 pr-16 shadow-[0_9px_24px_rgba(25,43,64,0.055)] transition-all duration-[250ms] sm:gap-6 sm:px-7 sm:pr-20 lg:min-h-[clamp(104px,14vh,132px)] lg:gap-5 lg:px-6 lg:py-3 lg:pr-20 ${
+                      index === 2
+                        ? 'border-[#E6A62B] shadow-[0_10px_28px_rgba(178,123,25,0.07)]'
+                        : 'border-[#E7EAF0] group-hover:border-[#CFD7E1] group-hover:shadow-[0_12px_30px_rgba(25,43,64,0.085)]'
+                    }`}
+                  >
+                    {index === 2 && <span className="absolute inset-y-0 left-0 w-[3px] bg-[#D99B22]" />}
+
+                    <div
+                      className={`flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[17px] border sm:h-[78px] sm:w-[78px] lg:h-[62px] lg:w-[62px] ${
+                        isLocked
+                          ? 'border-[#D8DEE6] bg-[#F2F4F7] text-[#8A97A6]'
+                          : index === 0
+                            ? 'border-[#D9E4F7] bg-[#EAF1FF] text-[#2463C5]'
+                            : index === 1
+                              ? 'border-[#D4EFE8] bg-[#DFF6F0] text-[#0D7567]'
+                              : 'border-[#F0D9A6] bg-[#FFF3D9] text-[#805615]'
+                      }`}
+                    >
+                      {isLocked ? <Lock size={25} strokeWidth={1.8} /> : <Icon size={29} strokeWidth={1.8} />}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                        <h3 className="text-[17px] font-extrabold tracking-[-0.02em] text-[#101B33] sm:text-[18px] lg:text-[18px]">
+                          {title}
+                        </h3>
+                        {isLocked ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#EEF1F4] px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#657486]">
+                            <Lock size={9} /> Sign In
+                          </span>
+                        ) : (
+                          <span className={`inline-flex items-center rounded-full px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.15em] ${badgeStyle}`}>
+                            {badge}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-2 max-w-[780px] text-[13px] font-medium leading-[1.5] text-[#667A92] sm:text-[14px] lg:mt-1.5 lg:text-[13px]">
+                        {isLocked ? 'Sign in to unlock this creation method.' : description}
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap items-center gap-x-7 gap-y-2 lg:mt-2">
+                        {features.map((feature) => (
+                          <div key={feature} className="flex items-center gap-2 text-[11px] font-semibold text-[#526B87] sm:text-[12px]">
+                            <span className="flex h-[20px] w-[20px] items-center justify-center rounded-full bg-[#EDF5FC] text-[#2671C9]">
+                              <Check size={11} strokeWidth={3} />
+                            </span>
+                            {feature}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="absolute right-5 top-1/2 flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-[#F3F5F8] text-[#101B33] transition-all duration-200 group-hover:translate-x-1 group-hover:bg-[#EAF0F7] sm:right-7 lg:right-5 lg:h-11 lg:w-11">
+                      <ChevronRight size={22} strokeWidth={2.4} />
+                    </div>
+                  </div>
+                );
+
+                if (isLocked) {
+                  return (
+                    <SignInButton mode="modal" key={mode}>
+                      <div
+                        onMouseEnter={() => setPreviewMode(mode)}
+                        onFocus={() => setPreviewMode(mode)}
+                        onMouseLeave={() => setPreviewMode(defaultMode)}
+                        onBlur={() => setPreviewMode(defaultMode)}
+                        className="group w-full cursor-pointer text-left focus:outline-none"
+                      >
+                        {cardContent}
+                      </div>
+                    </SignInButton>
+                  );
+                }
+
+                return (
+                  <motion.button
+                    key={mode}
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.12 + index * 0.08, duration: 0.28 }}
+                    onClick={() => onChoose(mode)}
                     onMouseEnter={() => setPreviewMode(mode)}
                     onFocus={() => setPreviewMode(mode)}
                     onMouseLeave={() => setPreviewMode(defaultMode)}
                     onBlur={() => setPreviewMode(defaultMode)}
-                    className="group relative w-full text-left focus:outline-none cursor-pointer"
+                    className="group w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2B70D6] focus-visible:ring-offset-2"
+                    whileTap={{ scale: 0.996 }}
                   >
-                    <div className="absolute -inset-0.5 rounded-2xl bg-[#567C8D] opacity-0 blur transition duration-500 group-hover:opacity-15" />
                     {cardContent}
-                  </div>
-                </SignInButton>
-              );
-            }
+                  </motion.button>
+                );
+              })}
+            </div>
 
-            return (
-              <motion.button
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 + (index * 0.1) }}
-                key={mode}
-                onClick={() => onChoose(mode)}
-                onMouseEnter={() => setPreviewMode(mode)}
-                onFocus={() => setPreviewMode(mode)}
-                onMouseLeave={() => setPreviewMode(defaultMode)}
-                onBlur={() => setPreviewMode(defaultMode)}
-                className="group relative w-full text-left focus:outline-none"
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-              >
-                <div className="absolute -inset-0.5 rounded-2xl bg-[#567C8D] opacity-0 blur transition duration-500 group-hover:opacity-15" />
-                {cardContent}
-              </motion.button>
-            );
-          })}
+            <div className="mt-auto hidden pt-6 md:block lg:pt-[clamp(12px,2vh,22px)]">
+              <div className="flex items-center gap-4 text-[11px] font-medium text-[#65758C] sm:text-[12px]">
+                <span className="h-px flex-1 bg-[#D5DCE5]" />
+                <span>Trusted by thousands to build their careers</span>
+                <span className="h-px flex-1 bg-[#D5DCE5]" />
+              </div>
+
+              <div className="mx-auto mt-3 grid max-w-[780px] grid-cols-3 divide-x divide-[#D5DCE5] text-center lg:mt-[clamp(8px,1.2vh,12px)]">
+                <div className="px-4">
+                  <p className="text-[20px] font-extrabold tracking-[-0.02em] text-[#111C34] sm:text-[22px]">500K+</p>
+                  <p className="mt-1 text-[11px] font-medium text-[#65758C] sm:text-[12px]">Cover letters created</p>
+                </div>
+                <div className="px-4">
+                  <p className="text-[20px] font-extrabold tracking-[-0.02em] text-[#111C34] sm:text-[22px]">4.8/5</p>
+                  <p className="mt-1 text-[11px] font-medium text-[#65758C] sm:text-[12px]">User satisfaction</p>
+                </div>
+                <div className="px-4">
+                  <p className="text-[20px] font-extrabold tracking-[-0.02em] text-[#111C34] sm:text-[22px]">3x</p>
+                  <p className="mt-1 text-[11px] font-medium text-[#65758C] sm:text-[12px]">Higher response rate</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -1,12 +1,5 @@
-import Groq from "groq-sdk";
 import { recordCareerSenseUsage } from './careerSensePoints';
 import { cleanResumeText } from './resumeTextUtils';
-
-// Initialize Groq
-const groq = new Groq({
-  apiKey: import.meta.env.VITE_GROQ_API_KEY || 'gsk_YOUR_API_KEY_HERE', 
-  dangerouslyAllowBrowser: true 
-});
 
 const OPENING_BANNED_PATTERNS = [
   /i am excited to apply/i,
@@ -200,11 +193,17 @@ const isGenericOpening = (html = '') => {
 };
 
 const callBackendAiCompletion = async (params) => {
+  const apiBase =
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_BACKEND_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    'https://server.datasenseai.com';
+  const backendUrl = apiBase.replace(/\/careersense\/coverletter\/?$/, '');
+  const clerkId = window.clerkUserId || window.Clerk?.user?.id || 'anonymous';
+
+  let res;
   try {
-    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-    const backendUrl = apiBase.replace(/\/careersense\/coverletter\/?$/, "");
-    const clerkId = window.clerkUserId || window.Clerk?.user?.id || 'anonymous';
-    const res = await fetch(`${backendUrl}/careersense/coverletter/ai/chat-completion`, {
+    res = await fetch(`${backendUrl}/careersense/coverletter/ai/chat-completion`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -212,14 +211,38 @@ const callBackendAiCompletion = async (params) => {
       },
       body: JSON.stringify(params),
     });
-    if (res.ok) {
-      return await res.json();
-    }
-  } catch (err) {
-    console.warn('[groqService] Backend AI Proxy failed, trying direct Groq fallback:', err);
+  } catch (netErr) {
+    console.error('[aiService] Network error reaching AI server:', netErr);
+    throw new Error('Unable to connect to AI server. Please check your internet connection and try again.');
   }
 
-  return groq.chat.completions.create(params);
+  if (res.ok) {
+    const data = await res.json();
+    try {
+      window.dispatchEvent(new CustomEvent('careersense:tokens-updated'));
+    } catch (e) {}
+    return data;
+  }
+
+  let errorData = {};
+  try {
+    errorData = await res.json();
+  } catch (e) {}
+
+  const errorMessage = errorData.error || errorData.message || '';
+  const isOutOfTokens =
+    res.status === 402 ||
+    res.status === 403 ||
+    /insufficient|token|credit|quota|balance|limit|upgrade/i.test(errorMessage);
+
+  const error = new Error(
+    isOutOfTokens
+      ? 'You have run out of AI tokens. Please upgrade your plan or purchase tokens to continue.'
+      : errorMessage || `AI generation failed (Status ${res.status}).`
+  );
+  error.isOutOfTokens = isOutOfTokens;
+  error.status = res.status;
+  throw error;
 };
 
 const requestCoverLetterDraft = async (prompt) =>
@@ -296,7 +319,8 @@ export const generateCoverLetter = async ({ jobDescription, resumeText, companyN
       });
 
       const completion = await requestCoverLetterDraft(basePrompt);
-      const normalizedHtml = normalizeGeneratedHtml(completion.choices[0]?.message?.content, {
+      const content = completion.choices?.[0]?.message?.content || completion.content || '';
+      const normalizedHtml = normalizeGeneratedHtml(content, {
         companyName: safeCompanyName,
         recipientName: safeRecipientName,
       });
@@ -305,16 +329,19 @@ export const generateCoverLetter = async ({ jobDescription, resumeText, companyN
       recordCareerSenseUsage({
         feature: resumeText && jobDescription ? 'Executive Resume + JD Map' : 'Executive Analysis',
         label: companyName ? `Cover letter for ${companyName}` : 'Executive letter draft',
-        model: completion.model || 'llama-3.3-70b-versatile',
+        model: completion.model || 'Claude-3.5',
         inputPoints: usage.prompt_tokens,
         outputPoints: usage.completion_tokens,
         totalPoints: usage.total_tokens,
       });
 
-      return normalizedHtml || "<p>Error generating content.</p>";
+      if (!normalizedHtml) {
+        throw new Error('No content returned by AI generation.');
+      }
+      return normalizedHtml;
     } catch (error) {
       console.error("AI Generation Error:", error);
-      return `<p>Failed to generate letter. Error: ${error.message}</p>`;
+      throw error;
     } finally {
       setTimeout(() => inFlightCoverLetterRequests.delete(dedupKey), 4000);
     }
@@ -396,15 +423,18 @@ Question: "${cleanQuestion}"`;
     recordCareerSenseUsage({
       feature: 'Executive Q&A',
       label: cleanQuestion,
-      model: completion.model || 'llama-3.3-70b-versatile',
+      model: completion.model || 'Claude-3.5',
       inputPoints: usage.prompt_tokens,
       outputPoints: usage.completion_tokens,
       totalPoints: usage.total_tokens,
     });
 
-    return completion.choices[0]?.message?.content?.trim() || 'Focus on strategic impact and board alignment.';
+    return completion.choices?.[0]?.message?.content?.trim() || 'Focus on strategic impact and board alignment.';
   } catch (error) {
     console.error('Executive Q&A Error:', error);
+    if (error.isOutOfTokens) {
+      return 'You have run out of AI tokens. Please upgrade your plan at https://careersenseai.com/pricing to continue.';
+    }
     return 'I could not reach the analysis engine. Focus on high-level impact and ROI.';
   }
 };
