@@ -29,7 +29,7 @@ import { templateCount } from '../components/templates/templateCatalog';
 import { SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/clerk-react';
 import CustomUserButton from '../components/common/CustomUserButton';
 import { motion, AnimatePresence } from 'framer-motion';
-import coverLetterVideo from '../assets/CoverLetter1.mp4';
+const coverLetterVideo = 'https://d7exlrhix3get.cloudfront.net/CoverLetter.mp4';
 import BlueLogo from '../assets/logos/BlueGray.png';
 import heroBackground from '../assets/hero.png';
 import TrustedCompanies from '../components/landing/TrustedCompanies';

@@ -36,11 +36,14 @@ import { useNavigate } from 'react-router-dom';
 import { answerCoverLetterQuestion } from '../../services/groqService';
 import { useStore } from '../../store/useStore';
 
+import { Lottie } from 'lottie-react';
+
 import ctaBackground from '../../assets/cta.png';
 import coraGif from '../../assets/CORA.gif';
 import coraPng from '../../assets/CORA.png';
 import coraLandingPng from '../../assets/CORA2.png';
 import coraSound from '../../assets/CORA.mp4';
+import coraLottieData from '../../assets/CORA_backup.json';
 
 
 /* ============================================================
@@ -52,64 +55,10 @@ const CORA_ANIMATION_DURATION = 3000;
 
 
 /* ============================================================
-   CORA PORTRAIT
+   CORA PORTRAIT (LOTTIE ANIMATION)
    ============================================================ */
 
-const CoraPortrait = ({
-  playbackId,
-}) => {
-  const imageRef = useRef(null);
-  const canvasRef = useRef(null);
-  const freezeTimerRef = useRef(null);
-
-  const [
-    isFrozen,
-    setIsFrozen,
-  ] = useState(false);
-
-
-  useEffect(() => {
-    setIsFrozen(false);
-
-    return () => {
-      window.clearTimeout(
-        freezeTimerRef.current
-      );
-    };
-  }, [playbackId]);
-
-
-  const freezeFinalFrame = () => {
-    const image =
-      imageRef.current;
-
-    const canvas =
-      canvasRef.current;
-
-    if (!image || !canvas) {
-      return;
-    }
-
-    canvas.width =
-      image.naturalWidth || 1280;
-
-    canvas.height =
-      image.naturalHeight || 1280;
-
-    canvas
-      .getContext('2d')
-      ?.drawImage(
-        image,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
-    setIsFrozen(true);
-  };
-
-
+const CoraPortrait = ({ playbackId }) => {
   return (
     <div
       className="
@@ -117,60 +66,19 @@ const CoraPortrait = ({
         aspect-square
         w-full
         max-w-[520px]
+        flex
+        items-center
+        justify-center
       "
       aria-label="CORA, the Career Optimization and Readiness Assistant"
     >
-      <img
+      <Lottie
         key={playbackId}
-        ref={imageRef}
-        src={`${coraGif}?play=${playbackId}`}
-        alt="CORA, the Career Optimization and Readiness Assistant"
-        onLoad={() => {
-          window.clearTimeout(
-            freezeTimerRef.current
-          );
-
-          freezeTimerRef.current =
-            window.setTimeout(
-              freezeFinalFrame,
-              CORA_ANIMATION_DURATION
-            );
-        }}
-        className={`
-          absolute
-          inset-0
-          h-full
-          w-full
-          object-contain
-          transition-opacity
-          duration-150
-
-          ${
-            isFrozen
-              ? 'opacity-0'
-              : 'opacity-100'
-          }
-        `}
-      />
-
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        className={`
-          absolute
-          inset-0
-          h-full
-          w-full
-          object-contain
-          transition-opacity
-          duration-150
-
-          ${
-            isFrozen
-              ? 'opacity-100'
-              : 'opacity-0'
-          }
-        `}
+        src={coraLottieData}
+        loop={false}
+        autoplay={true}
+        style={{ width: '100%', height: '100%' }}
+        className="h-full w-full object-contain"
       />
     </div>
   );
