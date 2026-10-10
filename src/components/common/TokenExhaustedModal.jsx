@@ -88,8 +88,6 @@ export default function TokenExhaustedModal({ isOpen, onClose, message }) {
             </button>
             <a
               href="https://careersenseai.com/pricing"
-              target="_blank"
-              rel="noopener noreferrer"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#E2B54B] px-6 text-[13px] font-bold text-[#082B45] shadow-[0_4px_16px_rgba(226,181,75,0.35)] transition hover:bg-[#EDC974] active:scale-[0.98]"
             >
               <span>Upgrade Plan &amp; Buy Tokens</span>

@@ -263,8 +263,8 @@ const Home = () => {
       <LandingBackdrop />
 
       <header className="relative z-50 w-full border-b border-white/10 bg-[#082B45]/95 text-white shadow-[0_10px_30px_rgba(3,22,36,0.22)] backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-[1600px] min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-2 sm:px-8 sm:py-3">
-          <button onClick={() => navigate('/')} className="flex items-center gap-3">
+        <div className="mx-auto flex w-full max-w-[1600px] min-h-16 items-center justify-between gap-3 px-4 py-2 sm:px-8 sm:py-3">
+          <button onClick={() => navigate('/')} className="flex items-center gap-3 shrink-0">
             <img src={BlueLogo} alt="CareerSense Logo" className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-2xl shadow-xs shrink-0" />
             <div className="text-left">
               <h1 className="text-[25px] font-black leading-none tracking-[-0.04em]">
@@ -276,12 +276,12 @@ const Home = () => {
             </div>
           </button>
 
-          <nav className="hidden items-center gap-6 text-sm font-extrabold text-[#D6E3EA] lg:flex" aria-label="Landing">
-            <div className="relative" ref={toolsRef}>
+          <nav className="hidden items-center gap-4 xl:gap-6 text-xs font-bold text-[#D6E3EA] lg:flex" aria-label="Landing">
+            <div className="relative shrink-0" ref={toolsRef}>
               <button
                 type="button"
                 onClick={() => setToolsOpen((prev) => !prev)}
-                className="flex items-center gap-1.5 transition hover:text-white"
+                className="flex items-center gap-1.5 whitespace-nowrap transition hover:text-white"
                 aria-expanded={toolsOpen}
               >
                 <span>Career Tools</span>
@@ -361,38 +361,46 @@ const Home = () => {
               </AnimatePresence>
             </div>
 
-            <a href="#methods" className="transition hover:text-white">Build Options</a>
-            <a href="#cover-letter-questions" className="transition hover:text-white"> Ai</a>
-            <a href="#anatomy" className="transition hover:text-white">Letter Guide</a>
-            <a href="#templates" className="transition hover:text-white">Templates</a>
-            <a href="#testimonials" className="transition hover:text-white">Reviews</a>
+            <a href="#methods" className="whitespace-nowrap transition hover:text-white">Build Options</a>
+            <a href="#cover-letter-questions" className="whitespace-nowrap transition hover:text-white">Ai</a>
+            <a href="#anatomy" className="whitespace-nowrap transition hover:text-white">Letter Guide</a>
+            <a href="#templates" className="whitespace-nowrap transition hover:text-white">Templates</a>
+            <a href="#testimonials" className="whitespace-nowrap transition hover:text-white">Reviews</a>
+            <a
+              href="https://careersenseai.com/pricing"
+              className="whitespace-nowrap transition hover:text-white"
+            >
+              Pricing
+            </a>
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <SignedIn>
-              <div className="hidden flex-1 items-center justify-end gap-2 sm:flex-none md:flex">
-                <div className="flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.07] px-3 py-1.5 shadow-2xs">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-500 shrink-0">
-                    <Star className="h-3.5 w-3.5" fill="currentColor" />
+              <div className="hidden items-center justify-end gap-2 md:flex">
+                <div className="hidden items-center gap-2 xl:flex">
+                  <div className="flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.07] px-3 py-1.5 shadow-2xs">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-500 shrink-0">
+                      <Star className="h-3.5 w-3.5" fill="currentColor" />
+                    </div>
+                    <div className="flex flex-col text-left leading-none">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#AFC4D1] leading-tight">AI Tokens Remaining</p>
+                      <p className="mt-0.5 text-xs font-black leading-none text-white">{(subData.tokensRemaining ?? 30000).toLocaleString()}</p>
+                    </div>
                   </div>
-                  <div className="flex flex-col text-left leading-none">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#AFC4D1] leading-tight">AI Tokens Remaining</p>
-                    <p className="mt-0.5 text-xs font-black leading-none text-white">{(subData.tokensRemaining ?? 30000).toLocaleString()}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.07] px-3 py-1.5 shadow-2xs">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shrink-0">
-                    <span className="text-xs font-black">$</span>
-                  </div>
-                  <div className="flex flex-col text-left leading-none">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#AFC4D1] leading-tight">Bill</p>
-                    <p className="mt-0.5 text-xs font-black leading-none text-white">{formatUsd(usage.totalBillUsd)}</p>
+                  <div className="flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.07] px-3 py-1.5 shadow-2xs">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shrink-0">
+                      <span className="text-xs font-black">$</span>
+                    </div>
+                    <div className="flex flex-col text-left leading-none">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#AFC4D1] leading-tight">Bill</p>
+                      <p className="mt-0.5 text-xs font-black leading-none text-white">{formatUsd(usage.totalBillUsd)}</p>
+                    </div>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => navigate('/dashboard')}
-                  className="inline-flex h-9 shrink-0 items-center gap-2 rounded-xl bg-[#E3BA5E] px-4 text-xs font-bold text-[#082B45] shadow-2xs transition-all hover:bg-[#EDC974] active:scale-95"
+                  className="inline-flex h-9 shrink-0 items-center gap-2 rounded-xl bg-[#E3BA5E] px-4 text-xs font-bold text-[#082B45] shadow-2xs transition-all hover:bg-[#EDC974] active:scale-95 whitespace-nowrap"
                 >
                   Dashboard
                 </button>
@@ -462,6 +470,13 @@ const Home = () => {
               <a href="#anatomy" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 transition hover:bg-white/[0.12] hover:text-white">Letter Guide</a>
               <a href="#templates" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 transition hover:bg-white/[0.12] hover:text-white">Templates</a>
               <a href="#testimonials" onClick={() => setIsMobileNavOpen(false)} className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 transition hover:bg-white/[0.12] hover:text-white">Reviews</a>
+              <a
+                href="https://careersenseai.com/pricing"
+                onClick={() => setIsMobileNavOpen(false)}
+                className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 transition hover:bg-white/[0.12] hover:text-white"
+              >
+                Pricing
+              </a>
               <SignedOut>
                 <SignInButton mode="modal">
                   <button onClick={() => setIsMobileNavOpen(false)} className="w-full rounded-lg bg-[#E3BA5E] px-3 py-2.5 text-center text-[12px] font-extrabold uppercase tracking-[0.12em] text-[#082B45] transition hover:bg-[#EDC974]">

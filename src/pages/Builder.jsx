@@ -439,6 +439,12 @@ const Builder = () => {
                     Dashboard
                   </button>
                 </SignedIn>
+                <a
+                  href="https://careersenseai.com/pricing"
+                  className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.09] px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-white shadow-sm transition-all hover:bg-white/[0.15] focus:outline-none focus:ring-2 focus:ring-white/30"
+                >
+                  Pricing
+                </a>
                 <button onClick={handleBack} className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.09] px-2.5 py-1.5 xl:px-3 text-[12px] font-bold text-white shadow-sm transition-all hover:bg-white/[0.15] focus:outline-none focus:ring-2 focus:ring-white/30">
                   <ArrowLeft size={14} />
                   Back
@@ -515,6 +521,13 @@ const Builder = () => {
                     Dashboard
                   </button>
                 </SignedIn>
+                <a
+                  href="https://careersenseai.com/pricing"
+                  onClick={() => setIsMobileNavOpen(false)}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/15 bg-white/[0.08] px-3 py-2 text-[12px] font-bold text-white shadow-sm"
+                >
+                  Pricing
+                </a>
                 <button
                   onClick={() => {
                     setIsMobileNavOpen(false);
