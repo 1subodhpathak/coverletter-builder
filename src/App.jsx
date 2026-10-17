@@ -6,6 +6,7 @@ import { useStore } from './store/useStore';
 const Home = lazy(() => import('./pages/Home'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Builder = lazy(() => import('./pages/Builder'));
+const WelcomeTokensModal = lazy(() => import('./components/common/WelcomeTokensModal'));
 
 function AuthStoreSynchronizer() {
   const { getToken, userId, isLoaded, isSignedIn } = useAuth();
@@ -29,6 +30,7 @@ function App() {
     <Router>
       <AuthStoreSynchronizer />
       <Suspense fallback={<div className="min-h-screen bg-[#F5EFEB]" />}>
+        <WelcomeTokensModal />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route 

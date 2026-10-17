@@ -5,6 +5,7 @@ import LoadingSkeleton from '../landing/LoadingSkeleton';
 import { useClerk, useUser } from '@clerk/clerk-react';
 import DownloadGateModal from '../common/DownloadGateModal';
 import TokenExhaustedModal from '../common/TokenExhaustedModal';
+import CoverLetterNextStepsModal from '../common/CoverLetterNextStepsModal';
 import { generateCoverLetter } from '../../services/groqService';
 import { checkDownloadPass } from '../../services/downloadGateService';
 import editorBackground from '../../assets/editor.png';
@@ -33,7 +34,7 @@ import { getSkillSuggestions } from './skillsLibrary';
 import { renderScratchParagraph, scratchParagraphSections } from './scratchParagraphLibrary';
 
 import { 
-  Download, Type, Layout, Palette, ChevronLeft, CheckCircle2, Zap,
+  Download, Loader2, Type, Layout, Palette, ChevronLeft, CheckCircle2, Zap,
   PenTool, User, MapPin, Phone, Mail, X, Grid, Camera, Trash2, Upload, 
   Building2, Briefcase, Plus, Sparkles, RefreshCw, Layers, AlignLeft,
   Bold, Italic, Underline, List, Undo2, Redo2, AlignCenter, AlignRight, Eye,
@@ -64,6 +65,8 @@ const Editor = ({ guideTarget }) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [isDownloadGateOpen, setIsDownloadGateOpen] = useState(false);
+  const [isNextStepsModalOpen, setIsNextStepsModalOpen] = useState(false);
+  const [isCheckingPass, setIsCheckingPass] = useState(false);
   const [templateSearch, setTemplateSearch] = useState('');
 
   // AI REGENERATION STATE
@@ -1110,18 +1113,23 @@ const Editor = ({ guideTarget }) => {
       };
 
       await printPdf();
+      // Show next steps recommendation modal across ecosystem
+      setTimeout(() => {
+        setIsNextStepsModalOpen(true);
+      }, 700);
     } catch (error) {
       console.error('Print/PDF export failed:', error);
     }
   };
 
   const handleDownload = async () => {
+    if (isCheckingPass) return;
     if (!clerkUserId) {
-      alert("Please sign in first to export your cover letter.");
-      clerk.openSignIn({});
+      setIsDownloadGateOpen(true);
       return;
     }
 
+    setIsCheckingPass(true);
     try {
       const passCheck = await checkDownloadPass(clerkUserId, "cover_letter_pdf", selectedTemplate || "default");
       if (!passCheck.canDownload) {
@@ -1130,6 +1138,8 @@ const Editor = ({ guideTarget }) => {
       }
     } catch (e) {
       console.warn("Download pass verification check error:", e);
+    } finally {
+      setIsCheckingPass(false);
     }
 
     await executeDownload();
@@ -1502,9 +1512,17 @@ const Editor = ({ guideTarget }) => {
                   <h2 className="text-[16px] font-bold text-slate-900">Print Preview</h2>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button onClick={handleDownload} className="inline-flex items-center gap-2 rounded-md bg-[#0a66c2] px-4 py-2 text-[13px] font-bold text-white shadow-sm transition-colors hover:bg-[#004182]">
-                    <Download size={16} />
-                    Print / Save PDF
+                  <button
+                    onClick={handleDownload}
+                    disabled={isCheckingPass}
+                    className="inline-flex items-center gap-2 rounded-md bg-[#0a66c2] px-4 py-2 text-[13px] font-bold text-white shadow-sm transition-colors hover:bg-[#004182] disabled:opacity-60"
+                  >
+                    {isCheckingPass ? (
+                      <Loader2 size={16} className="animate-spin text-white" />
+                    ) : (
+                      <Download size={16} />
+                    )}
+                    {isCheckingPass ? "Preparing..." : "Print / Save PDF"}
                   </button>
                   <button onClick={() => setIsPreviewOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900">
                     <X size={18} />
@@ -2022,13 +2040,26 @@ const Editor = ({ guideTarget }) => {
         <div data-editor-tour="export-actions" className="space-y-2 border-t border-[#E7E0D6] bg-[#FFFDF9]/95 p-4 sm:p-5">
           <button onClick={() => setIsPreviewOpen(true)} className="flex w-full items-center justify-center gap-2 rounded-[10px] border border-[#DDD6CB] bg-white py-2.5 text-[13px] font-bold text-[#36576A] shadow-[0_2px_8px_rgba(31,51,68,.04)] transition-all hover:border-[#B9CAD3] hover:bg-[#FAFCFD]"><Eye size={16} /> Print Preview</button>
           <motion.button 
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
+            whileHover={{ scale: isCheckingPass ? 1 : 1.01 }}
+            whileTap={{ scale: isCheckingPass ? 1 : 0.99 }}
             onClick={handleDownload} 
-            className="flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#103851] py-2.5 text-[13px] font-bold text-white shadow-[0_8px_18px_rgba(16,56,81,.16)] transition-all hover:bg-[#0B2F45]"
+            disabled={isCheckingPass}
+            className="flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#103851] py-2.5 text-[13px] font-bold text-white shadow-[0_8px_18px_rgba(16,56,81,.16)] transition-all hover:bg-[#0B2F45] disabled:opacity-60"
           >
-            <Download size={16} /> Print / Save PDF
+            {isCheckingPass ? (
+              <Loader2 size={16} className="animate-spin text-white" />
+            ) : (
+              <Download size={16} />
+            )}
+            {isCheckingPass ? "Preparing..." : "Print / Save PDF"}
           </motion.button>
+          <button 
+            type="button"
+            onClick={() => setIsNextStepsModalOpen(true)} 
+            className="flex w-full items-center justify-center gap-2 rounded-[10px] border border-[#C8D9E6] bg-[#F5EFE6]/70 py-2 text-[12px] font-bold text-[#2F4156] shadow-xs transition-all hover:bg-[#F5EFE6] hover:border-[#567C8D]"
+          >
+            <Sparkles size={14} className="text-[#567C8D]" /> Next Career Steps
+          </button>
           <div className="mt-2 border-t border-[#E7E0D6] pt-2">
             <button onClick={() => setStep(2)} className="flex w-full items-center justify-center gap-1 rounded-md py-2 text-[12px] font-semibold text-[#78909D] transition-all hover:text-[#17364D]"><ChevronLeft size={14} /> Back to Parameters</button>
           </div>
@@ -2083,17 +2114,30 @@ const Editor = ({ guideTarget }) => {
                 </button>
               </div>
             </div>
-            <div className="relative z-10 flex flex-col items-center">
+            <div className="relative z-10 flex min-w-full flex-col items-center pb-16">
               <motion.div 
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 ref={previewFrameRef}
                 data-editor-tour="canvas"
-                className="document-scale-content origin-top transition-transform duration-200"
+                className="document-scale-frame border border-slate-200/80 bg-white shadow-[0_16px_40px_rgba(30,41,59,0.14)] transition-all duration-300"
               >
-                {renderSelectedTemplate()}
+                <div className="document-scale-content">
+                  {renderSelectedTemplate()}
+                </div>
               </motion.div>
+              {pageFitNotice && (
+                <div className={`mt-4 w-full max-w-[715px] rounded-lg border px-4 py-3 text-[12px] font-medium leading-5 shadow-sm ${pageFitNotice.tone}`}>
+                  <div className="flex items-start gap-2.5">
+                    <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-bold">{pageFitNotice.title}</p>
+                      <p>{pageFitNotice.detail}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
         </div>
       </div>
@@ -2112,6 +2156,14 @@ const Editor = ({ guideTarget }) => {
         isOpen={isTokenModalOpen}
         onClose={() => setIsTokenModalOpen(false)}
         message={tokenModalMessage}
+      />
+
+      <CoverLetterNextStepsModal
+        isOpen={isNextStepsModalOpen}
+        onClose={() => setIsNextStepsModalOpen(false)}
+        targetRole={canvasRecipient.targetRole || canvasProfile.currentJobTitle || ''}
+        candidateName={canvasProfile.fullName || ''}
+        companyName={canvasRecipient.companyName || ''}
       />
     </div>
   );
