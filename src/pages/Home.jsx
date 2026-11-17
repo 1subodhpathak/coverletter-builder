@@ -510,7 +510,6 @@ const Home = () => {
     lg:h-[calc(100dvh-82px)]
     lg:min-h-0
   "
-  data-scroll-reveal
   data-hero-section
 >
   {/* =========================================================

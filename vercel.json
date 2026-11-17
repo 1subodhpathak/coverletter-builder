@@ -1,5 +1,7 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(dashboard|builder)(.*)", "dest": "/app.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
